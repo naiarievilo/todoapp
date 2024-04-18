@@ -1,0 +1,267 @@
+databaseChangeLog:
+  - changeSet:
+      id: "create-users-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "users"
+      changes:
+        - createTable:
+            tableName: "users"
+            columns:
+              - column:
+                  name: "id"
+                  type: "BIGINT"
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: "pk_users"
+                    nullable: false
+              - column:
+                  name: "username"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: "username"
+                    nullable: false
+              - column:
+                  name: "password"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "email"
+                  type: "VARCHAR(320)"
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: "email"
+                    nullable: false
+              - column:
+                  name: "first_name"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "last_name"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "is_expired"
+                  type: "BOOLEAN"
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "is_locked"
+                  type: "BOOLEAN"
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "is_enabled"
+                  type: "BOOLEAN"
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: "create-roles-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "roles"
+      changes:
+        - createTable:
+            tableName: "roles"
+            columns:
+              - column:
+                  name: "id"
+                  type: "BIGINT"
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: "pk_roles"
+                    nullable: false
+              - column:
+                  name: "role"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: "role"
+              - column:
+                  name: "description"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: "create-permissions-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "permissions"
+      changes:
+        - createTable:
+            tableName: "permissions"
+            columns:
+              - column:
+                  name: "id"
+                  type: "BIGINT"
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: "pk_permissions"
+                    nullable: false
+              - column:
+                  name: "permission"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: "permission"
+                    nullable: false
+
+  - changeSet:
+      id: "create-users_roles-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "users_roles"
+      changes:
+        - createTable:
+            tableName: "users_roles"
+            columns:
+              - column:
+                  name: "user_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_users_roles_users"
+                    references: "users(id)"
+                    primaryKey: true
+                    primaryKeyName: "cpk_users_roles"
+                    nullable: false
+              - column:
+                  name: "role_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_users_roles_roles"
+                    references: "roles(id)"
+                    primaryKey: true
+                    primaryKeyName: "cpk_users_roles"
+                    nullable: false
+
+  - changeSet:
+      id: "create-roles_permissions-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "roles_permissions"
+      changes:
+        - createTable:
+            tableName: "roles_permissions"
+            columns:
+              - column:
+                  name: "role_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_roles_permissions_roles"
+                    references: "roles(id)"
+                    primaryKey: true
+                    primaryKeyName: "cpk_roles_permissions"
+                    nullable: false
+              - column:
+                  name: "permission_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_roles_permissions_permissions"
+                    references: "permissions(id)"
+                    primaryKey: true
+                    primaryKeyName: "cpk_roles_permissions"
+                    nullable: false
+
+  - changeSet:
+      id: "create-todolists-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "todolists"
+      changes:
+        - createTable:
+            tableName: "todolists"
+            columns:
+              - column:
+                  name: "id"
+                  type: "BIGINT"
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: "pk_todolists"
+                    nullable: false
+              - column:
+                  name: "user_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_todolists_users"
+                    referencedTableName: "users"
+                    referencedColumnNames: "id"
+                    deleteCascade: true
+                    nullable: false
+              - column:
+                  name: "date"
+                  type: "DATE"
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: "create-todos-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "todos"
+      changes:
+        - createTable:
+            tableName: "todos"
+            columns:
+              - column:
+                  name: "id"
+                  type: "BIGINT"
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: "pk_todos"
+                    nullable: false
+              - column:
+                  name: "todolist_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_todos_todolists"
+                    referencedTableName: "todolists"
+                    referencedColumnNames: "id"
+                    deleteCascade: true
+                    nullable: false
+              - column:
+                  name: "task"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "is_done"
+                  type: "BOOLEAN"
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
