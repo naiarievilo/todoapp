@@ -1,3 +1,15 @@
+logging:
+  level:
+    org:
+      springframework:
+        web: "TRACE"
+
+server:
+  ssl:
+    key-store: "classpath:certificate.p12"
+    key-store-type: "PKCS12"
+    key-store-password: "Vftcg7af2023!?"
+
 spring:
   application:
     name: "todoapp"
@@ -16,10 +28,4 @@ spring:
     show-sql: true
   liquibase:
     change-log: "classpath:/db/changelog/root-changelog.yaml"
-
-logging:
-  level:
-    org:
-      springframework:
-        web: "TRACE"
 
