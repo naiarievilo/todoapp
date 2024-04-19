@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
