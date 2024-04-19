@@ -5,6 +5,7 @@ logging:
         web: "TRACE"
 
 server:
+  port: 8443
   ssl:
     key-store: "classpath:certificate.p12"
     key-store-type: "PKCS12"
