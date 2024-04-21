@@ -1,7 +1,6 @@
 package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cascade;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

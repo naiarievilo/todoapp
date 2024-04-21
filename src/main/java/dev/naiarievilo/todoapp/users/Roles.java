@@ -1,6 +1,6 @@
 package dev.naiarievilo.todoapp.users;
 
 public enum Roles {
-    ADMIN,
-    USER
+    ROLE_ADMIN,
+    ROLE_USER
 }
