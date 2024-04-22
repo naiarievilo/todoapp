@@ -15,6 +15,19 @@ public class UserPrincipal implements UserDetails {
         this.user = user;
     }
 
+    public String getEmail() {
+        return user.getEmail();
+    }
+
+    public Collection<? extends GrantedAuthority> getRoles() {
+        Set<Role> roles = user.getRoles();
+
+        return roles.stream()
+            .map(Role::getRole)
+            .map(SimpleGrantedAuthority::new)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<Role> roles = user.getRoles();
