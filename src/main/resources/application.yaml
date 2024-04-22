@@ -4,6 +4,11 @@ logging:
       springframework:
         web: "TRACE"
 
+jwt:
+  secret: ${JWT_SECRET}
+  issuer: ${JWT_ISSUER}
+  expiration: ${JWT_EXPIRATION}
+
 server:
   port: 8443
   ssl:
