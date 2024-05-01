@@ -1,6 +1,8 @@
 package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.LinkedHashSet;
@@ -22,11 +24,22 @@ public class Role {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "roles_permissions",
         joinColumns = @JoinColumn(name = "role_id"),
         inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions = new LinkedHashSet<>();
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new LinkedHashSet<>();
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
 
     public Long getId() {
         return id;
@@ -57,7 +70,60 @@ public class Role {
     }
 
     public void setPermissions(Set<Permission> permissions) {
-        this.permissions = permissions;
+        this.permissions = new LinkedHashSet<>();
+        addPermissions(permissions);
     }
 
+    public void addPermission(Permission permission) {
+        permissions.add(permission);
+        permission.getRoles().add(this);
+    }
+
+    public void removePermission(Permission permission) {
+        permissions.remove(permission);
+        permission.getRoles().remove(this);
+    }
+
+    public void addPermissions(Set<Permission> permissions) {
+        for (Permission permission : permissions) {
+            this.permissions.add(permission);
+            permission.getRoles().add(this);
+        }
+    }
+
+    public void removePermissions(Set<Permission> permissions) {
+        for (Permission permission : permissions) {
+            this.permissions.remove(permission);
+            permission.getRoles().remove(this);
+        }
+    }
+
+    public void removeAllPermissions() {
+        for (Permission permission : new LinkedHashSet<>(permissions)) {
+            permissions.remove(permission);
+            permission.getRoles().remove(this);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder();
+        hcb.append(role);
+        return hcb.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Role other)) {
+            return false;
+        }
+
+        EqualsBuilder eb = new EqualsBuilder();
+        eb.append(role, other.role);
+        return eb.isEquals();
+    }
 }
