@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NaturalId;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -14,7 +15,8 @@ public class Role {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "role", unique = true, nullable = false)
+    @NaturalId
+    @Column(name = "role", unique = true, nullable = false, updatable = false)
     private String role;
 
     @Column(name = "description", nullable = false)

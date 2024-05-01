@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.NaturalId;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -15,6 +16,7 @@ public class User {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @NaturalId
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 

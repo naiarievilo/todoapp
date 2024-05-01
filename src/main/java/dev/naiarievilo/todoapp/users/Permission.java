@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "permissions")
@@ -11,7 +12,8 @@ public class Permission {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "permission", unique = true, nullable = false)
+    @NaturalId
+    @Column(name = "permission", unique = true, nullable = false, updatable = false)
     private String permission;
 
     public Long getId() {
