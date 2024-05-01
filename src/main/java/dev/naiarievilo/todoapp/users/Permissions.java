@@ -2,6 +2,6 @@ package dev.naiarievilo.todoapp.users;
 
 public enum Permissions {
     READ,
-    EDIT,
+    WRITE,
     DELETE
 }
