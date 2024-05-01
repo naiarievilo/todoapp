@@ -1,6 +1,8 @@
 package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.NaturalId;
 
@@ -44,7 +46,7 @@ public class User {
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled = false;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -127,7 +129,61 @@ public class User {
     }
 
     public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+        this.roles = new LinkedHashSet<>();
+        addRoles(roles);
+    }
+
+    public void addRole(Role role) {
+        roles.add(role);
+        role.getUsers().add(this);
+    }
+
+    public void removeRole(Role role) {
+        roles.remove(role);
+        role.getUsers().remove(this);
+    }
+
+    public void addRoles(Set<Role> roles) {
+        for (Role role : roles) {
+            this.roles.add(role);
+            role.getUsers().add(this);
+        }
+    }
+
+    public void removeRoles(Set<Role> roles) {
+        for (Role role : roles) {
+            this.roles.remove(role);
+            role.getUsers().remove(this);
+        }
+    }
+
+    public void removeAllRoles() {
+        for (Role role : new LinkedHashSet<>(roles)) {
+            role.getUsers().remove(this);
+            roles.remove(role);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder();
+        hcb.append(username);
+        return hcb.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof User other)) {
+            return false;
+        }
+
+        EqualsBuilder eb = new EqualsBuilder();
+        eb.append(username, other.username);
+        return eb.isEquals();
     }
 
 }
