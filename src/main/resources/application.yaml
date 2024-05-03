@@ -9,13 +9,6 @@ jwt:
   issuer: ${JWT_ISSUER}
   expiration: ${JWT_EXPIRATION}
 
-server:
-  port: 8443
-  ssl:
-    key-store: "classpath:certificate.p12"
-    key-store-type: "PKCS12"
-    key-store-password: "Vftcg7af2023!?"
-
 spring:
   application:
     name: "todoapp"
