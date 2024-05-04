@@ -1,12 +1,12 @@
 package dev.naiarievilo.todoapp.users;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.hypersistence.utils.spring.repository.BaseJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Transactional(readOnly = true)
-public interface PermissionRepository extends JpaRepository<Permission, Long> {
+public interface PermissionRepository extends BaseJpaRepository<Permission, Long> {
 
     Optional<Permission> findByPermission(String permissionName);
 }
