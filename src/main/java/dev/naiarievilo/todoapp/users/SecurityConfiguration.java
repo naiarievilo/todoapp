@@ -47,9 +47,9 @@ public class SecurityConfiguration {
 
     @Bean
     public UserDetailsService userDetailsService(PermissionRepository permissionRepository,
-        RoleRepository roleRepository, UserRepository userRepository) {
+        RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
-        return new UserService(permissionRepository, roleRepository, userRepository);
+        return new UserServiceImpl(permissionRepository, roleRepository, userRepository, passwordEncoder);
     }
 
     @Bean
