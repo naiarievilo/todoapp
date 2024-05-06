@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.roles;
 
 public class RoleNotFoundException extends RuntimeException {
 

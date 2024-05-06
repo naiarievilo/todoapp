@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.roles;
 
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
 import org.springframework.data.jpa.repository.Query;

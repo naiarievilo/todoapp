@@ -1,5 +1,7 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.roles;
 
+import dev.naiarievilo.todoapp.permissions.Permission;
+import dev.naiarievilo.todoapp.users.User;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -70,8 +72,14 @@ public class Role {
     }
 
     public void setPermissions(Set<Permission> permissions) {
-        this.permissions = new LinkedHashSet<>();
         addPermissions(permissions);
+    }
+
+    public void addPermissions(Set<Permission> permissions) {
+        for (Permission permission : permissions) {
+            this.permissions.add(permission);
+            permission.getRoles().add(this);
+        }
     }
 
     public void addPermission(Permission permission) {
@@ -82,13 +90,6 @@ public class Role {
     public void removePermission(Permission permission) {
         permissions.remove(permission);
         permission.getRoles().remove(this);
-    }
-
-    public void addPermissions(Set<Permission> permissions) {
-        for (Permission permission : permissions) {
-            this.permissions.add(permission);
-            permission.getRoles().add(this);
-        }
     }
 
     public void removePermissions(Set<Permission> permissions) {
