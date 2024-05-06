@@ -35,8 +35,9 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public Set<Role> getAllRoles() {
+        List<Role> roles = roleRepository.findAll();
+        return new LinkedHashSet<>(roles);
     }
 
     @Override
