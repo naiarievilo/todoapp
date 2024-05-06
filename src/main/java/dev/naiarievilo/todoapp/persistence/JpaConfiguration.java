@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp;
+package dev.naiarievilo.todoapp.persistence;
 
 import io.hypersistence.utils.spring.repository.BaseJpaRepositoryImpl;
 import org.springframework.context.annotation.Configuration;
