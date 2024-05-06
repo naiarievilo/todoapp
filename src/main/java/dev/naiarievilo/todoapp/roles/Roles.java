@@ -14,7 +14,7 @@ public enum Roles {
         this.description = description;
     }
 
-    static List<String> getRoleNames() {
+    static List<String> roleNames() {
         return roleNames;
     }
 
@@ -22,7 +22,7 @@ public enum Roles {
         return roleNames.contains(role);
     }
 
-    public String getDescription() {
+    public String description() {
         return description;
     }
 

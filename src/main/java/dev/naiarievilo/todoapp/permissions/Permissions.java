@@ -15,7 +15,7 @@ public enum Permissions {
         this.description = description;
     }
 
-    static List<String> getPermissionNames() {
+    static List<String> permissionNames() {
         return permissionNames;
     }
 
@@ -23,7 +23,7 @@ public enum Permissions {
         return permissionNames.contains(permission);
     }
 
-    public String getDescription() {
+    public String description() {
         return description;
     }
 }
