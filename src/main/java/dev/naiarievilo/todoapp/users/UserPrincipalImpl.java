@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.security;
+package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.permissions.Permissions;
 import dev.naiarievilo.todoapp.roles.Roles;

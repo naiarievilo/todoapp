@@ -14,11 +14,11 @@ public enum Roles {
         this.description = description;
     }
 
-    static List<String> roleNames() {
+    public static List<String> roleNames() {
         return roleNames;
     }
 
-    static boolean hasRole(String role) {
+    public static boolean hasRole(String role) {
         return roleNames.contains(role);
     }
 

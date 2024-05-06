@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

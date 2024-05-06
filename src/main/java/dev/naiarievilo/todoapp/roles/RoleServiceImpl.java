@@ -12,13 +12,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
+
 @Service
 @Transactional(readOnly = true)
 public class RoleServiceImpl implements RoleService {
-
-    private static final String ROLE_NOT_NULL = "Role cannot be null";
-    private static final String PERMISSIONS_NOT_NULL_OR_EMPTY = "Permissions cannot be null or contain null elements";
-    private static final String DESCRIPTION_NOT_BLANK = "Description cannot be blank";
 
     private final RoleRepository roleRepository;
     private final PermissionService permissionService;
@@ -30,7 +28,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role getRole(Roles role) {
-        Validate.notNull(role, ROLE_NOT_NULL);
+        Validate.notNull(role, ROLE_NOT_NULL.message());
         return roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
     }
 
@@ -43,13 +41,13 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void createRole(Roles role, List<Permissions> permissions) {
-        Validate.notNull(role, ROLE_NOT_NULL);
-        Validate.noNullElements(permissions, PERMISSIONS_NOT_NULL_OR_EMPTY);
+        Validate.notNull(role, ROLE_NOT_NULL.message());
+        Validate.noNullElements(permissions, PERMISSIONS_NOT_NULL_OR_EMPTY.message());
 
         String roleName = role.name();
-        String description = role.getDescription();
+        String description = role.description();
 
-        Validate.notBlank(description, DESCRIPTION_NOT_BLANK);
+        Validate.notBlank(description, DESCRIPTION_NOT_BLANK.message());
 
         Set<Permission> permissionSet = permissions.stream()
             .map(permissionService::getPermission)
@@ -66,15 +64,15 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void deleteRole(Roles role) {
-        Validate.notNull(role, ROLE_NOT_NULL);
+        Validate.notNull(role, ROLE_NOT_NULL.message());
         roleRepository.deleteByName(role.name());
     }
 
     @Override
     @Transactional
     public void addPermissionToRole(Roles role, Permissions permission) {
-        Validate.notNull(role, ROLE_NOT_NULL);
-        Validate.notNull(permission, PERMISSIONS_NOT_NULL_OR_EMPTY);
+        Validate.notNull(role, ROLE_NOT_NULL.message());
+        Validate.notNull(permission, PERMISSIONS_NOT_NULL_OR_EMPTY.message());
 
         Role targetRole = roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
         Permission permissionToAdd = permissionService.getPermission(permission);
@@ -85,8 +83,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void removePermissionFromRole(Roles role, Permissions permission) {
-        Validate.notNull(role, ROLE_NOT_NULL);
-        Validate.notNull(permission, PERMISSIONS_NOT_NULL_OR_EMPTY);
+        Validate.notNull(role, ROLE_NOT_NULL.message());
+        Validate.notNull(permission, PERMISSIONS_NOT_NULL_OR_EMPTY.message());
 
         Role targetRole = roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
         Permission permissionToRemove = permissionService.getPermission(permission);

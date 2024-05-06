@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.security;
+package dev.naiarievilo.todoapp.users;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
