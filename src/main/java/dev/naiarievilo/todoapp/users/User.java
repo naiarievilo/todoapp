@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.users;
 
+import dev.naiarievilo.todoapp.roles.Role;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -129,8 +130,14 @@ public class User {
     }
 
     public void setRoles(Set<Role> roles) {
-        this.roles = new LinkedHashSet<>();
         addRoles(roles);
+    }
+
+    public void addRoles(Set<Role> roles) {
+        for (Role role : roles) {
+            this.roles.add(role);
+            role.getUsers().add(this);
+        }
     }
 
     public void addRole(Role role) {
@@ -141,13 +148,6 @@ public class User {
     public void removeRole(Role role) {
         roles.remove(role);
         role.getUsers().remove(this);
-    }
-
-    public void addRoles(Set<Role> roles) {
-        for (Role role : roles) {
-            this.roles.add(role);
-            role.getUsers().add(this);
-        }
     }
 
     public void removeRoles(Set<Role> roles) {

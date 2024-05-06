@@ -1,5 +1,6 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.permissions;
 
+import dev.naiarievilo.todoapp.roles.Role;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -21,8 +22,19 @@ public class Permission {
     @Column(name = "permission", unique = true, nullable = false, updatable = false)
     private String name;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
     @ManyToMany(mappedBy = "permissions")
     private Set<Role> roles = new LinkedHashSet<>();
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Set<Role> getRoles() {
         return roles;

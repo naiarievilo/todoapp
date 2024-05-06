@@ -31,7 +31,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role getRole(Roles role) {
         Validate.notNull(role, ROLE_NOT_NULL);
-        return roleRepository.findByRole(role.name()).orElseThrow(RoleNotFoundException::new);
+        return roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
     }
 
     @Override
@@ -51,12 +51,11 @@ public class RoleServiceImpl implements RoleService {
         Validate.notBlank(description, DESCRIPTION_NOT_BLANK);
 
         Set<Permission> permissionSet = permissions.stream()
-            .map(Permissions::name)
             .map(permissionService::getPermission)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         Role newRole = new Role();
-        newRole.setRole(roleName);
+        newRole.setName(roleName);
         newRole.setDescription(description);
         newRole.setPermissions(permissionSet);
 
@@ -67,7 +66,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void deleteRole(Roles role) {
         Validate.notNull(role, ROLE_NOT_NULL);
-        roleRepository.deleteByRole(role.name());
+        roleRepository.deleteByName(role.name());
     }
 
     @Override
@@ -76,8 +75,8 @@ public class RoleServiceImpl implements RoleService {
         Validate.notNull(role, ROLE_NOT_NULL);
         Validate.notNull(permission, PERMISSIONS_NOT_NULL_OR_EMPTY);
 
-        Role targetRole = roleRepository.findByRole(role.name()).orElseThrow(RoleNotFoundException::new);
-        Permission permissionToAdd = permissionService.getPermission(permission.name());
+        Role targetRole = roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
+        Permission permissionToAdd = permissionService.getPermission(permission);
 
         targetRole.addPermission(permissionToAdd);
     }
@@ -88,8 +87,8 @@ public class RoleServiceImpl implements RoleService {
         Validate.notNull(role, ROLE_NOT_NULL);
         Validate.notNull(permission, PERMISSIONS_NOT_NULL_OR_EMPTY);
 
-        Role targetRole = roleRepository.findByRole(role.name()).orElseThrow(RoleNotFoundException::new);
-        Permission permissionToRemove = permissionService.getPermission(permission.name());
+        Role targetRole = roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
+        Permission permissionToRemove = permissionService.getPermission(permission);
 
         targetRole.removePermission(permissionToRemove);
     }
