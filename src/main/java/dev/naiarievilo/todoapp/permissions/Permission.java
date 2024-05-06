@@ -19,7 +19,7 @@ public class Permission {
 
     @NaturalId
     @Column(name = "permission", unique = true, nullable = false, updatable = false)
-    private String permission;
+    private String name;
 
     @ManyToMany(mappedBy = "permissions")
     private Set<Role> roles = new LinkedHashSet<>();
@@ -40,18 +40,18 @@ public class Permission {
         this.id = id;
     }
 
-    public String getPermission() {
-        return permission;
+    public String getName() {
+        return name;
     }
 
-    public void setPermission(String permission) {
-        this.permission = permission;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public int hashCode() {
         HashCodeBuilder hcb = new HashCodeBuilder();
-        hcb.append(permission);
+        hcb.append(name);
         return hcb.toHashCode();
     }
 
@@ -66,7 +66,7 @@ public class Permission {
         }
 
         EqualsBuilder eb = new EqualsBuilder();
-        eb.append(permission, other.permission);
+        eb.append(name, other.name);
         return eb.isEquals();
     }
 
