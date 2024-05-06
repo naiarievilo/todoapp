@@ -12,4 +12,6 @@ public interface PermissionRepository extends BaseJpaRepository<Permission, Long
 
     @Query("SELECT p FROM Permission AS p")
     List<Permission> findAll();
+
+    void deleteByName(String name);
 }
