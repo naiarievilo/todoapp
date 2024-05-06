@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +9,8 @@ public interface UserPrincipal extends UserDetails {
 
     String getEmail();
 
-    Collection<? extends GrantedAuthority> getRoles();
+    Collection<GrantedAuthority> getRoles();
 
+    @Override
+    Collection<GrantedAuthority> getAuthorities();
 }
