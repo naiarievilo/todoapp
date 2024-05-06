@@ -12,8 +12,8 @@ public interface RoleRepository extends BaseJpaRepository<Role, Long> {
 
     Optional<Role> findByRole(String role);
 
-    @Query("SELECT DISTINCT r.role FROM Role AS r")
-    List<Role> findDistinctRoles();
+    @Query("SELECT r FROM Role AS r")
+    List<Role> findAll();
 
     @Transactional
     void deleteByRole(String role);
