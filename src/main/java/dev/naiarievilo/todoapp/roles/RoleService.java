@@ -8,7 +8,7 @@ public interface RoleService {
 
     Role getRole(Roles role);
 
-    List<Role> getRoles();
+    List<Role> getAllRoles();
 
     void createRole(Roles role, List<Permissions> permissions);
 
