@@ -1,11 +1,11 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.permissions;
 
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
-@Transactional(readOnly = true)
 public interface PermissionRepository extends BaseJpaRepository<Permission, Long> {
 
     Optional<Permission> findByName(String permissionName);
