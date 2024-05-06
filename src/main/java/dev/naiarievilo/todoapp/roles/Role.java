@@ -21,7 +21,7 @@ public class Role {
 
     @NaturalId
     @Column(name = "role", unique = true, nullable = false, updatable = false)
-    private String role;
+    private String name;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -51,12 +51,12 @@ public class Role {
         this.id = id;
     }
 
-    public String getRole() {
-        return role;
+    public String getName() {
+        return name;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -109,7 +109,7 @@ public class Role {
     @Override
     public int hashCode() {
         HashCodeBuilder hcb = new HashCodeBuilder();
-        hcb.append(role);
+        hcb.append(name);
         return hcb.toHashCode();
     }
 
@@ -124,7 +124,7 @@ public class Role {
         }
 
         EqualsBuilder eb = new EqualsBuilder();
-        eb.append(role, other.role);
+        eb.append(name, other.name);
         return eb.isEquals();
     }
 }

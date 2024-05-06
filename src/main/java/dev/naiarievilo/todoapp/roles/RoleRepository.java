@@ -10,11 +10,11 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public interface RoleRepository extends BaseJpaRepository<Role, Long> {
 
-    Optional<Role> findByRole(String role);
+    Optional<Role> findByName(String role);
 
     @Query("SELECT r FROM Role AS r")
     List<Role> findAll();
 
     @Transactional
-    void deleteByRole(String role);
+    void deleteByName(String role);
 }
