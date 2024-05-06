@@ -127,6 +127,11 @@ databaseChangeLog:
                     unique: true
                     uniqueConstraintName: "permission"
                     nullable: false
+              - column:
+                  name: "description"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: "create-users_roles-table"
