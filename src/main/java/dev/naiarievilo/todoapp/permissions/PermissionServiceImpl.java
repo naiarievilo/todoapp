@@ -6,8 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.DESCRIPTION_NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.PERMISSION_NOT_NULL;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
+
 
 @Service
 @Transactional(readOnly = true)
@@ -26,17 +27,17 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Permission getPermission(Permissions permission) {
-        Validate.notNull(permission, PERMISSION_NOT_NULL.message());
+        Validate.notNull(permission, NOT_NULL.message());
         return permissionRepository.findByName(permission.name()).orElseThrow(PermissionNotFoundException::new);
     }
 
     @Override
     @Transactional
     public void createPermission(Permissions permission) {
-        Validate.notNull(permission, PERMISSION_NOT_NULL.message());
+        Validate.notNull(permission, NOT_NULL.message());
 
         String description = permission.description();
-        Validate.notBlank(description, DESCRIPTION_NOT_BLANK.message());
+        Validate.notBlank(description, NOT_BLANK.message());
 
         Permission newPermission = new Permission();
         newPermission.setName(permission.name());
@@ -48,7 +49,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional
     public void deletePermission(Permissions permission) {
-        Validate.notNull(permission, PERMISSION_NOT_NULL.message());
+        Validate.notNull(permission, NOT_NULL.message());
         permissionRepository.deleteByName(permission.name());
     }
 }

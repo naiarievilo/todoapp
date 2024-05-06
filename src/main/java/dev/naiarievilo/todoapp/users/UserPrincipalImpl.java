@@ -26,11 +26,11 @@ public class UserPrincipalImpl implements UserPrincipal {
     private UserPrincipalImpl(String username, String password, String email, Set<GrantedAuthority> roles,
         Set<GrantedAuthority> permissions, boolean isExpired, boolean isLocked, boolean isEnabled) {
 
-        Validate.notBlank(username, USERNAME_NOT_BLANK.message());
-        Validate.notBlank(password, PASSWORD_NOT_BLANK.message());
-        Validate.notBlank(email, EMAIL_NOT_BLANK.message());
-        Validate.noNullElements(roles, ROLES_NOT_NULL_OR_EMPTY.message());
-        Validate.noNullElements(permissions, PERMISSIONS_NOT_NULL_OR_EMPTY.message());
+        Validate.notBlank(username, NOT_BLANK.message());
+        Validate.notBlank(password, NOT_BLANK.message());
+        Validate.notBlank(email, NOT_BLANK.message());
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
+        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
 
         this.username = username;
         this.password = password;
@@ -43,7 +43,7 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     public static UserPrincipalImplBuilder withUsername(String username) {
-        Validate.notBlank(username, USERNAME_NOT_BLANK.message());
+        Validate.notBlank(username, NOT_BLANK.message());
 
         return builder().setUsername(username);
     }
@@ -53,7 +53,7 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     public static UserPrincipal withUser(User user) {
-        Validate.notNull(user, USER_NOT_NULL.message());
+        Validate.notNull(user, NOT_NULL.message());
 
         return builder()
             .setUsername(user.getUsername())
@@ -124,28 +124,28 @@ public class UserPrincipalImpl implements UserPrincipal {
         private boolean isEnabled;
 
         public UserPrincipalImplBuilder setUsername(String username) {
-            Validate.notBlank(username, USERNAME_NOT_BLANK.message());
+            Validate.notBlank(username, NOT_BLANK.message());
 
             this.username = username;
             return this;
         }
 
         public UserPrincipalImplBuilder setPassword(String password) {
-            Validate.notBlank(password, PASSWORD_NOT_BLANK.message());
+            Validate.notBlank(password, NOT_BLANK.message());
 
             this.password = password;
             return this;
         }
 
         public UserPrincipalImplBuilder setEmail(String email) {
-            Validate.notBlank(email, EMAIL_NOT_BLANK.message());
+            Validate.notBlank(email, NOT_BLANK.message());
 
             this.email = email;
             return this;
         }
 
         public UserPrincipalImplBuilder setRoles(Roles... roles) {
-            Validate.noNullElements(roles, ROLES_NOT_NULL_OR_EMPTY.message());
+            Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
 
             for (Roles role : roles) {
                 this.roles.add(new SimpleGrantedAuthority(role.name()));
@@ -155,14 +155,14 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipalImplBuilder setRoles(Set<GrantedAuthority> roles) {
-            Validate.noNullElements(roles, ROLES_NOT_NULL_OR_EMPTY.message());
+            Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
 
             this.roles.addAll(roles);
             return this;
         }
 
         public UserPrincipalImplBuilder setPermissions(Permissions... permissions) {
-            Validate.noNullElements(permissions, PERMISSIONS_NOT_NULL_OR_EMPTY.message());
+            Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
 
             for (Permissions permission : permissions) {
                 this.permissions.add(new SimpleGrantedAuthority(permission.name()));
@@ -172,7 +172,7 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipalImplBuilder setPermissions(Set<GrantedAuthority> permissions) {
-            Validate.noNullElements(permissions, PERMISSIONS_NOT_NULL_OR_EMPTY.message());
+            Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
 
             this.permissions.addAll(permissions);
             return this;
