@@ -2,16 +2,18 @@ package dev.naiarievilo.todoapp.roles;
 
 import dev.naiarievilo.todoapp.permissions.Permissions;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 public interface RoleService {
 
     Role getRole(Roles role);
 
+    Set<Role> getRoles(Collection<Roles> roles);
+
     Set<Role> getAllRoles();
 
-    void createRole(Roles role, List<Permissions> permissions);
+    void createRole(Roles role, Collection<Permissions> permissions);
 
     void deleteRole(Roles role);
 

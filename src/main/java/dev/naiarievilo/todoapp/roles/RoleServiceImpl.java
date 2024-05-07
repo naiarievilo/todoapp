@@ -7,6 +7,7 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,18 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public Set<Role> getRoles(Collection<Roles> roles) {
+        Validate.noNullElements(roles, NOT_NULL.message());
+
+        Set<Role> rolesSet = new LinkedHashSet<>();
+        for (Roles role : roles) {
+            rolesSet.add(getRole(role));
+        }
+
+        return rolesSet;
+    }
+
+    @Override
     public Role getRole(Roles role) {
         Validate.notNull(role, NOT_NULL.message());
         return roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
@@ -40,7 +53,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public void createRole(Roles role, List<Permissions> permissions) {
+    public void createRole(Roles role, Collection<Permissions> permissions) {
         Validate.notNull(role, NOT_NULL.message());
         Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
 
