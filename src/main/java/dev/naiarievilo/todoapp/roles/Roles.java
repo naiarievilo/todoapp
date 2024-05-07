@@ -1,14 +1,15 @@
 package dev.naiarievilo.todoapp.roles;
 
 import org.apache.commons.lang3.Validate;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
 
 public enum Roles {
     ROLE_ADMIN("Superuser role"),
@@ -22,16 +23,17 @@ public enum Roles {
         this.description = description;
     }
 
-    public static Optional<Roles> getRole(String role) {
-        Validate.notBlank(role, NOT_BLANK.message());
+    public static Roles toRole(GrantedAuthority role) {
+        Validate.notNull(role, NOT_NULL.message());
 
+        String roleName = role.getAuthority();
         for (Roles roles : rolesSet) {
-            if (roles.name().equals(role)) {
-                return Optional.of(roles);
+            if (roles.name().equals(roleName)) {
+                return roles;
             }
         }
 
-        return Optional.empty();
+        throw new RoleNotFoundException();
     }
 
     public static Set<Roles> roles() {
