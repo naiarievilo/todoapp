@@ -3,12 +3,15 @@ package dev.naiarievilo.todoapp.roles;
 import dev.naiarievilo.todoapp.permissions.Permission;
 import dev.naiarievilo.todoapp.users.User;
 import jakarta.persistence.*;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
 
 @Entity
 @Table(name = "roles")
@@ -40,6 +43,7 @@ public class Role {
     }
 
     public void setUsers(Set<User> users) {
+        Validate.noNullElements(users, NO_NULL_ELEMENTS.message());
         this.users = users;
     }
 
@@ -48,6 +52,7 @@ public class Role {
     }
 
     public void setId(Long id) {
+        Validate.notNull(id, NOT_NULL.message());
         this.id = id;
     }
 
@@ -56,6 +61,7 @@ public class Role {
     }
 
     public void setName(String name) {
+        Validate.notBlank(name, NOT_BLANK.message());
         this.name = name;
     }
 
@@ -64,6 +70,7 @@ public class Role {
     }
 
     public void setDescription(String description) {
+        Validate.notBlank(description, NOT_BLANK.message());
         this.description = description;
     }
 
@@ -72,10 +79,12 @@ public class Role {
     }
 
     public void setPermissions(Set<Permission> permissions) {
+        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
         addPermissions(permissions);
     }
 
     public void addPermissions(Set<Permission> permissions) {
+        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
         for (Permission permission : permissions) {
             this.permissions.add(permission);
             permission.getRoles().add(this);
@@ -83,16 +92,19 @@ public class Role {
     }
 
     public void addPermission(Permission permission) {
+        Validate.notNull(permission, NOT_NULL.message());
         permissions.add(permission);
         permission.getRoles().add(this);
     }
 
     public void removePermission(Permission permission) {
+        Validate.notNull(permission, NOT_NULL.message());
         permissions.remove(permission);
         permission.getRoles().remove(this);
     }
 
     public void removePermissions(Set<Permission> permissions) {
+        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
         for (Permission permission : permissions) {
             this.permissions.remove(permission);
             permission.getRoles().remove(this);

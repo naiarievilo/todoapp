@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Role;
 import jakarta.persistence.*;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnDefault;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.NaturalId;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
 
 @Entity
 @Table(name = "users")
@@ -37,15 +40,15 @@ public class User {
 
     @ColumnDefault("false")
     @Column(name = "is_expired", nullable = false)
-    private Boolean isExpired = false;
+    private boolean isExpired = false;
 
     @ColumnDefault("false")
     @Column(name = "is_locked", nullable = false)
-    private Boolean isLocked = false;
+    private boolean isLocked = false;
 
     @ColumnDefault("false")
     @Column(name = "is_enabled", nullable = false)
-    private Boolean isEnabled = false;
+    private boolean isEnabled = false;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
@@ -58,6 +61,7 @@ public class User {
     }
 
     public void setId(Long id) {
+        Validate.notNull(id, NOT_NULL.message());
         this.id = id;
     }
 
@@ -66,6 +70,7 @@ public class User {
     }
 
     public void setUsername(String username) {
+        Validate.notBlank(username, NOT_BLANK.message());
         this.username = username;
     }
 
@@ -74,6 +79,7 @@ public class User {
     }
 
     public void setPassword(String password) {
+        Validate.notBlank(password, NOT_BLANK.message());
         this.password = password;
     }
 
@@ -82,6 +88,7 @@ public class User {
     }
 
     public void setEmail(String email) {
+        Validate.notBlank(email, NOT_BLANK.message());
         this.email = email;
     }
 
@@ -90,6 +97,7 @@ public class User {
     }
 
     public void setFirstName(String firstName) {
+        Validate.notBlank(firstName, NOT_BLANK.message());
         this.firstName = firstName;
     }
 
@@ -98,30 +106,31 @@ public class User {
     }
 
     public void setLastName(String lastName) {
+        Validate.notBlank(lastName, NOT_BLANK.message());
         this.lastName = lastName;
     }
 
-    public Boolean getIsExpired() {
+    public boolean getIsExpired() {
         return isExpired;
     }
 
-    public void setIsExpired(Boolean isExpired) {
+    public void setIsExpired(boolean isExpired) {
         this.isExpired = isExpired;
     }
 
-    public Boolean getIsLocked() {
+    public boolean getIsLocked() {
         return isLocked;
     }
 
-    public void setIsLocked(Boolean isLocked) {
+    public void setIsLocked(boolean isLocked) {
         this.isLocked = isLocked;
     }
 
-    public Boolean getIsEnabled() {
+    public boolean getIsEnabled() {
         return isEnabled;
     }
 
-    public void setIsEnabled(Boolean isEnabled) {
+    public void setIsEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
     }
 
@@ -130,10 +139,12 @@ public class User {
     }
 
     public void setRoles(Set<Role> roles) {
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
         addRoles(roles);
     }
 
     public void addRoles(Set<Role> roles) {
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
         for (Role role : roles) {
             this.roles.add(role);
             role.getUsers().add(this);
@@ -141,16 +152,19 @@ public class User {
     }
 
     public void addRole(Role role) {
+        Validate.notNull(role, NOT_NULL.message());
         roles.add(role);
         role.getUsers().add(this);
     }
 
     public void removeRole(Role role) {
+        Validate.notNull(role, NOT_NULL.message());
         roles.remove(role);
         role.getUsers().remove(this);
     }
 
     public void removeRoles(Set<Role> roles) {
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
         for (Role role : roles) {
             this.roles.remove(role);
             role.getUsers().remove(this);

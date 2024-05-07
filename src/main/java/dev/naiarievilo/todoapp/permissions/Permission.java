@@ -2,12 +2,15 @@ package dev.naiarievilo.todoapp.permissions;
 
 import dev.naiarievilo.todoapp.roles.Role;
 import jakarta.persistence.*;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
 
 @Entity
 @Table(name = "permissions")
@@ -33,6 +36,7 @@ public class Permission {
     }
 
     public void setDescription(String description) {
+        Validate.notBlank(description, NOT_BLANK.message());
         this.description = description;
     }
 
@@ -41,6 +45,7 @@ public class Permission {
     }
 
     public void setRoles(Set<Role> roles) {
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
         this.roles = roles;
     }
 
@@ -49,6 +54,7 @@ public class Permission {
     }
 
     public void setId(Long id) {
+        Validate.notNull(id, NOT_NULL.message());
         this.id = id;
     }
 
@@ -57,6 +63,7 @@ public class Permission {
     }
 
     public void setName(String name) {
+        Validate.notBlank(name, NOT_BLANK.message());
         this.name = name;
     }
 
