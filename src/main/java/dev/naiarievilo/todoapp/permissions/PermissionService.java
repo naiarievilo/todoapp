@@ -1,12 +1,15 @@
 package dev.naiarievilo.todoapp.permissions;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 
 public interface PermissionService {
 
-    List<Permission> getAllPermissions();
+    Set<Permission> getAllPermissions();
 
     Permission getPermission(Permissions permission);
+
+    Set<Permission> getPermissions(Collection<Permissions> permissions);
 
     void createPermission(Permissions permission);
 
