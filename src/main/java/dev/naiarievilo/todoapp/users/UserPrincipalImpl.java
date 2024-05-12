@@ -19,12 +19,11 @@ public class UserPrincipalImpl implements UserPrincipal {
     private final String email;
     private final Set<GrantedAuthority> roles;
     private final Set<GrantedAuthority> permissions;
-    private final boolean isExpired;
     private final boolean isLocked;
     private final boolean isEnabled;
 
     private UserPrincipalImpl(String username, String password, String email, Set<GrantedAuthority> roles,
-        Set<GrantedAuthority> permissions, boolean isExpired, boolean isLocked, boolean isEnabled) {
+        Set<GrantedAuthority> permissions, boolean isLocked, boolean isEnabled) {
 
         Validate.notBlank(username, NOT_BLANK.message());
         Validate.notBlank(password, NOT_BLANK.message());
@@ -37,7 +36,6 @@ public class UserPrincipalImpl implements UserPrincipal {
         this.email = email;
         this.roles = roles;
         this.permissions = permissions;
-        this.isExpired = isExpired;
         this.isLocked = isLocked;
         this.isEnabled = isEnabled;
     }
@@ -61,7 +59,6 @@ public class UserPrincipalImpl implements UserPrincipal {
             .setEmail(user.getEmail())
             .setRoles(UserServiceImpl.getUserRoles(user))
             .setPermissions(UserServiceImpl.getUserPermissions(user))
-            .setExpired(user.getIsExpired())
             .setLocked(user.getIsLocked())
             .setEnabled(user.getIsEnabled())
             .build();
@@ -94,7 +91,7 @@ public class UserPrincipalImpl implements UserPrincipal {
 
     @Override
     public boolean isAccountNonExpired() {
-        return !isExpired;
+        return true;
     }
 
     @Override
@@ -119,7 +116,6 @@ public class UserPrincipalImpl implements UserPrincipal {
         private String username;
         private String password;
         private String email;
-        private boolean isExpired;
         private boolean isLocked;
         private boolean isEnabled;
 
@@ -178,11 +174,6 @@ public class UserPrincipalImpl implements UserPrincipal {
             return this;
         }
 
-        public UserPrincipalImplBuilder setExpired(boolean expired) {
-            isExpired = expired;
-            return this;
-        }
-
         public UserPrincipalImplBuilder setLocked(boolean locked) {
             isLocked = locked;
             return this;
@@ -195,7 +186,7 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipal build() {
-            return new UserPrincipalImpl(username, password, email, roles, permissions, isExpired, isLocked, isEnabled);
+            return new UserPrincipalImpl(username, password, email, roles, permissions, isLocked, isEnabled);
         }
 
     }

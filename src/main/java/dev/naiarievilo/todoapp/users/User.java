@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.NaturalId;
 
+import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,23 +33,19 @@ public class User {
     @Column(name = "email", unique = true, nullable = false, length = 320)
     private String email;
 
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
-
-    @Column(name = "last_name", nullable = false)
-    private String lastName;
-
-    @ColumnDefault("false")
-    @Column(name = "is_expired", nullable = false)
-    private boolean isExpired = false;
-
     @ColumnDefault("false")
     @Column(name = "is_locked", nullable = false)
-    private boolean isLocked = false;
+    private Boolean isLocked = false;
 
-    @ColumnDefault("false")
+    @ColumnDefault("true")
     @Column(name = "is_enabled", nullable = false)
-    private boolean isEnabled = false;
+    private Boolean isEnabled = false;
+
+    @Column(name = "failed_login_attempts", nullable = false)
+    private Integer failedLoginAttempts;
+
+    @Column(name = "failed_login_time")
+    private LocalTime failedLoginTime;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
@@ -92,37 +89,12 @@ public class User {
         this.email = email;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        Validate.notBlank(firstName, NOT_BLANK.message());
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        Validate.notBlank(lastName, NOT_BLANK.message());
-        this.lastName = lastName;
-    }
-
-    public boolean getIsExpired() {
-        return isExpired;
-    }
-
-    public void setIsExpired(boolean isExpired) {
-        this.isExpired = isExpired;
-    }
-
     public boolean getIsLocked() {
         return isLocked;
     }
 
-    public void setIsLocked(boolean isLocked) {
+    public void setIsLocked(Boolean isLocked) {
+        Validate.notNull(isLocked, NOT_NULL.message());
         this.isLocked = isLocked;
     }
 
@@ -130,8 +102,31 @@ public class User {
         return isEnabled;
     }
 
-    public void setIsEnabled(boolean isEnabled) {
+    public void setIsEnabled(Boolean isEnabled) {
+        Validate.notNull(isEnabled, NOT_NULL.message());
         this.isEnabled = isEnabled;
+    }
+
+    public int getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public void setFailedLoginAttempts(Integer failedLoginAttempts) {
+        Validate.notNull(failedLoginAttempts, NOT_NULL.message());
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public void incrementFailedLoginAttempts() {
+        failedLoginAttempts++;
+    }
+
+    public LocalTime getFailedLoginTime() {
+        return failedLoginTime;
+    }
+
+    public void setFailedLoginTime(LocalTime failedLoginTime) {
+        Validate.notNull(failedLoginTime, NOT_NULL.message());
+        this.failedLoginTime = failedLoginTime;
     }
 
     public Set<Role> getRoles() {
