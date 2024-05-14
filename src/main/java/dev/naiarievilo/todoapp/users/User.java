@@ -24,14 +24,11 @@ public class User {
     private Long id;
 
     @NaturalId
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
+    @Column(name = "email", unique = true, nullable = false, length = 320)
+    private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
-
-    @Column(name = "email", unique = true, nullable = false, length = 320)
-    private String email;
 
     @ColumnDefault("false")
     @Column(name = "is_locked", nullable = false)
@@ -62,13 +59,13 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        Validate.notBlank(username, NOT_BLANK.message());
-        this.username = username;
+    public void setEmail(String email) {
+        Validate.notBlank(email, NOT_BLANK.message());
+        this.email = email;
     }
 
     public String getPassword() {
@@ -78,15 +75,6 @@ public class User {
     public void setPassword(String password) {
         Validate.notBlank(password, NOT_BLANK.message());
         this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        Validate.notBlank(email, NOT_BLANK.message());
-        this.email = email;
     }
 
     public boolean getIsLocked() {
@@ -176,7 +164,7 @@ public class User {
     @Override
     public int hashCode() {
         HashCodeBuilder hcb = new HashCodeBuilder();
-        hcb.append(username);
+        hcb.append(email);
         return hcb.toHashCode();
     }
 
@@ -191,7 +179,7 @@ public class User {
         }
 
         EqualsBuilder eb = new EqualsBuilder();
-        eb.append(username, other.username);
+        eb.append(email, other.email);
         return eb.isEquals();
     }
 

@@ -30,7 +30,7 @@ public class JwtService {
     }
 
     public String createToken(UserPrincipal userPrincipal) {
-        String username = userPrincipal.getUsername();
+        Long id = userPrincipal.getId();
         String email = userPrincipal.getEmail();
 
         String[] roles = userPrincipal.getRoles()
@@ -43,7 +43,7 @@ public class JwtService {
 
         Instant now = Instant.now();
         return JWT.create()
-            .withSubject(username)
+            .withSubject(String.valueOf(id))
             .withIssuer(issuer)
             .withIssuedAt(now)
             .withExpiresAt(now.plusMillis(expiration.toMillis()))

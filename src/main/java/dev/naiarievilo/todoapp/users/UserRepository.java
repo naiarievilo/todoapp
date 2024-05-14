@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface UserRepository extends BaseJpaRepository<User, Long> {
 
-    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
 
-    void deleteByUsername(String username);
+    void deleteByEmail(String email);
 }

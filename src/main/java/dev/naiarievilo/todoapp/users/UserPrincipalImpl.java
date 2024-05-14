@@ -14,36 +14,35 @@ import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
 
 public class UserPrincipalImpl implements UserPrincipal {
 
-    private final String username;
-    private final String password;
+    private final Long id;
     private final String email;
+    private final String password;
     private final Set<GrantedAuthority> roles;
     private final Set<GrantedAuthority> permissions;
     private final boolean isLocked;
     private final boolean isEnabled;
 
-    private UserPrincipalImpl(String username, String password, String email, Set<GrantedAuthority> roles,
+    private UserPrincipalImpl(Long id, String email, String password, Set<GrantedAuthority> roles,
         Set<GrantedAuthority> permissions, boolean isLocked, boolean isEnabled) {
 
-        Validate.notBlank(username, NOT_BLANK.message());
-        Validate.notBlank(password, NOT_BLANK.message());
+        Validate.notNull(id, NOT_NULL.message());
         Validate.notBlank(email, NOT_BLANK.message());
+        Validate.notBlank(password, NOT_BLANK.message());
         Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
         Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
 
-        this.username = username;
-        this.password = password;
+        this.id = id;
         this.email = email;
+        this.password = password;
         this.roles = roles;
         this.permissions = permissions;
         this.isLocked = isLocked;
         this.isEnabled = isEnabled;
     }
 
-    public static UserPrincipalImplBuilder withUsername(String username) {
-        Validate.notBlank(username, NOT_BLANK.message());
-
-        return builder().setUsername(username);
+    public static UserPrincipalImplBuilder withEmail(String email) {
+        Validate.notBlank(email, NOT_BLANK.message());
+        return builder().setEmail(email);
     }
 
     public static UserPrincipalImplBuilder builder() {
@@ -52,11 +51,9 @@ public class UserPrincipalImpl implements UserPrincipal {
 
     public static UserPrincipal withUser(User user) {
         Validate.notNull(user, NOT_NULL.message());
-
         return builder()
-            .setUsername(user.getUsername())
-            .setPassword(user.getPassword())
             .setEmail(user.getEmail())
+            .setPassword(user.getPassword())
             .setRoles(UserServiceImpl.getUserRoles(user))
             .setPermissions(UserServiceImpl.getUserPermissions(user))
             .setLocked(user.getIsLocked())
@@ -65,8 +62,18 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
     public String getEmail() {
         return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -80,32 +87,12 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     @Override
-    public String getPassword() {
-        return password;
+    public boolean isAccountLocked() {
+        return isLocked;
     }
 
     @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return !isLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
+    public boolean isAccountEnabled() {
         return isEnabled;
     }
 
@@ -113,16 +100,22 @@ public class UserPrincipalImpl implements UserPrincipal {
 
         private final Set<GrantedAuthority> roles = new LinkedHashSet<>();
         private final Set<GrantedAuthority> permissions = new LinkedHashSet<>();
-        private String username;
-        private String password;
+        private Long id;
         private String email;
+        private String password;
         private boolean isLocked;
         private boolean isEnabled;
 
-        public UserPrincipalImplBuilder setUsername(String username) {
-            Validate.notBlank(username, NOT_BLANK.message());
+        public UserPrincipalImplBuilder setId(Long id) {
+            Validate.notNull(id, NOT_NULL.message());
+            this.id = id;
+            return this;
+        }
 
-            this.username = username;
+        public UserPrincipalImplBuilder setEmail(String email) {
+            Validate.notBlank(email, NOT_BLANK.message());
+
+            this.email = email;
             return this;
         }
 
@@ -133,12 +126,6 @@ public class UserPrincipalImpl implements UserPrincipal {
             return this;
         }
 
-        public UserPrincipalImplBuilder setEmail(String email) {
-            Validate.notBlank(email, NOT_BLANK.message());
-
-            this.email = email;
-            return this;
-        }
 
         public UserPrincipalImplBuilder setRoles(Roles... roles) {
             Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
@@ -186,7 +173,7 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipal build() {
-            return new UserPrincipalImpl(username, password, email, roles, permissions, isLocked, isEnabled);
+            return new UserPrincipalImpl(id, email, password, roles, permissions, isLocked, isEnabled);
         }
 
     }

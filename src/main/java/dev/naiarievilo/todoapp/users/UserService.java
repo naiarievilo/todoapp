@@ -1,17 +1,16 @@
 package dev.naiarievilo.todoapp.users;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
+public interface UserService {
 
-public interface UserService extends UserDetailsService {
+    UserPrincipal loadUserByEmail(String email);
 
-    @Override
-    UserPrincipal loadUserByUsername(String username);
+    User getUser(String email);
 
     void createUser(UserPrincipal user);
 
-    void updateUser(User user);
+    void updateUser(UserPrincipal user);
 
-    void deleteUser(String username);
+    void deleteUser(UserPrincipal user);
 
     void changePassword(String oldPassword, String newPassword);
 
