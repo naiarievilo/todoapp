@@ -16,7 +16,7 @@ public interface UserPrincipal {
 
     Collection<GrantedAuthority> getAuthorities();
 
-    boolean isAccountLocked();
+    boolean isLocked();
 
-    boolean isAccountEnabled();
+    boolean isEnabled();
 }

@@ -87,12 +87,12 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     @Override
-    public boolean isAccountLocked() {
+    public boolean isLocked() {
         return isLocked;
     }
 
     @Override
-    public boolean isAccountEnabled() {
+    public boolean isEnabled() {
         return isEnabled;
     }
 
@@ -114,14 +114,12 @@ public class UserPrincipalImpl implements UserPrincipal {
 
         public UserPrincipalImplBuilder setEmail(String email) {
             Validate.notBlank(email, NOT_BLANK.message());
-
             this.email = email;
             return this;
         }
 
         public UserPrincipalImplBuilder setPassword(String password) {
             Validate.notBlank(password, NOT_BLANK.message());
-
             this.password = password;
             return this;
         }
@@ -133,13 +131,11 @@ public class UserPrincipalImpl implements UserPrincipal {
             for (Roles role : roles) {
                 this.roles.add(new SimpleGrantedAuthority(role.name()));
             }
-
             return this;
         }
 
         public UserPrincipalImplBuilder setRoles(Set<GrantedAuthority> roles) {
             Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
-
             this.roles.addAll(roles);
             return this;
         }
@@ -150,13 +146,11 @@ public class UserPrincipalImpl implements UserPrincipal {
             for (Permissions permission : permissions) {
                 this.permissions.add(new SimpleGrantedAuthority(permission.name()));
             }
-
             return this;
         }
 
         public UserPrincipalImplBuilder setPermissions(Set<GrantedAuthority> permissions) {
             Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
-
             this.permissions.addAll(permissions);
             return this;
         }
@@ -168,7 +162,6 @@ public class UserPrincipalImpl implements UserPrincipal {
 
         public UserPrincipalImplBuilder setEnabled(boolean enabled) {
             isEnabled = enabled;
-
             return this;
         }
 

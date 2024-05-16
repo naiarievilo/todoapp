@@ -23,7 +23,7 @@ public enum Roles {
         this.description = description;
     }
 
-    public static Roles toRole(GrantedAuthority role) {
+    public static Roles toRoles(GrantedAuthority role) {
         Validate.notNull(role, NOT_NULL.message());
 
         String roleName = role.getAuthority();
