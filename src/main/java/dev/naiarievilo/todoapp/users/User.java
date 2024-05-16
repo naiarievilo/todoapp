@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalTime;
@@ -30,11 +30,11 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ColumnDefault("false")
+    @Generated
     @Column(name = "is_locked", nullable = false)
     private Boolean isLocked = false;
 
-    @ColumnDefault("true")
+    @Generated
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled = false;
 
