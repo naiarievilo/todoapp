@@ -40,11 +40,11 @@ public enum Roles {
         return rolesSet;
     }
 
-    public static boolean hasRole(String role) {
-        Validate.notNull(role, NOT_BLANK.message());
+    public static boolean hasRole(String roleName) {
+        Validate.notNull(roleName, NOT_BLANK.message());
 
-        for (Roles roles : rolesSet) {
-            if (roles.name().equals(role)) {
+        for (Roles role : rolesSet) {
+            if (role.name().equals(roleName)) {
                 return true;
             }
         }
