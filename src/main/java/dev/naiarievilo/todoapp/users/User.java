@@ -32,11 +32,11 @@ public class User {
 
     @Generated
     @Column(name = "is_locked", nullable = false)
-    private Boolean isLocked = false;
+    private Boolean isLocked;
 
     @Generated
     @Column(name = "is_enabled", nullable = false)
-    private Boolean isEnabled = false;
+    private Boolean isEnabled;
 
     @Column(name = "failed_login_attempts", nullable = false)
     private Integer failedLoginAttempts;

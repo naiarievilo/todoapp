@@ -1,19 +1,32 @@
 package dev.naiarievilo.todoapp.users;
 
+import dev.naiarievilo.todoapp.roles.Roles;
+
 public interface UserService {
+
+    boolean userExists(String email);
 
     UserPrincipal loadUserByEmail(String email);
 
-    User getUser(String email);
+    User getUser(UserPrincipal userPrincipal);
 
-    void createUser(UserPrincipal user);
+    void createUser(UserPrincipal userPrincipal);
 
-    void updateUser(UserPrincipal user);
+    void deleteUser(UserPrincipal userPrincipal);
 
-    void deleteUser(UserPrincipal user);
+    UserPrincipal changeEmail(UserPrincipal userPrincipal, String newEmail);
 
-    void changePassword(String oldPassword, String newPassword);
+    UserPrincipal changePassword(UserPrincipal userPrincipal, String newPassword);
 
-    boolean userExists(String username);
+    UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role);
 
+    UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role);
+
+    void lockUser(UserPrincipal userPrincipal);
+
+    void unlockUser(UserPrincipal userPrincipal);
+
+    void disableUser(UserPrincipal userPrincipal);
+
+    void enableUser(UserPrincipal userPrincipal);
 }

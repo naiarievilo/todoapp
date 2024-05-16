@@ -54,8 +54,8 @@ public class UserPrincipalImpl implements UserPrincipal {
         return builder()
             .setEmail(user.getEmail())
             .setPassword(user.getPassword())
-            .setRoles(UserServiceImpl.getUserRoles(user))
-            .setPermissions(UserServiceImpl.getUserPermissions(user))
+            .setRoles(UserServiceImpl.getRolesFromUser(user))
+            .setPermissions(UserServiceImpl.getPermissionsFromUser(user))
             .setLocked(user.getIsLocked())
             .setEnabled(user.getIsEnabled())
             .build();
