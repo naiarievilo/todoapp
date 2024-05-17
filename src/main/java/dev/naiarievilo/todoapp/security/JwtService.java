@@ -5,12 +5,16 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
 
 @Service
 public class JwtService {
@@ -29,6 +33,8 @@ public class JwtService {
     }
 
     public String createToken(UserPrincipal userPrincipal) {
+        Validate.notNull(userPrincipal, NOT_NULL.message());
+
         Long id = userPrincipal.getId();
         String email = userPrincipal.getEmail();
 
@@ -53,6 +59,7 @@ public class JwtService {
     }
 
     public DecodedJWT validateToken(String token) throws JWTVerificationException {
+        Validate.notBlank(token, NOT_BLANK.message());
         return verifier.verify(token);
     }
 }
