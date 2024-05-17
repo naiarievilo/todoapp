@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Roles;
+import dev.naiarievilo.todoapp.security.UserPrincipal;
 
 public interface UserService {
 

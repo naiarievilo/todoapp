@@ -1,7 +1,9 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.security;
 
 import dev.naiarievilo.todoapp.permissions.Permissions;
 import dev.naiarievilo.todoapp.roles.Roles;
+import dev.naiarievilo.todoapp.users.User;
+import dev.naiarievilo.todoapp.users.UserServiceImpl;
 import org.apache.commons.lang3.Validate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

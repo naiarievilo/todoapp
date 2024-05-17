@@ -4,6 +4,8 @@ import dev.naiarievilo.todoapp.permissions.Permission;
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.Roles;
+import dev.naiarievilo.todoapp.security.UserPrincipal;
+import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
 import org.apache.commons.lang3.Validate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
