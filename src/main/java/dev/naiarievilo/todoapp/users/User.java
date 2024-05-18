@@ -44,14 +44,15 @@ public class User {
     @Column(name = "failed_login_time")
     private LocalTime failedLoginTime;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserInfo userInfo;
-
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new LinkedHashSet<>();
+
+    public Long getId() {
+        return id;
+    }
 
     public String getEmail() {
         return email;
@@ -109,19 +110,6 @@ public class User {
     public void setFailedLoginTime(LocalTime failedLoginTime) {
         Validate.notNull(failedLoginTime, NOT_NULL.message());
         this.failedLoginTime = failedLoginTime;
-    }
-
-    public UserInfo getUserInfo() {
-        return userInfo;
-    }
-
-    public void setUserInfo(UserInfo userInfo) {
-        if (userInfo == null) {
-            if (this.userInfo != null) this.userInfo.setUser(null);
-        } else {
-            userInfo.setUser(this);
-        }
-        this.userInfo = userInfo;
     }
 
     public Set<Role> getRoles() {

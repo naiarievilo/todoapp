@@ -18,6 +18,12 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
+    public UserInfo getUserInfoById(Long userId) {
+        Validate.notNull(userId, NOT_NULL.message());
+        return userInfoRepository.findById(userId).orElseThrow(UserInfoNotFoundException::new);
+    }
+
+    @Override
     @Transactional
     public void createUserInfo(UserCreationDTO userCreationDTO, User user) {
         Validate.notNull(userCreationDTO, NOT_NULL.message());
@@ -29,6 +35,13 @@ public class UserInfoServiceImpl implements UserInfoService {
         userInfo.setLastName(userCreationDTO.lastName());
 
         userInfoRepository.persist(userInfo);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserInfo(Long userId) {
+        Validate.notNull(userId, NOT_NULL.message());
+        userInfoRepository.deleteById(userId);
     }
 
     @Override
