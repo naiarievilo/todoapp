@@ -3,16 +3,18 @@ package dev.naiarievilo.todoapp.users;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.NaturalId;
 
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
 
 @Entity
 @Table(name = "users_info")
 public class UserInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @NaturalId
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -28,11 +30,21 @@ public class UserInfo {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        Validate.notNull(id, NOT_NULL.message());
+        this.id = id;
+    }
+
     public User getUser() {
         return user;
     }
 
     public void setUser(User user) {
+        Validate.notNull(user, NOT_NULL.message());
         this.user = user;
     }
 
@@ -64,7 +76,9 @@ public class UserInfo {
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        HashCodeBuilder hb = new HashCodeBuilder();
+        hb.append(id);
+        return hb.toHashCode();
     }
 
     @Override
@@ -78,17 +92,8 @@ public class UserInfo {
         }
 
         EqualsBuilder eb = new EqualsBuilder();
-        eb.append(getId(), null);
-        eb.append(getId(), other.getId());
-
+        eb.append(id, other.id);
         return eb.isEquals();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

@@ -25,12 +25,14 @@ import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserInfoService userInfoService;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, PasswordEncoder passwordEncoder) {
-
+    public UserServiceImpl(UserRepository userRepository, UserInfoService userInfoService, RoleService roleService,
+        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.userInfoService = userInfoService;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -76,24 +78,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void createUser(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL.message());
+    public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
+        Validate.notNull(userCreationDTO, NOT_NULL.message());
 
-        Set<Role> roles = getRolesFromUserPrincipal(userPrincipal);
+        if (userExists(userCreationDTO.email())) {
+            throw new UserAlreadyExistsException();
+        }
+
+        Role defaultRole = roleService.getRole(Roles.ROLE_USER);
 
         User newUser = new User();
-        newUser.setEmail(userPrincipal.getEmail());
-        newUser.setPassword(passwordEncoder.encode(userPrincipal.getPassword()));
-        newUser.setRoles(roles);
+        newUser.setEmail(userCreationDTO.email());
+        newUser.setPassword(passwordEncoder.encode(userCreationDTO.password()));
+        newUser.addRole(defaultRole);
 
-        userRepository.persist(newUser);
-    }
+        newUser = userRepository.persist(newUser);
+        userInfoService.createUserInfo(userCreationDTO, newUser);
 
-    private Set<Role> getRolesFromUserPrincipal(UserPrincipal userPrincipal) {
-        return userPrincipal.getRoles().stream()
-            .map(Roles::toRoles)
-            .map(roleService::getRole)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        return UserPrincipalImpl.withUser(newUser);
     }
 
     @Override
@@ -104,6 +106,7 @@ public class UserServiceImpl implements UserService {
         User user = getUser(userPrincipal);
         user.removeAllRoles();
 
+        userInfoService.deleteUserInfo(user.getId());
         userRepository.deleteByEmail(user.getEmail());
     }
 
@@ -200,4 +203,6 @@ public class UserServiceImpl implements UserService {
         user.setIsEnabled(true);
         userRepository.update(user);
     }
+
+
 }

@@ -11,7 +11,7 @@ public interface UserService {
 
     User getUser(UserPrincipal userPrincipal);
 
-    void createUser(UserPrincipal userPrincipal);
+    UserPrincipal createUser(UserCreationDTO userCreationDTO);
 
     void deleteUser(UserPrincipal userPrincipal);
 
