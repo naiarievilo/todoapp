@@ -2,7 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 public interface UserInfoService {
 
-    void createUserInfo(UserInfo userInfo);
+    void createUserInfo(UserCreationDTO userCreationDTO, User user);
 
     UserInfo changeFirstName(UserInfo userInfo, String newFirstName);
 

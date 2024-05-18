@@ -19,8 +19,15 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     @Transactional
-    public void createUserInfo(UserInfo userInfo) {
-        Validate.notNull(userInfo, NOT_NULL.message());
+    public void createUserInfo(UserCreationDTO userCreationDTO, User user) {
+        Validate.notNull(userCreationDTO, NOT_NULL.message());
+        Validate.notNull(user, NOT_NULL.message());
+
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUser(user);
+        userInfo.setFirstName(userCreationDTO.firstName());
+        userInfo.setLastName(userCreationDTO.lastName());
+
         userInfoRepository.persist(userInfo);
     }
 
