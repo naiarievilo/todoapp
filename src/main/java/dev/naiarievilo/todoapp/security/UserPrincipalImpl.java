@@ -54,6 +54,7 @@ public class UserPrincipalImpl implements UserPrincipal {
     public static UserPrincipal withUser(User user) {
         Validate.notNull(user, NOT_NULL.message());
         return builder()
+            .setId(user.getId())
             .setEmail(user.getEmail())
             .setPassword(user.getPassword())
             .setRoles(UserServiceImpl.getRolesFromUser(user))
