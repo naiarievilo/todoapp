@@ -6,23 +6,23 @@ import jakarta.validation.constraints.Size;
 
 @PasswordMatching(password = "password", confirmPassword = "confirmPassword")
 public record UserCreationDTO(
-    @NotBlank
+    @NotBlank(message = "Email must be provided")
     @Size(max = 320)
     String email,
 
-    @NotBlank
+    @NotBlank(message = "Password must be provided")
     @Size(max = 255)
     String password,
 
-    @NotBlank
+    @NotBlank(message = "Password confirmation must be provided")
     @Size(max = 255)
     String confirmPassword,
 
-    @NotBlank
+    @NotBlank(message = "First name must be provided")
     @Size(max = 255)
     String firstName,
 
-    @NotBlank
+    @NotBlank(message = "Last name must be provided")
     @Size(max = 255)
     String lastName
 ) {
