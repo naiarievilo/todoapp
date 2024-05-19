@@ -24,6 +24,12 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    public boolean permissionExists(Permissions permission) {
+        Validate.notNull(permission, NOT_NULL.message());
+        return permissionRepository.findByName(permission.name()).isPresent();
+    }
+
+    @Override
     public Set<Permission> getAllPermissions() {
         List<Permission> permissions = permissionRepository.findAll();
         return new LinkedHashSet<>(permissions);

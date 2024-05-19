@@ -7,6 +7,8 @@ import java.util.Set;
 
 public interface RoleService {
 
+    boolean roleExists(Roles role);
+
     Role getRole(Roles role);
 
     Set<Role> getRoles(Collection<Roles> roles);

@@ -28,6 +28,18 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public boolean roleExists(Roles role) {
+        Validate.notNull(role, NOT_NULL.message());
+        return roleRepository.findByName(role.name()).isPresent();
+    }
+
+    @Override
+    public Role getRole(Roles role) {
+        Validate.notNull(role, NOT_NULL.message());
+        return roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
+    }
+
+    @Override
     public Set<Role> getRoles(Collection<Roles> roles) {
         Validate.noNullElements(roles, NOT_NULL.message());
 
@@ -37,12 +49,6 @@ public class RoleServiceImpl implements RoleService {
         }
 
         return rolesSet;
-    }
-
-    @Override
-    public Role getRole(Roles role) {
-        Validate.notNull(role, NOT_NULL.message());
-        return roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
     }
 
     @Override

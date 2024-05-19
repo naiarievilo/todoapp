@@ -5,6 +5,8 @@ import java.util.Set;
 
 public interface PermissionService {
 
+    boolean permissionExists(Permissions permission);
+
     Set<Permission> getAllPermissions();
 
     Permission getPermission(Permissions permission);
