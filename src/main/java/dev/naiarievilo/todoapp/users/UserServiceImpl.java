@@ -91,6 +91,7 @@ public class UserServiceImpl implements UserService {
         newUser.setEmail(userCreationDTO.email());
         newUser.setPassword(passwordEncoder.encode(userCreationDTO.password()));
         newUser.addRole(defaultRole);
+        newUser.setFailedLoginAttempts(0);
 
         newUser = userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);
