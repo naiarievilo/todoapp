@@ -12,8 +12,6 @@ public interface UserPrincipal {
 
     String getPassword();
 
-    Collection<GrantedAuthority> getRoles();
-
     Collection<GrantedAuthority> getAuthorities();
 
     boolean isLocked();

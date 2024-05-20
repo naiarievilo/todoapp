@@ -1,6 +1,5 @@
 package dev.naiarievilo.todoapp.users;
 
-import dev.naiarievilo.todoapp.permissions.Permission;
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.Roles;
@@ -35,16 +34,6 @@ public class UserServiceImpl implements UserService {
         this.userInfoService = userInfoService;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
-    }
-
-    public static Set<GrantedAuthority> getPermissionsFromUser(User user) {
-        Validate.notNull(user, NOT_NULL.message());
-
-        return user.getRoles().stream()
-            .flatMap(role -> role.getPermissions().stream())
-            .map(Permission::getName)
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static Set<GrantedAuthority> getRolesFromUser(User user) {

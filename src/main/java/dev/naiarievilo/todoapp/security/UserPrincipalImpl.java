@@ -1,6 +1,5 @@
 package dev.naiarievilo.todoapp.security;
 
-import dev.naiarievilo.todoapp.permissions.Permissions;
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserServiceImpl;
@@ -20,24 +19,21 @@ public class UserPrincipalImpl implements UserPrincipal {
     private final String email;
     private final String password;
     private final Set<GrantedAuthority> roles;
-    private final Set<GrantedAuthority> permissions;
     private final boolean isLocked;
     private final boolean isEnabled;
 
     private UserPrincipalImpl(Long id, String email, String password, Set<GrantedAuthority> roles,
-        Set<GrantedAuthority> permissions, boolean isLocked, boolean isEnabled) {
+        boolean isLocked, boolean isEnabled) {
 
         Validate.notNull(id, NOT_NULL.message());
         Validate.notBlank(email, NOT_BLANK.message());
         Validate.notBlank(password, NOT_BLANK.message());
         Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
-        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
 
         this.id = id;
         this.email = email;
         this.password = password;
         this.roles = roles;
-        this.permissions = permissions;
         this.isLocked = isLocked;
         this.isEnabled = isEnabled;
     }
@@ -58,7 +54,6 @@ public class UserPrincipalImpl implements UserPrincipal {
             .setEmail(user.getEmail())
             .setPassword(user.getPassword())
             .setRoles(UserServiceImpl.getRolesFromUser(user))
-            .setPermissions(UserServiceImpl.getPermissionsFromUser(user))
             .setLocked(user.getIsLocked())
             .setEnabled(user.getIsEnabled())
             .build();
@@ -80,13 +75,8 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     @Override
-    public Collection<GrantedAuthority> getRoles() {
-        return roles;
-    }
-
-    @Override
     public Collection<GrantedAuthority> getAuthorities() {
-        return permissions;
+        return roles;
     }
 
     @Override
@@ -102,7 +92,6 @@ public class UserPrincipalImpl implements UserPrincipal {
     public static final class UserPrincipalImplBuilder {
 
         private final Set<GrantedAuthority> roles = new LinkedHashSet<>();
-        private final Set<GrantedAuthority> permissions = new LinkedHashSet<>();
         private Long id;
         private String email;
         private String password;
@@ -143,21 +132,6 @@ public class UserPrincipalImpl implements UserPrincipal {
             return this;
         }
 
-        public UserPrincipalImplBuilder setPermissions(Permissions... permissions) {
-            Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
-
-            for (Permissions permission : permissions) {
-                this.permissions.add(new SimpleGrantedAuthority(permission.name()));
-            }
-            return this;
-        }
-
-        public UserPrincipalImplBuilder setPermissions(Set<GrantedAuthority> permissions) {
-            Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
-            this.permissions.addAll(permissions);
-            return this;
-        }
-
         public UserPrincipalImplBuilder setLocked(boolean locked) {
             isLocked = locked;
             return this;
@@ -169,7 +143,7 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipal build() {
-            return new UserPrincipalImpl(id, email, password, roles, permissions, isLocked, isEnabled);
+            return new UserPrincipalImpl(id, email, password, roles, isLocked, isEnabled);
         }
 
     }

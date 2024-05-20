@@ -38,11 +38,7 @@ public class JwtService {
         Long id = userPrincipal.getId();
         String email = userPrincipal.getEmail();
 
-        String[] roles = userPrincipal.getRoles()
-            .stream()
-            .map(GrantedAuthority::getAuthority)
-            .toArray(String[]::new);
-        String[] authorities = userPrincipal.getAuthorities().stream()
+        String[] roles = userPrincipal.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .toArray(String[]::new);
 
@@ -54,7 +50,6 @@ public class JwtService {
             .withExpiresAt(now.plusMillis(expiration.toMillis()))
             .withClaim("email", email)
             .withArrayClaim("roles", roles)
-            .withArrayClaim("authorities", authorities)
             .sign(algorithm);
     }
 

@@ -1,6 +1,5 @@
 package dev.naiarievilo.todoapp.roles;
 
-import dev.naiarievilo.todoapp.permissions.Permission;
 import dev.naiarievilo.todoapp.users.User;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.Validate;
@@ -11,7 +10,8 @@ import org.hibernate.annotations.NaturalId;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NO_NULL_ELEMENTS;
 
 @Entity
 @Table(name = "roles")
@@ -29,12 +29,6 @@ public class Role {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(name = "roles_permissions",
-        joinColumns = @JoinColumn(name = "role_id"),
-        inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private Set<Permission> permissions = new LinkedHashSet<>();
-
     @ManyToMany(mappedBy = "roles")
     private Set<User> users = new LinkedHashSet<>();
 
@@ -49,11 +43,6 @@ public class Role {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        Validate.notNull(id, NOT_NULL.message());
-        this.id = id;
     }
 
     public String getName() {
@@ -72,50 +61,6 @@ public class Role {
     public void setDescription(String description) {
         Validate.notBlank(description, NOT_BLANK.message());
         this.description = description;
-    }
-
-    public Set<Permission> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Set<Permission> permissions) {
-        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
-        addPermissions(permissions);
-    }
-
-    public void addPermissions(Set<Permission> permissions) {
-        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
-        for (Permission permission : permissions) {
-            this.permissions.add(permission);
-            permission.getRoles().add(this);
-        }
-    }
-
-    public void addPermission(Permission permission) {
-        Validate.notNull(permission, NOT_NULL.message());
-        permissions.add(permission);
-        permission.getRoles().add(this);
-    }
-
-    public void removePermission(Permission permission) {
-        Validate.notNull(permission, NOT_NULL.message());
-        permissions.remove(permission);
-        permission.getRoles().remove(this);
-    }
-
-    public void removePermissions(Set<Permission> permissions) {
-        Validate.noNullElements(permissions, NO_NULL_ELEMENTS.message());
-        for (Permission permission : permissions) {
-            this.permissions.remove(permission);
-            permission.getRoles().remove(this);
-        }
-    }
-
-    public void removeAllPermissions() {
-        for (Permission permission : new LinkedHashSet<>(permissions)) {
-            permissions.remove(permission);
-            permission.getRoles().remove(this);
-        }
     }
 
     @Override
