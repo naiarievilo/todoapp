@@ -61,6 +61,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByEmail(String email) {
+        Validate.notBlank(email, NOT_BLANK.message());
+        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+    }
+
+    @Override
     public User getUser(UserPrincipal userPrincipal) {
         Validate.notNull(userPrincipal, NOT_NULL.message());
         return userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(UserNotFoundException::new);

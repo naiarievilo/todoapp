@@ -1,6 +1,9 @@
 package dev.naiarievilo.todoapp.security;
 
+import dev.naiarievilo.todoapp.users.User;
+import dev.naiarievilo.todoapp.users.UserNotFoundException;
 import dev.naiarievilo.todoapp.users.UserService;
+import dev.naiarievilo.todoapp.users.UserServiceImpl;
 import org.apache.commons.lang3.Validate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +15,7 @@ import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_INSTANCE_
 
 public class EmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
+    private static final String BAD_CREDENTIALS = "Incorrect email and/or password";
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
@@ -28,13 +32,21 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
         String email = (String) authentication.getPrincipal();
         String password = (String) authentication.getCredentials();
 
-        UserPrincipal user = userService.loadUserByEmail(email);
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new BadCredentialsException("Incorrect email and/or password");
+        User user;
+        try {
+            user = userService.getUserByEmail(email);
+        } catch (UserNotFoundException ex) {
+            throw new BadCredentialsException(BAD_CREDENTIALS);
         }
 
-        authentication.setAuthenticated(true);
-        return authentication;
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            userService.addLoginAttempt(user);
+            throw new BadCredentialsException(BAD_CREDENTIALS);
+        }
+
+        userService.resetLoginAttempt(user);
+        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(), user.getPassword(),
+            UserServiceImpl.getRolesFromUser(user));
     }
 
     @Override

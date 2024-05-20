@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,12 +39,11 @@ public class UserController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<Void> authenticateUser(@Valid @RequestBody UserAuthenticationDTO userAuthenticationDTO) {
-        Authentication user = new EmailPasswordAuthenticationToken(
+        authenticationManager.authenticate(EmailPasswordAuthenticationToken.unauthenticated(
             userAuthenticationDTO.email(), userAuthenticationDTO.password()
-        );
+        ));
 
-        user = authenticationManager.authenticate(user);
-        UserPrincipal userPrincipal = userService.loadUserByEmail((String) user.getPrincipal());
+        UserPrincipal userPrincipal = userService.loadUserByEmail(userAuthenticationDTO.email());
         String token = jwtService.createToken(userPrincipal);
 
         return ResponseEntity

@@ -1,33 +1,39 @@
 package dev.naiarievilo.todoapp.security;
 
-import org.apache.commons.lang3.Validate;
-import org.springframework.security.core.Authentication;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
+public class EmailPasswordAuthenticationToken extends AbstractAuthenticationToken {
 
-public class EmailPasswordAuthenticationToken implements Authentication {
+    private transient Object principal;
+    private transient Object credentials;
 
-    private static final String METHOD_NOT_SUPPORTED = "%s is not supported for the purpose of the present token";
-
-    private final String principal;
-    private final String credentials;
-    private Boolean isAuthenticated;
-
-    public EmailPasswordAuthenticationToken(String email, String password) {
-        Validate.notBlank(email, NOT_BLANK.message("email"));
-        Validate.notBlank(password, NOT_BLANK.message("password"));
-
-        this.principal = email;
-        this.credentials = password;
-        this.isAuthenticated = false;
+    public EmailPasswordAuthenticationToken(Object principal, Object credentials,
+        Collection<? extends GrantedAuthority> authorities) {
+        super(authorities);
+        this.principal = principal;
+        this.credentials = credentials;
+        super.setAuthenticated(true);
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        throw new UnsupportedOperationException(String.format(METHOD_NOT_SUPPORTED, "getAuthorities()"));
+    public EmailPasswordAuthenticationToken(Object principal, Object credentials) {
+        super(null);
+        this.principal = principal;
+        this.credentials = credentials;
+        super.setAuthenticated(false);
+    }
+
+    public static EmailPasswordAuthenticationToken unauthenticated(Object principal, Object credentials) {
+        return new EmailPasswordAuthenticationToken(principal, credentials);
+    }
+
+    public static EmailPasswordAuthenticationToken authenticated(Object principal, Object credentials,
+        Collection<? extends GrantedAuthority> authorities) {
+        return new EmailPasswordAuthenticationToken(principal, credentials, authorities);
     }
 
     @Override
@@ -36,27 +42,29 @@ public class EmailPasswordAuthenticationToken implements Authentication {
     }
 
     @Override
-    public Object getDetails() {
-        throw new UnsupportedOperationException(String.format(METHOD_NOT_SUPPORTED, "getDetails()"));
-    }
-
-    @Override
     public Object getPrincipal() {
         return principal;
     }
 
     @Override
-    public boolean isAuthenticated() {
-        return isAuthenticated;
-    }
-
-    @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-        this.isAuthenticated = isAuthenticated;
+        throw new IllegalArgumentException("Use `authenticated` static method or constructor with authorities instead");
     }
 
     @Override
-    public String getName() {
-        throw new UnsupportedOperationException(String.format(METHOD_NOT_SUPPORTED, "getName()"));
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EmailPasswordAuthenticationToken token)) return false;
+
+        EqualsBuilder eb = new EqualsBuilder();
+        eb.append(principal, token.principal);
+        return eb.isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hb = new HashCodeBuilder();
+        hb.append(principal);
+        return hb.toHashCode();
     }
 }

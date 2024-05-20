@@ -9,6 +9,8 @@ public interface UserService {
 
     UserPrincipal loadUserByEmail(String email);
 
+    User getUserByEmail(String email);
+
     User getUser(UserPrincipal userPrincipal);
 
     UserPrincipal createUser(UserCreationDTO userCreationDTO);
