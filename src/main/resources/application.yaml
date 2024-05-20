@@ -16,12 +16,16 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  jackson:
+    time-zone: "UTC"
   jpa:
     hibernate:
       ddl-auto: "validate"
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          time_zone: "UTC"
     show-sql: true
   liquibase:
     change-log: "classpath:/db/changelog/root-changelog.yaml"
