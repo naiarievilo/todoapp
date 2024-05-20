@@ -1,7 +1,11 @@
 package dev.naiarievilo.todoapp.security;
 
+import dev.naiarievilo.todoapp.users.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -47,6 +51,14 @@ public class SecurityConfiguration {
         corsSource.registerCorsConfiguration("/**", corsConfiguration);
 
         return corsSource;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserService userService, PasswordEncoder passwordEncoder) {
+        AuthenticationProvider authenticationProvider =
+            new EmailPasswordAuthenticationProvider(userService, passwordEncoder);
+
+        return new ProviderManager(authenticationProvider);
     }
 
     @Bean
