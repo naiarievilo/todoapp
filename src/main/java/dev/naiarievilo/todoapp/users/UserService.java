@@ -30,4 +30,8 @@ public interface UserService {
     void disableUser(UserPrincipal userPrincipal);
 
     void enableUser(UserPrincipal userPrincipal);
+
+    void addLoginAttempt(User user);
+
+    void resetLoginAttempt(User user);
 }

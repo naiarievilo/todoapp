@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -192,6 +193,24 @@ public class UserServiceImpl implements UserService {
         User user = getUser(userPrincipal);
         user.setIsEnabled(true);
         userRepository.update(user);
+    }
+
+    @Override
+    public void addLoginAttempt(User user) {
+        Validate.notNull(user, NOT_NULL.message());
+
+        user.incrementFailedLoginAttempts();
+        user.setFailedLoginTime(LocalTime.now());
+
+        userRepository.update(user);
+    }
+
+    @Override
+    public void resetLoginAttempt(User user) {
+        Validate.notNull(user, NOT_NULL.message());
+        user.setFailedLoginAttempts(0);
+        userRepository.update(user);
+
     }
 
 
