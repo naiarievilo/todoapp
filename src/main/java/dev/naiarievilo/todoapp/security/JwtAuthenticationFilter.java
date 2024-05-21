@@ -13,6 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static dev.naiarievilo.todoapp.security.JwtConstants.BEARER_PREFIX;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -27,12 +29,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         FilterChain filterChain) throws ServletException, IOException {
 
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization == null || authorization.isBlank() || !authorization.startsWith("Bearer ")) {
+        if (authorization == null || authorization.isBlank() || !authorization.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorization.replaceFirst("Bearer ", "");
+        String token = authorization.replaceFirst(BEARER_PREFIX, "");
         EmailPasswordAuthenticationToken authentication =
             (EmailPasswordAuthenticationToken) jwtService.getAuthentication(token);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

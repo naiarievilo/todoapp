@@ -19,14 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static dev.naiarievilo.todoapp.security.JwtConstants.*;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
 
 @Service
 public class JwtService {
-
-    private static final String EMAIL_CLAIM = "email";
-    private static final String ROLES_CLAIM = "roles";
 
     private final Algorithm algorithm;
     private final JWTVerifier verifier;
@@ -73,8 +71,8 @@ public class JwtService {
             .sign(algorithm);
 
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("token", accessToken);
-        tokens.put("refreshToken", refreshToken);
+        tokens.put(ACCESS_TOKEN, accessToken);
+        tokens.put(REFRESH_TOKEN, refreshToken);
 
         return tokens;
     }
