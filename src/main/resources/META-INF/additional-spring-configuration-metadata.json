@@ -1,9 +1,14 @@
 {
   "properties": [
     {
-      "name": "jwt.expiration",
+      "name": "jwt.expires-in",
       "type": "java.lang.String",
-      "description": "Expiration time for the JWT in milliseconds."
+      "description": "Expiration time for access tokens (in minutes)."
+    },
+    {
+      "name": "jwt.refresh-expires-in",
+      "type": "java.lang.String",
+      "description": "Expiration time for refresh tokens (in minutes)."
     },
     {
       "name": "jwt.secret",

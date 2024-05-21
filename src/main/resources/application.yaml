@@ -7,7 +7,8 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
   issuer: ${JWT_ISSUER}
-  expiration: ${JWT_EXPIRATION}
+  expires-in: ${JWT_EXPIRATION}
+  refresh-expires-in: ${REFRESH_JWT_EXPIRATION}
 
 spring:
   application:

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -29,11 +31,12 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<Void> createUser(@Valid @RequestBody UserCreationDTO userCreationDTO) {
         UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
-        String token = jwtService.createToken(userPrincipal);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .header("Authorization", "Bearer " + token)
+            .header("Authorization", "Bearer " + tokens.get("accessToken"))
+            .header("Refresh-Token", tokens.get("refreshToken"))
             .build();
     }
 
@@ -44,11 +47,11 @@ public class UserController {
         ));
 
         UserPrincipal userPrincipal = userService.loadUserByEmail(userAuthenticationDTO.email());
-        String token = jwtService.createToken(userPrincipal);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .header("Authorization", "Bearer " + token)
+            .header("Authorization", "Bearer " + tokens.get("accessToken"))
             .build();
     }
 }
