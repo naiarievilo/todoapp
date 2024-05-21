@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.*;
 
 public class UserPrincipalImpl implements UserPrincipal {
 
@@ -25,10 +25,11 @@ public class UserPrincipalImpl implements UserPrincipal {
     private UserPrincipalImpl(Long id, String email, String password, Set<GrantedAuthority> roles,
         boolean isLocked, boolean isEnabled) {
 
-        Validate.notNull(id, NOT_NULL.message());
-        Validate.notBlank(email, NOT_BLANK.message());
-        Validate.notBlank(password, NOT_BLANK.message());
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
+        Validate.notNull(id, NOT_NULL);
+        Validate.notBlank(email, NOT_BLANK);
+        Validate.notBlank(password, NOT_BLANK);
+        Validate.notEmpty(roles, NOT_EMPTY);
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
 
         this.id = id;
         this.email = email;
@@ -39,7 +40,7 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     public static UserPrincipalImplBuilder withEmail(String email) {
-        Validate.notBlank(email, NOT_BLANK.message());
+        Validate.notBlank(email, NOT_BLANK);
         return builder().setEmail(email);
     }
 
@@ -48,7 +49,7 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     public static UserPrincipal withUser(User user) {
-        Validate.notNull(user, NOT_NULL.message());
+        Validate.notNull(user, NOT_NULL);
         return builder()
             .setId(user.getId())
             .setEmail(user.getEmail())
@@ -99,26 +100,27 @@ public class UserPrincipalImpl implements UserPrincipal {
         private boolean isEnabled;
 
         public UserPrincipalImplBuilder setId(Long id) {
-            Validate.notNull(id, NOT_NULL.message());
+            Validate.notNull(id, NOT_NULL);
             this.id = id;
             return this;
         }
 
         public UserPrincipalImplBuilder setEmail(String email) {
-            Validate.notBlank(email, NOT_BLANK.message());
+            Validate.notBlank(email, NOT_BLANK);
             this.email = email;
             return this;
         }
 
         public UserPrincipalImplBuilder setPassword(String password) {
-            Validate.notBlank(password, NOT_BLANK.message());
+            Validate.notBlank(password, NOT_BLANK);
             this.password = password;
             return this;
         }
 
 
         public UserPrincipalImplBuilder setRoles(Roles... roles) {
-            Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
+            Validate.notEmpty(roles, NOT_EMPTY);
+            Validate.noNullElements(roles, NO_NULL_ELEMENTS);
 
             for (Roles role : roles) {
                 this.roles.add(new SimpleGrantedAuthority(role.name()));
@@ -127,7 +129,8 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipalImplBuilder setRoles(Set<GrantedAuthority> roles) {
-            Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
+            Validate.notEmpty(roles, NOT_EMPTY);
+            Validate.noNullElements(roles, NO_NULL_ELEMENTS);
             this.roles.addAll(roles);
             return this;
         }

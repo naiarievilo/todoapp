@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_INSTANCE_OF;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.IS_INSTANCE_OF;
 
 public class EmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
@@ -26,8 +26,7 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Validate.isInstanceOf(EmailPasswordAuthenticationToken.class, authentication, IS_INSTANCE_OF.message(
-            "authentication", EmailPasswordAuthenticationToken.class.getName()));
+        Validate.isInstanceOf(EmailPasswordAuthenticationToken.class, authentication, IS_INSTANCE_OF);
 
         String email = (String) authentication.getPrincipal();
         String password = (String) authentication.getCredentials();

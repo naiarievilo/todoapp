@@ -10,8 +10,7 @@ import org.hibernate.annotations.NaturalId;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.NO_NULL_ELEMENTS;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.*;
 
 @Entity
 @Table(name = "roles")
@@ -37,7 +36,8 @@ public class Role {
     }
 
     public void setUsers(Set<User> users) {
-        Validate.noNullElements(users, NO_NULL_ELEMENTS.message());
+        Validate.notEmpty(users, NOT_EMPTY);
+        Validate.noNullElements(users, NO_NULL_ELEMENTS);
         this.users = users;
     }
 
@@ -50,7 +50,7 @@ public class Role {
     }
 
     public void setName(String name) {
-        Validate.notBlank(name, NOT_BLANK.message());
+        Validate.notBlank(name, NOT_BLANK);
         this.name = name;
     }
 
@@ -59,7 +59,7 @@ public class Role {
     }
 
     public void setDescription(String description) {
-        Validate.notBlank(description, NOT_BLANK.message());
+        Validate.notBlank(description, NOT_BLANK);
         this.description = description;
     }
 

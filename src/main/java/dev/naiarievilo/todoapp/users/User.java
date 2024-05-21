@@ -12,7 +12,7 @@ import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.*;
 
 @Entity
 @Table(name = "users")
@@ -59,7 +59,7 @@ public class User {
     }
 
     public void setEmail(String email) {
-        Validate.notBlank(email, NOT_BLANK.message());
+        Validate.notBlank(email, NOT_BLANK);
         this.email = email;
     }
 
@@ -68,7 +68,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        Validate.notBlank(password, NOT_BLANK.message());
+        Validate.notBlank(password, NOT_BLANK);
         this.password = password;
     }
 
@@ -77,7 +77,7 @@ public class User {
     }
 
     public void setIsLocked(Boolean isLocked) {
-        Validate.notNull(isLocked, NOT_NULL.message());
+        Validate.notNull(isLocked, NOT_NULL);
         this.isLocked = isLocked;
     }
 
@@ -86,7 +86,7 @@ public class User {
     }
 
     public void setIsEnabled(Boolean isEnabled) {
-        Validate.notNull(isEnabled, NOT_NULL.message());
+        Validate.notNull(isEnabled, NOT_NULL);
         this.isEnabled = isEnabled;
     }
 
@@ -95,7 +95,7 @@ public class User {
     }
 
     public void setFailedLoginAttempts(Integer failedLoginAttempts) {
-        Validate.notNull(failedLoginAttempts, NOT_NULL.message());
+        Validate.notNull(failedLoginAttempts, NOT_NULL);
         this.failedLoginAttempts = failedLoginAttempts;
     }
 
@@ -108,7 +108,7 @@ public class User {
     }
 
     public void setFailedLoginTime(LocalTime failedLoginTime) {
-        Validate.notNull(failedLoginTime, NOT_NULL.message());
+        Validate.notNull(failedLoginTime, NOT_NULL);
         this.failedLoginTime = failedLoginTime;
     }
 
@@ -117,12 +117,15 @@ public class User {
     }
 
     public void setRoles(Set<Role> roles) {
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
+        Validate.notEmpty(roles, NOT_EMPTY);
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
         addRoles(roles);
     }
 
     public void addRoles(Set<Role> roles) {
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
+        Validate.notEmpty(roles, NOT_EMPTY);
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
+
         for (Role role : roles) {
             this.roles.add(role);
             role.getUsers().add(this);
@@ -130,19 +133,21 @@ public class User {
     }
 
     public void addRole(Role role) {
-        Validate.notNull(role, NOT_NULL.message());
+        Validate.notNull(role, NOT_NULL);
         roles.add(role);
         role.getUsers().add(this);
     }
 
     public void removeRole(Role role) {
-        Validate.notNull(role, NOT_NULL.message());
+        Validate.notNull(role, NOT_NULL);
         roles.remove(role);
         role.getUsers().remove(this);
     }
 
     public void removeRoles(Set<Role> roles) {
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS.message());
+        Validate.notEmpty(roles, NOT_EMPTY);
+        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
+
         for (Role role : roles) {
             this.roles.remove(role);
             role.getUsers().remove(this);

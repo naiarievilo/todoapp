@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import static dev.naiarievilo.todoapp.security.JwtConstants.*;
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NULL;
 
 @Service
 public class JwtService {
@@ -45,7 +45,7 @@ public class JwtService {
     }
 
     public Map<String, String> createAccessAndRefreshTokens(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL.message());
+        Validate.notNull(userPrincipal, NOT_NULL);
 
         Long id = userPrincipal.getId();
         String email = userPrincipal.getEmail();
@@ -78,7 +78,7 @@ public class JwtService {
     }
 
     public Authentication getAuthentication(String token) throws JWTDecodeException {
-        Validate.notBlank(token, NOT_BLANK.message());
+        Validate.notBlank(token, NOT_BLANK);
         DecodedJWT decodedJWT = verifyToken(token);
 
         String email = decodedJWT.getClaim(EMAIL_CLAIM).asString();
@@ -87,7 +87,7 @@ public class JwtService {
     }
 
     public DecodedJWT verifyToken(String token) throws JWTVerificationException {
-        Validate.notBlank(token, NOT_BLANK.message());
+        Validate.notBlank(token, NOT_BLANK);
         return verifier.verify(token);
     }
 

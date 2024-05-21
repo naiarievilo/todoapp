@@ -8,8 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_NULL;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NULL;
 
 public enum Roles {
     ROLE_ADMIN("Superuser role"),
@@ -24,7 +24,7 @@ public enum Roles {
     }
 
     public static Roles toRoles(GrantedAuthority role) {
-        Validate.notNull(role, NOT_NULL.message());
+        Validate.notNull(role, NOT_NULL);
 
         String roleName = role.getAuthority();
         for (Roles roles : rolesSet) {
@@ -41,7 +41,7 @@ public enum Roles {
     }
 
     public static boolean hasRole(String roleName) {
-        Validate.notNull(roleName, NOT_BLANK.message());
+        Validate.notBlank(roleName, NOT_BLANK);
 
         for (Roles role : rolesSet) {
             if (role.name().equals(roleName)) {
