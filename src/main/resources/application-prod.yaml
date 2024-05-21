@@ -3,3 +3,6 @@ logging:
     org:
       springframework:
         web: "INFO"
+        security:
+          web:
+            FilterChainProxy: "INFO"

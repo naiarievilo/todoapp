@@ -3,6 +3,9 @@ logging:
     org:
       springframework:
         web: "TRACE"
+        security:
+          web:
+            FilterChainProxy: "DEBUG"
 
 jwt:
   secret: ${JWT_SECRET}
