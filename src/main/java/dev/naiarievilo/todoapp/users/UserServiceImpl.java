@@ -48,6 +48,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public void addLoginAttempt(User user) {
+        Validate.notNull(user, NOT_NULL);
+
+        user.incrementFailedLoginAttempts();
+        user.setFailedLoginTime(LocalTime.now());
+
+        userRepository.update(user);
+    }
+
+    @Override
     public boolean userExists(String email) {
         Validate.notBlank(email, NOT_BLANK);
         return userRepository.findByEmail(email).isPresent();
@@ -202,17 +213,9 @@ public class UserServiceImpl implements UserService {
         userRepository.update(user);
     }
 
-    @Override
-    public void addLoginAttempt(User user) {
-        Validate.notNull(user, NOT_NULL);
-
-        user.incrementFailedLoginAttempts();
-        user.setFailedLoginTime(LocalTime.now());
-
-        userRepository.update(user);
-    }
 
     @Override
+    @Transactional
     public void resetLoginAttempt(User user) {
         Validate.notNull(user, NOT_NULL);
         user.setFailedLoginAttempts(0);
