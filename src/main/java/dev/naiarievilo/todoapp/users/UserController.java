@@ -44,7 +44,7 @@ public class UserController {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
-            .header(REFRESH_TOKEN_HEADER, tokens.get(REFRESH_TOKEN))
+            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN))
             .build();
     }
 
@@ -76,5 +76,10 @@ public class UserController {
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
             .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN))
             .build();
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<Void> deleteUser() {
+        return ResponseEntity.noContent().build();
     }
 }

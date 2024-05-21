@@ -34,13 +34,10 @@ public class SecurityConfiguration {
                 .requestMatchers("/users/*").permitAll()
                 .anyRequest().authenticated()
             )
-            .cors(cors -> cors
-                .configurationSource(corsConfigurationSource())
-            )
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+            .logout(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
