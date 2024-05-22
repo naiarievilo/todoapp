@@ -2,7 +2,11 @@ logging:
   level:
     org:
       springframework:
-        web: "INFO"
+        web: "WARN"
         security:
           web:
-            FilterChainProxy: "INFO"
+            FilterChainProxy: "WARN"
+
+spring:
+  jpa:
+    show-sql: false

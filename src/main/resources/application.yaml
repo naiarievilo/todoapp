@@ -35,5 +35,5 @@ spring:
     change-log: "classpath:/db/changelog/root-changelog.yaml"
   sql:
     init:
-      mode: "always"
+      mode: "never"
 
