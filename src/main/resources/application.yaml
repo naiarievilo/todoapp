@@ -11,7 +11,7 @@ jwt:
   secret: ${JWT_SECRET}
   issuer: ${JWT_ISSUER}
   expires-in: ${JWT_EXPIRATION}
-  refresh-expires-in: ${REFRESH_JWT_EXPIRATION}
+  refresh-expires-in: ${JWT_REFRESH_EXPIRATION}
 
 spring:
   application:
@@ -36,4 +36,3 @@ spring:
   sql:
     init:
       mode: "never"
-

@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static dev.naiarievilo.todoapp.security.JwtConstants.*;
 
-
 @RestController
 @RequestMapping("/users")
 public class UserController {

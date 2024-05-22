@@ -1,11 +1,13 @@
 package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.validation.PasswordMatching;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @PasswordMatching(password = "password", confirmPassword = "confirmPassword")
 public record UserCreationDTO(
+    @Email(message = "Email provided must be valid")
     @NotBlank(message = "Email must be provided")
     @Size(max = 320)
     String email,
