@@ -60,6 +60,7 @@ public class UserController {
         return ResponseEntity
             .status(HttpStatus.OK)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
+            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN))
             .build();
     }
 
