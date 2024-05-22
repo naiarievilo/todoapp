@@ -45,6 +45,11 @@ public class Role {
         return id;
     }
 
+    public void setId(Long id) {
+        Validate.notNull(id, NOT_NULL);
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
