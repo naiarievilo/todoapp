@@ -4,6 +4,8 @@ import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserServiceImpl;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -88,6 +90,22 @@ public class UserPrincipalImpl implements UserPrincipal {
     @Override
     public boolean isEnabled() {
         return isEnabled;
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hb = new HashCodeBuilder();
+        hb.append(email);
+        return hb.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof UserPrincipalImpl other)) return false;
+        EqualsBuilder eb = new EqualsBuilder();
+        eb.append(email, other.email);
+        return eb.isEquals();
     }
 
     public static final class UserPrincipalImplBuilder {
