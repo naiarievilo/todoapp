@@ -11,7 +11,7 @@ public interface UserService {
 
     User getUserByEmail(String email);
 
-    User getUser(UserPrincipal userPrincipal);
+    User getUserByPrincipal(UserPrincipal userPrincipal);
 
     UserPrincipal createUser(UserCreationDTO userCreationDTO);
 
