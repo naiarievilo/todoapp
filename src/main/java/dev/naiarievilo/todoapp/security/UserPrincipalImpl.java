@@ -9,7 +9,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -78,7 +77,7 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     @Override
-    public Collection<GrantedAuthority> getAuthorities() {
+    public Set<GrantedAuthority> getAuthorities() {
         return roles;
     }
 

@@ -2,7 +2,7 @@ package dev.naiarievilo.todoapp.security;
 
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
+import java.util.Set;
 
 public interface UserPrincipal {
 
@@ -12,7 +12,7 @@ public interface UserPrincipal {
 
     String getPassword();
 
-    Collection<GrantedAuthority> getAuthorities();
+    Set<GrantedAuthority> getAuthorities();
 
     boolean isLocked();
 
