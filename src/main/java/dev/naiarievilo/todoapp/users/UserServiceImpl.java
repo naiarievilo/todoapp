@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
         user.removeAllRoles();
 
         userInfoService.deleteUserInfo(user.getId());
-        userRepository.deleteByEmail(user.getEmail());
+        userRepository.delete(user);
     }
 
     @Override
