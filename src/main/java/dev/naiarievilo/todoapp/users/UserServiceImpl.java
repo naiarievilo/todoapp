@@ -180,6 +180,10 @@ public class UserServiceImpl implements UserService {
         Validate.notNull(userPrincipal, NOT_NULL);
 
         User user = getUserByPrincipal(userPrincipal);
+        if (user.getIsLocked()) {
+            return;
+        }
+
         user.setIsLocked(true);
         userRepository.update(user);
     }
@@ -190,6 +194,10 @@ public class UserServiceImpl implements UserService {
         Validate.notNull(userPrincipal, NOT_NULL);
 
         User user = getUserByPrincipal(userPrincipal);
+        if (!user.getIsLocked()) {
+            return;
+        }
+
         user.setIsLocked(false);
         userRepository.update(user);
     }
@@ -200,6 +208,10 @@ public class UserServiceImpl implements UserService {
         Validate.notNull(userPrincipal, NOT_NULL);
 
         User user = getUserByPrincipal(userPrincipal);
+        if (!user.getIsEnabled()) {
+            return;
+        }
+
         user.setIsEnabled(false);
         userRepository.update(user);
     }
@@ -210,6 +222,10 @@ public class UserServiceImpl implements UserService {
         Validate.notNull(userPrincipal, NOT_NULL);
 
         User user = getUserByPrincipal(userPrincipal);
+        if (user.getIsEnabled()) {
+            return;
+        }
+
         user.setIsEnabled(true);
         userRepository.update(user);
     }
