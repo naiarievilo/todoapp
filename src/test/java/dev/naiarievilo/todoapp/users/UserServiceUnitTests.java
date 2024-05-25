@@ -23,6 +23,7 @@ import java.util.Set;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
+import static dev.naiarievilo.todoapp.users.UserServiceTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -30,17 +31,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceUnitTests {
 
-    private static final String EMAIL = "johnDoe@example.com";
-    private static final String PASSWORD = "securePassword";
-    private static final String CONFIRM_PASSWORD = PASSWORD;
-    private static final String FIRST_NAME = "John";
-    private static final String LAST_NAME = "Doe";
-
-    private static final String NEW_EMAIL = "newEmail@example.com";
-    private static final String NEW_PASSWORD = "newSecurePassword";
-
-    private static final String EMPTY = "";
-    private static final String BLANK = "   ";
     private final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
     @Mock
     private UserRepository userRepository;
@@ -55,20 +45,20 @@ class UserServiceUnitTests {
     private User user;
     private UserPrincipal userPrincipal;
     private UserCreationDTO userCreationDTO;
-    private Role role;
+    private Role userRole;
 
     @BeforeEach
     void setUpUser() {
-        role = new Role();
-        role.setId(1L);
-        role.setName(ROLE_USER.name());
-        role.setDescription(ROLE_USER.description());
+        userRole = new Role();
+        userRole.setId(1L);
+        userRole.setName(ROLE_USER.name());
+        userRole.setDescription(ROLE_USER.description());
 
         user = new User();
         user.setId(1L);
         user.setEmail(EMAIL);
         user.setPassword(PASSWORD);
-        user.addRole(role);
+        user.addRole(userRole);
         user.setIsEnabled(true);
         user.setIsLocked(false);
         user.setFailedLoginAttempts(0);
@@ -79,28 +69,28 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("userExists: 'NullPointerException' is thrown when email is null")
-    void userExists_EmailIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("userExists(): " + THROWS_NULL_POINTER_WHEN_EMAIL_NULL)
+    void userExists_EmailIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.userExists(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("userExists: 'IllegalArgumentException' is thrown when email is empty")
-    void userExists_EmailIsEmpty_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("userExists(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_EMAIL_EMPTY)
+    void userExists_EmailIsEmpty_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.userExists(EMPTY));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("userExists: 'IllegalArgumentException' is thrown when email is blank")
-    void userExists_EmailIsBlank_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("userExists(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_EMAIL_BLANK)
+    void userExists_EmailIsBlank_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.userExists(BLANK));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("userExists: returns false when email isn't registered")
+    @DisplayName("userExists(): " + RETURNS_FALSE_WHEN_EMAIL_NOT_REGISTERED)
     void userExists_EmailIsNotRegistered_ReturnsFalse() {
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
 
@@ -111,7 +101,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("userExists: returns true when email is registered")
+    @DisplayName("userExists(): " + RETURNS_TRUE_WHEN_EMAIL_REGISTERED)
     void userExists_EmailIsRegistered_ReturnsTrue() {
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
 
@@ -122,28 +112,28 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("loadUserByEmail: 'NullPointerException' is thrown when email is null")
-    void loadUserByEmail_EmailIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("loadUserByEmail(): " + THROWS_NULL_POINTER_WHEN_EMAIL_NULL)
+    void loadUserByEmail_EmailIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.loadUserByEmail(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("loadUserByEmail: 'IllegalArgumentException' is thrown when email is empty")
-    void loadUserByEmail_EmailIsEmpty_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("loadUserByEmail(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_EMAIL_EMPTY)
+    void loadUserByEmail_EmailIsEmpty_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.loadUserByEmail(EMPTY));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("loadUserByEmail: 'IllegalArgumentException' is thrown when email is blank")
-    void loadUserByEmail_EmailIsBlank_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("loadUserByEmail(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_EMAIL_BLANK)
+    void loadUserByEmail_EmailIsBlank_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.loadUserByEmail(BLANK));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("loadUserByEmail: 'UserNotFoundException' is thrown when email isn't registered")
+    @DisplayName("loadUserByEmail(): " + THROWS_USER_NOT_FOUND_WHEN_EMAIL_NOT_REGISTERED)
     void loadUserByEmail_EmailIsNotRegistered_UserNotFoundExceptionIsThrown() {
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
 
@@ -152,7 +142,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("loadUserByEmail: returns 'UserPrincipal' when email is registered")
+    @DisplayName("loadUserByEmail(): " + RETURNS_PRINCIPAL_WHEN_EMAIL_REGISTERED)
     void loadUserByEmail_EmailIsRegistered_ReturnsUserPrincipal() {
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
 
@@ -163,28 +153,28 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getUserByEmail: 'NullPointerException' is thrown when email is null")
-    void getUserByEmail_EmailIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("getUserByEmail(): " + THROWS_NULL_POINTER_WHEN_EMAIL_NULL)
+    void getUserByEmail_EmailIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.getUserByEmail(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("getUserByEmail: 'IllegalArgumentException' is thrown when email is empty")
-    void getUserByEmail_EmailIsEmpty_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("getUserByEmail(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_EMAIL_EMPTY)
+    void getUserByEmail_EmailIsEmpty_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.getUserByEmail(EMPTY));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("getUserByEmail: 'IllegalArgumentException' is thrown when email is blank")
-    void getUserByEmail_EmailIsBlank_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("getUserByEmail(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_EMAIL_BLANK)
+    void getUserByEmail_EmailIsBlank_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.getUserByEmail(BLANK));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("getUserByEmail: 'UserNotFoundException' is thrown when email isn't registered")
+    @DisplayName("getUserByEmail(): " + THROWS_USER_NOT_FOUND_WHEN_EMAIL_NOT_REGISTERED)
     void getUserByEmail_EmailIsNotRegistered_UserNotFoundExceptionIsThrown() {
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
 
@@ -193,7 +183,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getUserByEmail: returns user when email is registered")
+    @DisplayName("getUserByEmail(): " + RETURNS_USER_WHEN_EMAIL_REGISTERED)
     void getUserByEmail_EmailIsRegistered_ReturnsUser() {
         given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
 
@@ -204,14 +194,14 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getUserByPrincipal: 'NullPointerException' is thrown when user principal is null")
-    void getUserByPrincipal_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("getUserByPrincipal(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void getUserByPrincipal_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.getUserByPrincipal(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("getUserByPrincipal: 'UserNotFoundException' is thrown when user principal isn't registered")
+    @DisplayName("getUserByPrincipal(): " + THROWS_USER_NOT_FOUND_WHEN_PRINCIPAL_NOT_REGISTERED)
     void getUserByPrincipal_UserPrincipalNotRegistered_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
@@ -221,7 +211,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getUserByPrincipal: returns user when user principal is registered")
+    @DisplayName("getUserByPrincipal(): " + RETURNS_USER_WHEN_PRINCIPAL_REGISTERED)
     void getUserByPrincipal_UserPrincipalIsRegistered_ReturnsUser() {
         String email = userPrincipal.getEmail();
 
@@ -234,8 +224,8 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("createUser: 'NullPointerException' is thrown when userCreationDTO is null")
-    void createUser_UserCreationDTOIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("createUser(): " + THROWS_NULL_POINTER_WHEN_USER_CREATION_DTO_NULL)
+    void createUser_UserCreationDTOIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.createUser(null));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(roleService);
@@ -244,7 +234,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("createUser: 'UserAlreadyExistsException' is thrown when user already exists")
+    @DisplayName("createUser(): " + THROWS_USER_ALREADY_EXISTS_WHEN_USER_REGISTERED)
     void createUser_UserAlreadyExists_UserAlreadyExistsExceptionIsThrown() {
         String email = userCreationDTO.email();
 
@@ -259,14 +249,14 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("createUser: creates user when user doesn't exist")
+    @DisplayName("createUser(): " + CREATES_USER_WHEN_USER_NOT_REGISTERED)
     void createUser_UserDoestNotExist_UserCreated() {
         String email = userCreationDTO.email();
         String password = userCreationDTO.password();
-        GrantedAuthority userRole = new SimpleGrantedAuthority(ROLE_USER.name());
+        GrantedAuthority userRoleGrantedAuthority = new SimpleGrantedAuthority(ROLE_USER.name());
 
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
-        given(roleService.getRole(ROLE_USER)).willReturn(role);
+        given(roleService.getRole(ROLE_USER)).willReturn(userRole);
         given(passwordEncoder.encode(password)).willReturn("encodedPassword");
         given(userRepository.persist(user)).willReturn(user);
 
@@ -274,7 +264,7 @@ class UserServiceUnitTests {
         Set<GrantedAuthority> authorities = returnedPrincipal.getAuthorities();
 
         assertEquals(userPrincipal, returnedPrincipal);
-        assertTrue(authorities.size() == 1 && authorities.contains(userRole));
+        assertTrue(authorities.size() == 1 && authorities.contains(userRoleGrantedAuthority));
 
         InOrder invokeInOrder = inOrder(roleService, passwordEncoder, userRepository, userInfoService);
         invokeInOrder.verify(userRepository).findByEmail(email);
@@ -285,15 +275,15 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("deleteUser: 'NullPointerException' is thrown when user principal is null")
-    void deleteUser_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("deleteUser(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void deleteUser_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.deleteUser(null));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(userInfoService);
     }
 
     @Test
-    @DisplayName("deleteUser: 'UserNotFoundException' is thrown when user doesn't exist")
+    @DisplayName("deleteUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_NOT_REGISTERED)
     void deleteUser_UserDoesNotExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
@@ -306,7 +296,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("deleteUser: user is deleted when user exists")
+    @DisplayName("deleteUser(): " + DELETES_USER_WHEN_USER_REGISTERED)
     void deleteUser_UserExists_UserDeleted() {
         given(userRepository.findByEmail(userPrincipal.getEmail())).willReturn(Optional.of(user));
 
@@ -320,35 +310,35 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("updateEmail: 'NullPointerException' is thrown when user principal is null")
-    void updateEmail_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("updateEmail(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void updateEmail_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.updateEmail(null, NEW_EMAIL));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("updateEmail: 'NullPointerException' is thrown when new email is null")
-    void updateEmail_NewEmailIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("updateEmail(): " + THROWS_NULL_POINTER_WHEN_NEW_EMAIL_NULL)
+    void updateEmail_NewEmailIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.updateEmail(userPrincipal, null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("updateEmail: 'IllegalArgumentException' is thrown when new email is empty")
-    void updateEmail_EmailIsEmpty_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("updateEmail(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_NEW_EMAIL_EMPTY)
+    void updateEmail_EmailIsEmpty_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.updateEmail(userPrincipal, EMPTY));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("updateEmail: 'IllegalArgumentException' is thrown when new email is blank")
-    void updateEmail_EmailIsBlank_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("updateEmail(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_NEW_EMAIL_BLANK)
+    void updateEmail_EmailIsBlank_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.updateEmail(userPrincipal, BLANK));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("updateEmail: 'EmailAlreadyRegisteredException' is thrown when new email is already registered")
+    @DisplayName("updateEmail(): " + THROWS_EMAIL_ALREADY_REGISTERED_WHEN_EMAIL_REGISTERED)
     void updateEmail_NewEmailAlreadyRegistered_EmailAlreadyRegisteredExceptionIsThrown() {
         User otherUser = new User();
         otherUser.setEmail(NEW_EMAIL);
@@ -361,7 +351,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("updateEmail: email is updated when email isn't already registered")
+    @DisplayName("updateEmail(): " + UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED)
     void updateEmail_NewEmailIsNotRegistered_EmailUpdated() {
 
         String email = userPrincipal.getEmail();
@@ -380,39 +370,39 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("updatePassword: 'NullPointerException' is thrown when user principal is null")
-    void updatePassword_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("updatePassword(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void updatePassword_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.updatePassword(null, NEW_PASSWORD));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(passwordEncoder);
     }
 
     @Test
-    @DisplayName("updatePassword: 'NullPointerException' is thrown when new password is null")
-    void updatePassword_NewPasswordIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("updatePassword(): " + THROWS_NULL_POINTER_WHEN_NEW_PASSWORD_NULL)
+    void updatePassword_NewPasswordIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.updatePassword(userPrincipal, null));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(passwordEncoder);
     }
 
     @Test
-    @DisplayName("updatedPassword: 'IllegalArgumentException' is thrown when new password is empty")
-    void updatePassword_NewPasswordIsEmpty_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("updatePassword(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_NEW_PASSWORD_EMPTY)
+    void updatePassword_NewPasswordIsEmpty_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.updatePassword(userPrincipal, EMPTY));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(passwordEncoder);
     }
 
     @Test
-    @DisplayName("updatePassword: 'IllegalArgumentException' is thrown when new password is blank")
-    void updatePassword_NewPasswordIsBlank_IllegalArgumentExceptionIsThrown() {
+    @DisplayName("updatePassword(): " + THROWS_ILLEGAL_ARGUMENT_WHEN_NEW_PASSWORD_BLANK)
+    void updatePassword_NewPasswordIsBlank_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> userService.updatePassword(userPrincipal, BLANK));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(passwordEncoder);
     }
 
     @Test
-    @DisplayName("updatePassword: 'UserNotFoundException' is thrown when user doesn't exist")
+    @DisplayName("updatePassword(): " + THROWS_USER_NOT_FOUND_WHEN_USER_NOT_REGISTERED)
     void updatePassword_UserDoesNotExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
@@ -425,7 +415,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("updatePassword: password is updated when user exists")
+    @DisplayName("updatePassword(): " + UPDATES_PASSWORD_WHEN_USER_REGISTERED)
     void updatePassword_UserExists_PasswordUpdated() {
         String email = userPrincipal.getEmail();
         String newEncodedPassword = "newEncodedPassword";
@@ -442,23 +432,23 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("addRoleToUser: 'NullPointerException' is thrown when user principal is null")
-    void addRoleToUser_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("addRoleToUser(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void addRoleToUser_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.addRoleToUser(null, ROLE_ADMIN));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(roleService);
     }
 
     @Test
-    @DisplayName("addRoleToUser: 'NullPointerException' is thrown when role to add is null")
-    void addRoleToUser_NewRoleIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("addRoleToUser(): " + THROWS_NULL_POINTER_WHEN_ROLE_NULL)
+    void addRoleToUser_NewRoleIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.addRoleToUser(userPrincipal, null));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(roleService);
     }
 
     @Test
-    @DisplayName("addRoleToUser: 'UserNotFoundException' is thrown when user doesn't exist")
+    @DisplayName("addRoleToUser(): " + THROWS_USER_NOT_FOUND_WHEN_PRINCIPAL_NOT_REGISTERED)
     void addRoleToUser_UserDoesNotExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
@@ -471,12 +461,12 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("addRoleToUser: role is not added to user when role is already assigned to user")
+    @DisplayName("addRoleToUser(): " + DOES_NOT_ADD_ROLE_WHEN_ROLE_ALREADY_ASSIGNED)
     void addRoleToUser_RoleAlreadyAssignedToUser_RoleNotAdded() {
         String email = userPrincipal.getEmail();
 
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
-        given(roleService.getRole(ROLE_USER)).willReturn(role);
+        given(roleService.getRole(ROLE_USER)).willReturn(userRole);
 
         UserPrincipal returnedPrincipal = userService.addRoleToUser(userPrincipal, ROLE_USER);
         Set<GrantedAuthority> authorities = returnedPrincipal.getAuthorities();
@@ -488,7 +478,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("addRoleToUser: role is added to user when user exist")
+    @DisplayName("addRoleToUser(): " + ADDS_ROLE_WHEN_ROLE_NOT_ASSIGNED)
     void addRoleToUser_UserExists_RoleAdded() {
         String email = userPrincipal.getEmail();
         Role roleToAdd = new Role();
@@ -508,23 +498,23 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("removeRoleFromUser: 'NullPointerException' is thrown when user principal is null")
-    void removeRoleFromUser_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("removeRoleFromUser(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void removeRoleFromUser_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.removeRoleFromUser(null, ROLE_USER));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(roleService);
     }
 
     @Test
-    @DisplayName("removeRoleFromUser: 'NullPointerException' is thrown when role to remove is null")
-    void removeRoleFromUser_RoleIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("removeRoleFromUser(): " + THROWS_NULL_POINTER_WHEN_ROLE_NULL)
+    void removeRoleFromUser_RoleIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.removeRoleFromUser(userPrincipal, null));
         verifyNoInteractions(userRepository);
         verifyNoInteractions(roleService);
     }
 
     @Test
-    @DisplayName("removeRoleFromUser: 'UserNotFoundException' is thrown when user doesn't exist")
+    @DisplayName("removeRoleFromUser(): " + THROWS_USER_NOT_FOUND_WHEN_PRINCIPAL_NOT_REGISTERED)
     void removeRoleFromUser_UserDoesNotExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
@@ -537,12 +527,12 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("removeRoleFromUser: 'UserRoleRemovalNotAllowedException' is thrown when trying to remove user role")
+    @DisplayName("removeRoleFromUser(): " + THROWS_USER_ROLE_REMOVAL_PROHIBITED_WHEN_USER_ROLE_REMOVED)
     void removeRoleFromUser_RoleIsUserRole_UserRoleRemovalNotAllowedExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
-        given(roleService.getRole(ROLE_USER)).willReturn(role);
+        given(roleService.getRole(ROLE_USER)).willReturn(userRole);
 
         assertThrows(UserRoleRemovalProhibitedException.class, () -> userService.removeRoleFromUser(userPrincipal,
             ROLE_USER));
@@ -552,7 +542,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("removeRoleFromUser: role is removed from user when user exists")
+    @DisplayName("removeRoleFromUser(): " + REMOVES_ROLE_WHEN_ROLE_NOT_ASSIGNED)
     void removeRoleFromUser_UserExists_RoleRemoved() {
         String email = userPrincipal.getEmail();
         Role roleToRemove = new Role();
@@ -574,15 +564,15 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("lockUser: 'NullPointedException' is thrown when user principal is null")
+    @DisplayName("lockUser(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
     void lockUser_UserPrincipalIsNull_NullPointedExceptionIsThrown() {
         assertThrows(NullPointerException.class, () -> userService.lockUser(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("lockUser: 'UserNotFoundException' is thrown when user doesn't exist")
-    void lockUser_UserDoesntExist_UserNotFoundExceptionIsThrown() {
+    @DisplayName("lockUser(): " + THROWS_USER_NOT_FOUND_WHEN_PRINCIPAL_NOT_REGISTERED)
+    void lockUser_UserDoesNotExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
@@ -593,7 +583,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("lockUser: user isn't updated when user is already locked")
+    @DisplayName("lockUser(): " + DOES_NOT_LOCK_USER_WHEN_USER_ALREADY_LOCKED)
     void lockUser_UserAlreadyLocked_UserNotUpdated() {
         String email = userPrincipal.getEmail();
         user.setIsLocked(true);
@@ -607,8 +597,8 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("lockUser: user is locked when user isn't locked")
-    void lockUser_UserExistsAndIsNotLocked_UserLocked() {
+    @DisplayName("lockUser(): " + LOCKS_USER_WHEN_USER_NOT_LOCKED)
+    void lockUser_UserNotLocked_UserLocked() {
         String email = userPrincipal.getEmail();
 
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
@@ -621,15 +611,15 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("unlockUser: 'NullPointerException' is thrown when user principal is null")
-    void unlockUser_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("unlockUser(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void unlockUser_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.unlockUser(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("unlockUser: 'UserNotFoundException' is thrown when user doesn't exist")
-    void unlockUser_UserDoesntExist_UserNotFoundExceptionIsThrown() {
+    @DisplayName("unlockUser(): " + THROWS_USER_NOT_FOUND_WHEN_PRINCIPAL_NOT_REGISTERED)
+    void unlockUser_UserDoesNotExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
@@ -640,7 +630,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("unlockUser: user isn't updated when user is already unlocked")
+    @DisplayName("unlockUser(): " + DOES_NOT_UNLOCK_USER_WHEN_ALREADY_UNLOCKED)
     void unlockUser_UserAlreadyUnlocked_UserNotUpdated() {
         String email = userPrincipal.getEmail();
 
@@ -653,7 +643,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("unlockUser: user is unlocked when user is locked")
+    @DisplayName("unlockUser(): " + UNLOCKS_USER_WHEN_USER_LOCKED)
     void unlockUser_UserIsLocked_UserUnlocked() {
         String email = userPrincipal.getEmail();
         user.setIsLocked(true);
@@ -668,14 +658,14 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("disableUser: 'NullPointerException' is thrown when user principal is null")
-    void disableUser_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("disableUser(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void disableUser_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.disableUser(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("disableUser: 'UserNotFoundException' is thrown when user doesn't exist")
+    @DisplayName("disableUser(): " + THROWS_USER_NOT_FOUND_WHEN_PRINCIPAL_NOT_REGISTERED)
     void disableUser_UserDoesntExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
@@ -687,7 +677,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("disableUser: user isn't updated when user is already disabled")
+    @DisplayName("disableUser(): " + DOES_NOT_DISABLE_USER_WHEN_USER_ALREADY_DISABLED)
     void disableUser_UserAlreadyDisabled_UserNotUpdated() {
         String email = userPrincipal.getEmail();
         user.setIsEnabled(false);
@@ -700,8 +690,8 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("disableUser: user is disabled when user is enabled")
-    void disableUser_UserIsEnabled_UserDisabled() {
+    @DisplayName("disableUser(): " + DISABLES_USER_WHEN_USER_ENABLED)
+    void disableUser_UserIsEnabled_DisablesUser() {
         String email = userPrincipal.getEmail();
 
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
@@ -714,14 +704,14 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("enableUser: 'NullPointerException' is thrown when user principal is null")
-    void enableUser_UserPrincipalIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("enableUser(): " + THROWS_NULL_POINTER_WHEN_PRINCIPAL_NULL)
+    void enableUser_UserPrincipalIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.enableUser(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("enableUser: 'UserNotFoundException' is thrown when user doesn't exist")
+    @DisplayName("enableUser(): " + THROWS_USER_NOT_FOUND_WHEN_PRINCIPAL_NOT_REGISTERED)
     void enableUser_UserDoesntExist_UserNotFoundExceptionIsThrown() {
         String email = userPrincipal.getEmail();
 
@@ -733,7 +723,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("enableUser: user is not updated when user is already enabled")
+    @DisplayName("enableUser(): " + DOES_NOT_ENABLE_USER_WHEN_USER_ALREADY_ENABLED)
     void enableUser_UserAlreadyEnabled_UserNotUpdated() {
         String email = userPrincipal.getEmail();
 
@@ -746,7 +736,7 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("enableUser: user is enabled when user is not enabled")
+    @DisplayName("enableUser(): " + ENABLES_USER_WHEN_USER_DISABLED)
     void enableUser_UserIsDisabled_UserEnabled() {
         String email = userPrincipal.getEmail();
         user.setIsEnabled(false);
@@ -761,14 +751,14 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("addLoginAttempt: 'NullPointerException' is thrown when user is null")
-    void addLoginAttempt_UserIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("addLoginAttempt(): " + THROWS_NULL_POINTER_WHEN_USER_NULL)
+    void addLoginAttempt_UserIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.addLoginAttempt(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("addLoginAttempt: login attempt updated when user isn't null")
+    @DisplayName("addLoginAttempt(): " + ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void addLoginAttempt_UserIsNotNull_LoginAttemptAdded() {
         int oldLoginAttempts = user.getFailedLoginAttempts();
         LocalTime oldLocalTime = LocalTime.now();
@@ -783,14 +773,14 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("resetLoginAttempt: 'NullPointerException' is thrown when user is null")
-    void resetLoginAttempt_UserIsNull_NullPointerExceptionIsThrown() {
+    @DisplayName("resetLoginAttempt(): " + THROWS_NULL_POINTER_WHEN_USER_NULL)
+    void resetLoginAttempt_UserIsNull_ThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> userService.resetLoginAttempt(null));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("resetLoginAttempt: login attempts are reset when user isn't null")
+    @DisplayName("resetLoginAttempt(): " + RESETS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void resetLoginAttempt_UserIsNotNull_LoginAttemptsReset() {
         user.setFailedLoginAttempts(2);
 
