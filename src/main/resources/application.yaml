@@ -2,7 +2,7 @@ logging:
   level:
     org:
       springframework:
-        web: "TRACE"
+        web: "DEBUG"
         security:
           web:
             FilterChainProxy: "DEBUG"
@@ -23,8 +23,6 @@ spring:
   jackson:
     time-zone: "UTC"
   jpa:
-    hibernate:
-      ddl-auto: "validate"
     properties:
       hibernate:
         format_sql: true
