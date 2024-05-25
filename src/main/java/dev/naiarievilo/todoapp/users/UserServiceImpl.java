@@ -126,6 +126,10 @@ public class UserServiceImpl implements UserService {
         Validate.notNull(userPrincipal, NOT_NULL);
         Validate.notBlank(newEmail, NOT_BLANK);
 
+        if (userExists(newEmail)) {
+            throw new EmailAlreadyRegisteredException();
+        }
+
         User user = this.getUserByPrincipal(userPrincipal);
         user.setEmail(newEmail);
         userRepository.update(user);
