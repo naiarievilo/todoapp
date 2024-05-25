@@ -146,6 +146,10 @@ public class UserServiceImpl implements UserService {
 
         User user = getUserByPrincipal(userPrincipal);
         Role roleToAdd = roleService.getRole(role);
+        if (user.getRoles().contains(roleToAdd)) {
+            return UserPrincipalImpl.withUser(user);
+        }
+
         user.addRole(roleToAdd);
         userRepository.update(user);
 
