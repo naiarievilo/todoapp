@@ -544,7 +544,8 @@ class UserServiceUnitTests {
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
         given(roleService.getRole(ROLE_USER)).willReturn(role);
 
-        assertThrows(UserRoleRemovalNotAllowed.class, () -> userService.removeRoleFromUser(userPrincipal, ROLE_USER));
+        assertThrows(UserRoleRemovalProhibitedException.class, () -> userService.removeRoleFromUser(userPrincipal,
+            ROLE_USER));
         verify(userRepository).findByEmail(email);
         verify(roleService).getRole(ROLE_USER);
         verify(userRepository, never()).update(user);

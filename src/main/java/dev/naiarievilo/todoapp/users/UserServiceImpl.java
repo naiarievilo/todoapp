@@ -165,7 +165,7 @@ public class UserServiceImpl implements UserService {
         User user = getUserByPrincipal(userPrincipal);
         Role roleToRemove = roleService.getRole(role);
         if (roleToRemove.getName().equals(ROLE_USER.name())) {
-            throw new UserRoleRemovalNotAllowed();
+            throw new UserRoleRemovalProhibitedException();
         }
 
         user.removeRole(roleToRemove);
