@@ -48,23 +48,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByPrincipal(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-        return userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(UserNotFoundException::new);
-    }
-
-    @Override
-    @Transactional
-    public void addLoginAttempt(User user) {
-        Validate.notNull(user, NOT_NULL);
-
-        user.incrementFailedLoginAttempts();
-        user.setFailedLoginTime(LocalTime.now());
-
-        userRepository.update(user);
-    }
-
-    @Override
     public boolean userExists(String email) {
         Validate.notBlank(email, NOT_BLANK);
         return userRepository.findByEmail(email).isPresent();
@@ -84,6 +67,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 
+    @Override
+    public User getUserByPrincipal(UserPrincipal userPrincipal) {
+        Validate.notNull(userPrincipal, NOT_NULL);
+        return userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(UserNotFoundException::new);
+    }
 
     @Override
     @Transactional
@@ -113,7 +101,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(UserPrincipal userPrincipal) {
         Validate.notNull(userPrincipal, NOT_NULL);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         user.removeAllRoles();
 
         userInfoService.deleteUserInfo(user.getId());
@@ -122,7 +110,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserPrincipal changeEmail(UserPrincipal userPrincipal, String newEmail) {
+    public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
         Validate.notNull(userPrincipal, NOT_NULL);
         Validate.notBlank(newEmail, NOT_BLANK);
 
@@ -139,11 +127,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserPrincipal changePassword(UserPrincipal userPrincipal, String newPassword) {
+    public UserPrincipal updatePassword(UserPrincipal userPrincipal, String newPassword) {
         Validate.notNull(userPrincipal, NOT_NULL);
         Validate.notBlank(newPassword, NOT_BLANK);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.update(user);
 
@@ -156,7 +144,7 @@ public class UserServiceImpl implements UserService {
         Validate.notNull(userPrincipal, NOT_NULL);
         Validate.notNull(role, NOT_NULL);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
         userRepository.update(user);
@@ -170,7 +158,7 @@ public class UserServiceImpl implements UserService {
         Validate.notNull(userPrincipal, NOT_NULL);
         Validate.notNull(role, NOT_NULL);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
         userRepository.update(user);
@@ -183,7 +171,7 @@ public class UserServiceImpl implements UserService {
     public void lockUser(UserPrincipal userPrincipal) {
         Validate.notNull(userPrincipal, NOT_NULL);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsLocked(true);
         userRepository.update(user);
     }
@@ -193,7 +181,7 @@ public class UserServiceImpl implements UserService {
     public void unlockUser(UserPrincipal userPrincipal) {
         Validate.notNull(userPrincipal, NOT_NULL);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsLocked(false);
         userRepository.update(user);
     }
@@ -203,7 +191,7 @@ public class UserServiceImpl implements UserService {
     public void disableUser(UserPrincipal userPrincipal) {
         Validate.notNull(userPrincipal, NOT_NULL);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsEnabled(false);
         userRepository.update(user);
     }
@@ -213,11 +201,21 @@ public class UserServiceImpl implements UserService {
     public void enableUser(UserPrincipal userPrincipal) {
         Validate.notNull(userPrincipal, NOT_NULL);
 
-        User user = this.getUserByPrincipal(userPrincipal);
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsEnabled(true);
         userRepository.update(user);
     }
 
+    @Override
+    @Transactional
+    public void addLoginAttempt(User user) {
+        Validate.notNull(user, NOT_NULL);
+
+        user.incrementFailedLoginAttempts();
+        user.setFailedLoginTime(LocalTime.now());
+
+        userRepository.update(user);
+    }
 
     @Override
     @Transactional

@@ -17,9 +17,9 @@ public interface UserService {
 
     void deleteUser(UserPrincipal userPrincipal);
 
-    UserPrincipal changeEmail(UserPrincipal userPrincipal, String newEmail);
+    UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail);
 
-    UserPrincipal changePassword(UserPrincipal userPrincipal, String newPassword);
+    UserPrincipal updatePassword(UserPrincipal userPrincipal, String newPassword);
 
     UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role);
 
