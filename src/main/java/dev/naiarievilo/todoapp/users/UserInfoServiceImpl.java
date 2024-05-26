@@ -30,6 +30,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         Validate.notNull(user, NOT_NULL);
 
         UserInfo userInfo = new UserInfo();
+        userInfo.setId(user.getId());
         userInfo.setUser(user);
         userInfo.setFirstName(userCreationDTO.firstName());
         userInfo.setLastName(userCreationDTO.lastName());
