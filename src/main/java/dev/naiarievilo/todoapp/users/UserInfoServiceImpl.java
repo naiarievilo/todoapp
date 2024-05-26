@@ -18,6 +18,12 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
+    public boolean userInfoExists(Long userId) {
+        Validate.notNull(userId, NOT_NULL);
+        return userInfoRepository.findById(userId).isPresent();
+    }
+
+    @Override
     public UserInfo getUserInfoById(Long userId) {
         Validate.notNull(userId, NOT_NULL);
         return userInfoRepository.findById(userId).orElseThrow(UserInfoNotFoundException::new);
@@ -28,6 +34,10 @@ public class UserInfoServiceImpl implements UserInfoService {
     public void createUserInfo(UserCreationDTO userCreationDTO, User user) {
         Validate.notNull(userCreationDTO, NOT_NULL);
         Validate.notNull(user, NOT_NULL);
+
+        if (userInfoExists(user.getId())) {
+            throw new UserInfoAlreadyExistsException();
+        }
 
         UserInfo userInfo = new UserInfo();
         userInfo.setId(user.getId());
@@ -42,14 +52,21 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Transactional
     public void deleteUserInfo(Long userId) {
         Validate.notNull(userId, NOT_NULL);
+        if (!userInfoExists(userId)) {
+            throw new UserInfoNotFoundException();
+        }
+
         userInfoRepository.deleteById(userId);
     }
 
     @Override
     @Transactional
-    public UserInfo changeFirstName(UserInfo userInfo, String newFirstName) {
+    public UserInfo updateFirstName(UserInfo userInfo, String newFirstName) {
         Validate.notNull(userInfo, NOT_NULL);
         Validate.notBlank(newFirstName, NOT_BLANK);
+        if (!userInfoExists(userInfo.getId())) {
+            throw new UserInfoNotFoundException();
+        }
 
         userInfo.setFirstName(newFirstName);
         userInfoRepository.update(userInfo);
@@ -58,9 +75,12 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     @Transactional
-    public UserInfo changeLastName(UserInfo userInfo, String newLastName) {
+    public UserInfo updateLastName(UserInfo userInfo, String newLastName) {
         Validate.notNull(userInfo, NOT_NULL);
         Validate.notBlank(newLastName, NOT_BLANK);
+        if (!userInfoExists(userInfo.getId())) {
+            throw new UserInfoNotFoundException();
+        }
 
         userInfo.setLastName(newLastName);
         userInfoRepository.update(userInfo);
@@ -69,9 +89,12 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     @Transactional
-    public UserInfo changeAvatarUrl(UserInfo userInfo, String newAvatarUrl) {
+    public UserInfo updateAvatarUrl(UserInfo userInfo, String newAvatarUrl) {
         Validate.notNull(userInfo, NOT_NULL);
         Validate.notBlank(newAvatarUrl, NOT_BLANK);
+        if (!userInfoExists(userInfo.getId())) {
+            throw new UserInfoNotFoundException();
+        }
 
         userInfo.setAvatarUrl(newAvatarUrl);
         userInfoRepository.update(userInfo);

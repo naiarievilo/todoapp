@@ -2,15 +2,17 @@ package dev.naiarievilo.todoapp.users;
 
 public interface UserInfoService {
 
+    boolean userInfoExists(Long userId);
+
     UserInfo getUserInfoById(Long userId);
 
     void createUserInfo(UserCreationDTO userCreationDTO, User user);
 
     void deleteUserInfo(Long userId);
 
-    UserInfo changeFirstName(UserInfo userInfo, String newFirstName);
+    UserInfo updateFirstName(UserInfo userInfo, String newFirstName);
 
-    UserInfo changeLastName(UserInfo userInfo, String newLastName);
+    UserInfo updateLastName(UserInfo userInfo, String newLastName);
 
-    UserInfo changeAvatarUrl(UserInfo userInfo, String newAvatarUrl);
+    UserInfo updateAvatarUrl(UserInfo userInfo, String newAvatarUrl);
 }
