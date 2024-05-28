@@ -1,13 +1,9 @@
 package dev.naiarievilo.todoapp.users;
 
 import jakarta.persistence.*;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
-
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NULL;
 
 @Entity
 @Table(name = "users_info")
@@ -35,7 +31,6 @@ public class UserInfo {
     }
 
     public void setId(Long id) {
-        Validate.notNull(id, NOT_NULL);
         this.id = id;
     }
 
@@ -44,7 +39,6 @@ public class UserInfo {
     }
 
     public void setUser(User user) {
-        Validate.notNull(user, NOT_NULL);
         this.user = user;
     }
 
@@ -53,7 +47,6 @@ public class UserInfo {
     }
 
     public void setFirstName(String firstName) {
-        Validate.notBlank(firstName, NOT_BLANK);
         this.firstName = firstName;
     }
 
@@ -62,7 +55,6 @@ public class UserInfo {
     }
 
     public void setLastName(String lastName) {
-        Validate.notBlank(lastName, NOT_BLANK);
         this.lastName = lastName;
     }
 

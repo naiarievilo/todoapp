@@ -2,7 +2,6 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Role;
 import jakarta.persistence.*;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Generated;
@@ -11,8 +10,6 @@ import org.hibernate.annotations.NaturalId;
 import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.*;
 
 @Entity
 @Table(name = "users")
@@ -31,12 +28,12 @@ public class User {
     private String password;
 
     @Generated
-    @Column(name = "is_locked", nullable = false)
-    private Boolean isLocked;
-
-    @Generated
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled;
+
+    @Generated
+    @Column(name = "is_locked", nullable = false)
+    private Boolean isLocked;
 
     @Column(name = "failed_login_attempts", nullable = false)
     private Integer failedLoginAttempts;
@@ -55,7 +52,6 @@ public class User {
     }
 
     public void setId(Long id) {
-        Validate.notNull(id, NOT_NULL);
         this.id = id;
     }
 
@@ -64,7 +60,6 @@ public class User {
     }
 
     public void setEmail(String email) {
-        Validate.notBlank(email, NOT_BLANK);
         this.email = email;
     }
 
@@ -73,7 +68,6 @@ public class User {
     }
 
     public void setPassword(String password) {
-        Validate.notBlank(password, NOT_BLANK);
         this.password = password;
     }
 
@@ -82,7 +76,6 @@ public class User {
     }
 
     public void setIsLocked(Boolean isLocked) {
-        Validate.notNull(isLocked, NOT_NULL);
         this.isLocked = isLocked;
     }
 
@@ -91,7 +84,6 @@ public class User {
     }
 
     public void setIsEnabled(Boolean isEnabled) {
-        Validate.notNull(isEnabled, NOT_NULL);
         this.isEnabled = isEnabled;
     }
 
@@ -100,7 +92,6 @@ public class User {
     }
 
     public void setFailedLoginAttempts(Integer failedLoginAttempts) {
-        Validate.notNull(failedLoginAttempts, NOT_NULL);
         this.failedLoginAttempts = failedLoginAttempts;
     }
 
@@ -113,7 +104,6 @@ public class User {
     }
 
     public void setFailedLoginTime(LocalTime failedLoginTime) {
-        Validate.notNull(failedLoginTime, NOT_NULL);
         this.failedLoginTime = failedLoginTime;
     }
 
@@ -122,15 +112,10 @@ public class User {
     }
 
     public void setRoles(Set<Role> roles) {
-        Validate.notEmpty(roles, NOT_EMPTY);
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
         addRoles(roles);
     }
 
     public void addRoles(Set<Role> roles) {
-        Validate.notEmpty(roles, NOT_EMPTY);
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
-
         for (Role role : roles) {
             this.roles.add(role);
             role.getUsers().add(this);
@@ -138,21 +123,16 @@ public class User {
     }
 
     public void addRole(Role role) {
-        Validate.notNull(role, NOT_NULL);
         roles.add(role);
         role.getUsers().add(this);
     }
 
     public void removeRole(Role role) {
-        Validate.notNull(role, NOT_NULL);
         roles.remove(role);
         role.getUsers().remove(this);
     }
 
     public void removeRoles(Set<Role> roles) {
-        Validate.notEmpty(roles, NOT_EMPTY);
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
-
         for (Role role : roles) {
             this.roles.remove(role);
             role.getUsers().remove(this);
