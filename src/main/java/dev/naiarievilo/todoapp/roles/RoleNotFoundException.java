@@ -8,4 +8,8 @@ public class RoleNotFoundException extends RuntimeException {
         super(DEFAULT_MESSAGE);
     }
 
+    public RoleNotFoundException(String role) {
+        super("Role '" + role + "' not found");
+    }
+
 }

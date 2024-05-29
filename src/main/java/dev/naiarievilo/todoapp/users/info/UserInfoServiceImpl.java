@@ -2,8 +2,6 @@ package dev.naiarievilo.todoapp.users.info;
 
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserCreationDTO;
-import dev.naiarievilo.todoapp.validation.Validate;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,21 +16,18 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public boolean userInfoExists(@NotNull Long userId) {
-        Validate.notNull(userId);
+    public boolean userInfoExists(Long userId) {
         return userInfoRepository.findById(userId).isPresent();
     }
 
     @Override
-    public UserInfo getUserInfoById(@NotNull Long userId) {
-        Validate.notNull(userId);
+    public UserInfo getUserInfoById(Long userId) {
         return userInfoRepository.findById(userId).orElseThrow(UserInfoNotFoundException::new);
     }
 
     @Override
     @Transactional
     public void createUserInfo(UserCreationDTO userCreationDTO, User user) {
-
         if (userInfoExists(user.getId())) {
             throw new UserInfoAlreadyExistsException();
         }
@@ -49,20 +44,16 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     @Transactional
     public void deleteUserInfo(Long userId) {
-
-        if (!userInfoExists(userId)) {
+        if (!userInfoExists(userId))
             throw new UserInfoNotFoundException();
-        }
-
         userInfoRepository.deleteById(userId);
     }
 
     @Override
     @Transactional
     public UserInfo updateFirstName(UserInfo userInfo, String newFirstName) {
-        if (!userInfoExists(userInfo.getId())) {
+        if (!userInfoExists(userInfo.getId()))
             throw new UserInfoNotFoundException();
-        }
 
         userInfo.setFirstName(newFirstName);
         userInfoRepository.update(userInfo);
@@ -72,9 +63,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     @Transactional
     public UserInfo updateLastName(UserInfo userInfo, String newLastName) {
-        if (!userInfoExists(userInfo.getId())) {
+        if (!userInfoExists(userInfo.getId()))
             throw new UserInfoNotFoundException();
-        }
 
         userInfo.setLastName(newLastName);
         userInfoRepository.update(userInfo);

@@ -7,4 +7,12 @@ public class UserInfoAlreadyExistsException extends RuntimeException {
     public UserInfoAlreadyExistsException() {
         super(DEFAULT_MESSAGE);
     }
+
+    public UserInfoAlreadyExistsException(Long userInfoId) {
+        super("User info with id " + userInfoId + " already exists");
+    }
+
+    public UserInfoAlreadyExistsException(String message) {
+        super(message);
+    }
 }
