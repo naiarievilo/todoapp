@@ -1,4 +1,7 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.users.info;
+
+import dev.naiarievilo.todoapp.users.User;
+import dev.naiarievilo.todoapp.users.UserCreationDTO;
 
 public interface UserInfoService {
 

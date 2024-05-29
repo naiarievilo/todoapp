@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.users.info;
 
 public class UserInfoNotFoundException extends RuntimeException {
 

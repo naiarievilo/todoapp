@@ -1,5 +1,6 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.users.info;
 
+import dev.naiarievilo.todoapp.users.User;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

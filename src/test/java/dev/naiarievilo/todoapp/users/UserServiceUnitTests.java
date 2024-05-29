@@ -2,8 +2,12 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
+import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
+import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
+import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
+import dev.naiarievilo.todoapp.users.info.UserInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
