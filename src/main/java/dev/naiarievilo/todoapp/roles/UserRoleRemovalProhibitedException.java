@@ -1,8 +1,8 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.roles;
 
 public class UserRoleRemovalProhibitedException extends RuntimeException {
 
-    private static final String DEFAULT_MESSAGE = "User role, the default role, removal not allowed";
+    private static final String DEFAULT_MESSAGE = "Removal of the default role `ROLE_USER` is prohibited";
 
     public UserRoleRemovalProhibitedException() {
         super(DEFAULT_MESSAGE);

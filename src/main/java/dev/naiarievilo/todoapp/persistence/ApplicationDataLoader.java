@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-public class DataLoader {
+public class ApplicationDataLoader {
 
     private final RoleService roleService;
 
-    public DataLoader(RoleService roleService) {
+    public ApplicationDataLoader(RoleService roleService) {
         this.roleService = roleService;
     }
 

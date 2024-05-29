@@ -29,10 +29,10 @@ import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NUL
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
-    private final UserInfoService userInfoService;
-    private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+    private final UserInfoService userInfoService;
+    private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository, UserInfoService userInfoService, RoleService roleService,
         PasswordEncoder passwordEncoder) {
@@ -81,10 +81,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
         Validate.notNull(userCreationDTO, NOT_NULL);
-
-        if (userExists(userCreationDTO.email())) {
+        if (userExists(userCreationDTO.email()))
             throw new UserAlreadyExistsException();
-        }
+
 
         Role defaultRole = roleService.getRole(ROLE_USER);
 
@@ -92,7 +91,6 @@ public class UserServiceImpl implements UserService {
         newUser.setEmail(userCreationDTO.email());
         newUser.setPassword(passwordEncoder.encode(userCreationDTO.password()));
         newUser.addRole(defaultRole);
-        newUser.setFailedLoginAttempts(0);
 
         newUser = userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);

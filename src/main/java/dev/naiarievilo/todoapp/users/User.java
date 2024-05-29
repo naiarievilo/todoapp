@@ -4,7 +4,6 @@ import dev.naiarievilo.todoapp.roles.Role;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalTime;
@@ -27,16 +26,14 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Generated
     @Column(name = "is_enabled", nullable = false)
-    private Boolean isEnabled;
+    private boolean isEnabled = true;
 
-    @Generated
     @Column(name = "is_locked", nullable = false)
-    private Boolean isLocked;
+    private boolean isLocked = false;
 
     @Column(name = "failed_login_attempts", nullable = false)
-    private Integer failedLoginAttempts;
+    private int failedLoginAttempts = 0;
 
     @Column(name = "failed_login_time")
     private LocalTime failedLoginTime;
@@ -75,7 +72,7 @@ public class User {
         return isLocked;
     }
 
-    public void setIsLocked(Boolean isLocked) {
+    public void setIsLocked(boolean isLocked) {
         this.isLocked = isLocked;
     }
 
@@ -83,7 +80,7 @@ public class User {
         return isEnabled;
     }
 
-    public void setIsEnabled(Boolean isEnabled) {
+    public void setIsEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
     }
 
@@ -91,7 +88,7 @@ public class User {
         return failedLoginAttempts;
     }
 
-    public void setFailedLoginAttempts(Integer failedLoginAttempts) {
+    public void setFailedLoginAttempts(int failedLoginAttempts) {
         this.failedLoginAttempts = failedLoginAttempts;
     }
 
