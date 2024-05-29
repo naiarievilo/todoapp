@@ -28,12 +28,13 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     @Transactional
     public void createUserInfo(UserCreationDTO userCreationDTO, User user) {
-        if (userInfoExists(user.getId())) {
-            throw new UserInfoAlreadyExistsException();
+        Long userId = user.getId();
+        if (userInfoExists(userId)) {
+            throw new UserInfoAlreadyExistsException(userId);
         }
 
         UserInfo userInfo = new UserInfo();
-        userInfo.setId(user.getId());
+        userInfo.setId(userId);
         userInfo.setUser(user);
         userInfo.setFirstName(userCreationDTO.firstName());
         userInfo.setLastName(userCreationDTO.lastName());
@@ -45,15 +46,16 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Transactional
     public void deleteUserInfo(Long userId) {
         if (!userInfoExists(userId))
-            throw new UserInfoNotFoundException();
+            throw new UserInfoNotFoundException(userId);
         userInfoRepository.deleteById(userId);
     }
 
     @Override
     @Transactional
     public UserInfo updateFirstName(UserInfo userInfo, String newFirstName) {
-        if (!userInfoExists(userInfo.getId()))
-            throw new UserInfoNotFoundException();
+        Long userInfoId = userInfo.getId();
+        if (!userInfoExists(userInfoId))
+            throw new UserInfoNotFoundException(userInfoId);
 
         userInfo.setFirstName(newFirstName);
         userInfoRepository.update(userInfo);
@@ -63,8 +65,9 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     @Transactional
     public UserInfo updateLastName(UserInfo userInfo, String newLastName) {
-        if (!userInfoExists(userInfo.getId()))
-            throw new UserInfoNotFoundException();
+        Long userInfoId = userInfo.getId();
+        if (!userInfoExists(userInfoId))
+            throw new UserInfoNotFoundException(userInfoId);
 
         userInfo.setLastName(newLastName);
         userInfoRepository.update(userInfo);
@@ -74,8 +77,9 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     @Transactional
     public UserInfo updateAvatarUrl(UserInfo userInfo, String newAvatarUrl) {
-        if (!userInfoExists(userInfo.getId())) {
-            throw new UserInfoNotFoundException();
+        Long userInfoId = userInfo.getId();
+        if (!userInfoExists(userInfoId)) {
+            throw new UserInfoNotFoundException(userInfoId);
         }
 
         userInfo.setAvatarUrl(newAvatarUrl);
