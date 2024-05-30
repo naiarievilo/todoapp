@@ -20,7 +20,7 @@ public class User {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @Column(name = "email", unique = true, nullable = false, length = 320)
     private String email;
 
