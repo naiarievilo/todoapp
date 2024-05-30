@@ -17,12 +17,12 @@ import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_EMP
 
 public class UserPrincipalImpl implements UserPrincipal {
 
-    private final String email;
     private final Long id;
-    private final boolean isEnabled;
-    private final boolean isLocked;
+    private final String email;
     private final String password;
     private final Set<GrantedAuthority> roles;
+    private final boolean isEnabled;
+    private final boolean isLocked;
 
     private UserPrincipalImpl(Long id, String email, String password, Set<GrantedAuthority> roles,
         boolean isLocked, boolean isEnabled) {

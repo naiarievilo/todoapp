@@ -9,7 +9,6 @@ import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.info.UserInfoService;
-import org.apache.commons.lang3.Validate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +21,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NULL;
 
 @Service
 @Transactional(readOnly = true)
@@ -128,12 +126,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role) {
-        User user = getUserByPrincipal(userPrincipal);
-        Role roleToAdd = roleService.getRole(role);
-        if (user.getRoles().contains(roleToAdd)) {
-            return UserPrincipalImpl.withUser(user);
+        if (userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
+            return userPrincipal;
         }
 
+        User user = getUserByPrincipal(userPrincipal);
+        Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
         userRepository.update(user);
         return UserPrincipalImpl.withUser(user);
@@ -142,12 +140,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role) {
-        User user = getUserByPrincipal(userPrincipal);
-        Role roleToRemove = roleService.getRole(role);
-        if (roleToRemove.getName().equals(ROLE_USER.name())) {
+        if (!userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
+            return userPrincipal;
+        }
+
+        if (role.name().equals(ROLE_USER.name())) {
             throw new UserRoleRemovalProhibitedException();
         }
 
+        User user = getUserByPrincipal(userPrincipal);
+        Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
         userRepository.update(user);
         return UserPrincipalImpl.withUser(user);
@@ -155,54 +157,54 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void lockUser(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-
-        User user = getUserByPrincipal(userPrincipal);
-        if (user.getIsLocked()) {
-            return;
+    public UserPrincipal lockUser(UserPrincipal userPrincipal) {
+        if (userPrincipal.isLocked()) {
+            return userPrincipal;
         }
 
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsLocked(true);
         userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public void unlockUser(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-
-        User user = getUserByPrincipal(userPrincipal);
-        if (!user.getIsLocked()) {
-            return;
+    public UserPrincipal unlockUser(UserPrincipal userPrincipal) {
+        if (!userPrincipal.isLocked()) {
+            return userPrincipal;
         }
 
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsLocked(false);
         userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public void disableUser(UserPrincipal userPrincipal) {
-        User user = getUserByPrincipal(userPrincipal);
-        if (!user.getIsEnabled()) {
-            return;
+    public UserPrincipal disableUser(UserPrincipal userPrincipal) {
+        if (!userPrincipal.isEnabled()) {
+            return userPrincipal;
         }
 
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsEnabled(false);
         userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public void enableUser(UserPrincipal userPrincipal) {
-        User user = getUserByPrincipal(userPrincipal);
-        if (user.getIsEnabled()) {
-            return;
+    public UserPrincipal enableUser(UserPrincipal userPrincipal) {
+        if (userPrincipal.isEnabled()) {
+            return userPrincipal;
         }
 
+        User user = getUserByPrincipal(userPrincipal);
         user.setIsEnabled(true);
         userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
@@ -210,13 +212,12 @@ public class UserServiceImpl implements UserService {
     public void addLoginAttempt(User user) {
         user.incrementFailedLoginAttempts();
         user.setFailedLoginTime(LocalTime.now());
-
         userRepository.update(user);
     }
 
     @Override
     @Transactional
-    public void resetLoginAttempt(User user) {
+    public void resetLoginAttempts(User user) {
         user.setFailedLoginAttempts(0);
         userRepository.update(user);
 

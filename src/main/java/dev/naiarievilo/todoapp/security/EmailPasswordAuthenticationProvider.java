@@ -43,7 +43,7 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
             throw new BadCredentialsException(BAD_CREDENTIALS);
         }
 
-        userService.resetLoginAttempt(user);
+        userService.resetLoginAttempts(user);
         return EmailPasswordAuthenticationToken.authenticated(user.getEmail(), user.getPassword(),
             UserServiceImpl.getRolesFromUser(user));
     }

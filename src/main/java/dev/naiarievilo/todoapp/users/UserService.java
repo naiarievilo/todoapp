@@ -25,15 +25,15 @@ public interface UserService {
 
     UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role);
 
-    void lockUser(UserPrincipal userPrincipal);
+    UserPrincipal lockUser(UserPrincipal userPrincipal);
 
-    void unlockUser(UserPrincipal userPrincipal);
+    UserPrincipal unlockUser(UserPrincipal userPrincipal);
 
-    void disableUser(UserPrincipal userPrincipal);
+    UserPrincipal disableUser(UserPrincipal userPrincipal);
 
-    void enableUser(UserPrincipal userPrincipal);
+    UserPrincipal enableUser(UserPrincipal userPrincipal);
 
     void addLoginAttempt(User user);
 
-    void resetLoginAttempt(User user);
+    void resetLoginAttempts(User user);
 }
