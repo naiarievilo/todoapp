@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.springframework.lang.Nullable;
 
 @Entity
 @Table(name = "users_info")
@@ -24,6 +25,7 @@ public class UserInfo {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Nullable
     @Column(name = "avatar_url")
     private String avatarUrl;
 
@@ -63,7 +65,7 @@ public class UserInfo {
         return avatarUrl;
     }
 
-    public void setAvatarUrl(String avatarUrl) {
+    public void setAvatarUrl(@Nullable String avatarUrl) {
         this.avatarUrl = avatarUrl;
     }
 

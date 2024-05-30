@@ -21,16 +21,15 @@ import java.util.Map;
 
 import static dev.naiarievilo.todoapp.security.JwtConstants.*;
 import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NULL;
 
 @Service
 public class JwtService {
 
-    private final Algorithm algorithm;
-    private final JWTVerifier verifier;
     private final Duration accessTokenExpiration;
-    private final Duration refreshTokenExpiration;
+    private final Algorithm algorithm;
     private final String issuer;
+    private final Duration refreshTokenExpiration;
+    private final JWTVerifier verifier;
 
     public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.expires-in}") Integer accessTokenExpiration,
         @Value("${jwt.refresh-expires-in}") Integer refreshTokenExpiration, @Value("${jwt.issuer}") String issuer) {
@@ -45,8 +44,6 @@ public class JwtService {
     }
 
     public Map<String, String> createAccessAndRefreshTokens(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-
         Long id = userPrincipal.getId();
         String email = userPrincipal.getEmail();
 

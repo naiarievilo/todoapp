@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NULL;
 
 public enum Roles {
     ROLE_ADMIN("Superuser role"),
@@ -24,8 +23,6 @@ public enum Roles {
     }
 
     public static Roles toRoles(GrantedAuthority role) {
-        Validate.notNull(role, NOT_NULL);
-
         String roleName = role.getAuthority();
         for (Roles roles : rolesSet) {
             if (roles.name().equals(roleName)) {
@@ -48,7 +45,6 @@ public enum Roles {
                 return true;
             }
         }
-
         return false;
     }
 

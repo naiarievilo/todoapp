@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalTime;
 import java.util.LinkedHashSet;
@@ -35,6 +36,7 @@ public class User {
     @Column(name = "failed_login_attempts", nullable = false)
     private int failedLoginAttempts = 0;
 
+    @Nullable
     @Column(name = "failed_login_time")
     private LocalTime failedLoginTime;
 
@@ -100,7 +102,7 @@ public class User {
         return failedLoginTime;
     }
 
-    public void setFailedLoginTime(LocalTime failedLoginTime) {
+    public void setFailedLoginTime(@Nullable LocalTime failedLoginTime) {
         this.failedLoginTime = failedLoginTime;
     }
 

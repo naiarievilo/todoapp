@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
 import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_NULL;
 
 @Service
@@ -43,8 +42,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public static Set<GrantedAuthority> getRolesFromUser(User user) {
-        Validate.notNull(user, NOT_NULL);
-
         return user.getRoles().stream()
             .map(Role::getName)
             .map(SimpleGrantedAuthority::new)
@@ -53,42 +50,38 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean userExists(String email) {
-        Validate.notBlank(email, NOT_BLANK);
         return userRepository.findByEmail(email).isPresent();
     }
 
     @Override
     public UserPrincipal loadUserByEmail(String email) {
-        Validate.notBlank(email, NOT_BLANK);
-
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
         return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     public User getUserByEmail(String email) {
-        Validate.notBlank(email, NOT_BLANK);
-        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
 
     @Override
     public User getUserByPrincipal(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-        return userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(UserNotFoundException::new);
+        String email = userPrincipal.getEmail();
+        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
 
     @Override
     @Transactional
     public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
-        Validate.notNull(userCreationDTO, NOT_NULL);
-        if (userExists(userCreationDTO.email()))
-            throw new UserAlreadyExistsException();
+        String email = userCreationDTO.email();
+        if (userExists(email))
+            throw new UserAlreadyExistsException(email);
 
 
         Role defaultRole = roleService.getRole(ROLE_USER);
 
         User newUser = new User();
-        newUser.setEmail(userCreationDTO.email());
+        newUser.setEmail(email);
         newUser.setPassword(passwordEncoder.encode(userCreationDTO.password()));
         newUser.addRole(defaultRole);
 
@@ -101,8 +94,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-
         User user = getUserByPrincipal(userPrincipal);
         user.removeAllRoles();
 
@@ -113,11 +104,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-        Validate.notBlank(newEmail, NOT_BLANK);
-
         if (userExists(newEmail)) {
-            throw new EmailAlreadyRegisteredException();
+            throw new EmailAlreadyRegisteredException(newEmail);
         }
 
         User user = this.getUserByPrincipal(userPrincipal);
@@ -130,9 +118,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserPrincipal updatePassword(UserPrincipal userPrincipal, String newPassword) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-        Validate.notBlank(newPassword, NOT_BLANK);
-
         User user = getUserByPrincipal(userPrincipal);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.update(user);
@@ -143,9 +128,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-        Validate.notNull(role, NOT_NULL);
-
         User user = getUserByPrincipal(userPrincipal);
         Role roleToAdd = roleService.getRole(role);
         if (user.getRoles().contains(roleToAdd)) {
@@ -154,16 +136,12 @@ public class UserServiceImpl implements UserService {
 
         user.addRole(roleToAdd);
         userRepository.update(user);
-
         return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
     public UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-        Validate.notNull(role, NOT_NULL);
-
         User user = getUserByPrincipal(userPrincipal);
         Role roleToRemove = roleService.getRole(role);
         if (roleToRemove.getName().equals(ROLE_USER.name())) {
@@ -172,7 +150,6 @@ public class UserServiceImpl implements UserService {
 
         user.removeRole(roleToRemove);
         userRepository.update(user);
-
         return UserPrincipalImpl.withUser(user);
     }
 
@@ -207,8 +184,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void disableUser(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-
         User user = getUserByPrincipal(userPrincipal);
         if (!user.getIsEnabled()) {
             return;
@@ -221,8 +196,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void enableUser(UserPrincipal userPrincipal) {
-        Validate.notNull(userPrincipal, NOT_NULL);
-
         User user = getUserByPrincipal(userPrincipal);
         if (user.getIsEnabled()) {
             return;
@@ -235,8 +208,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void addLoginAttempt(User user) {
-        Validate.notNull(user, NOT_NULL);
-
         user.incrementFailedLoginAttempts();
         user.setFailedLoginTime(LocalTime.now());
 
@@ -246,11 +217,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void resetLoginAttempt(User user) {
-        Validate.notNull(user, NOT_NULL);
         user.setFailedLoginAttempts(0);
         userRepository.update(user);
 
     }
-
 
 }

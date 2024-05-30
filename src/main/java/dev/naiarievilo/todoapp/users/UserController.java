@@ -26,8 +26,8 @@ public class UserController {
     private static final String REFRESH_TOKEN_HEADER = "Refresh-Token";
 
     private final AuthenticationManager authenticationManager;
-    private final UserService userService;
     private final JwtService jwtService;
+    private final UserService userService;
 
     public UserController(AuthenticationManager authenticationManager, UserService userService, JwtService jwtService) {
         this.authenticationManager = authenticationManager;

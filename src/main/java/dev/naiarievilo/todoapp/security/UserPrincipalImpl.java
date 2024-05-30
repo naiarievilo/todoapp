@@ -12,25 +12,22 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.*;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_EMPTY;
 
 public class UserPrincipalImpl implements UserPrincipal {
 
-    private final Long id;
     private final String email;
+    private final Long id;
+    private final boolean isEnabled;
+    private final boolean isLocked;
     private final String password;
     private final Set<GrantedAuthority> roles;
-    private final boolean isLocked;
-    private final boolean isEnabled;
 
     private UserPrincipalImpl(Long id, String email, String password, Set<GrantedAuthority> roles,
         boolean isLocked, boolean isEnabled) {
-
-        Validate.notNull(id, NOT_NULL);
         Validate.notBlank(email, NOT_BLANK);
         Validate.notBlank(password, NOT_BLANK);
-        Validate.notEmpty(roles, NOT_EMPTY);
-        Validate.noNullElements(roles, NO_NULL_ELEMENTS);
 
         this.id = id;
         this.email = email;
@@ -50,7 +47,6 @@ public class UserPrincipalImpl implements UserPrincipal {
     }
 
     public static UserPrincipal withUser(User user) {
-        Validate.notNull(user, NOT_NULL);
         return builder()
             .setId(user.getId())
             .setEmail(user.getEmail())
@@ -117,7 +113,6 @@ public class UserPrincipalImpl implements UserPrincipal {
         private boolean isEnabled;
 
         public UserPrincipalImplBuilder setId(Long id) {
-            Validate.notNull(id, NOT_NULL);
             this.id = id;
             return this;
         }
@@ -137,7 +132,6 @@ public class UserPrincipalImpl implements UserPrincipal {
 
         public UserPrincipalImplBuilder setRoles(Roles... roles) {
             Validate.notEmpty(roles, NOT_EMPTY);
-            Validate.noNullElements(roles, NO_NULL_ELEMENTS);
 
             for (Roles role : roles) {
                 this.roles.add(new SimpleGrantedAuthority(role.name()));
@@ -147,7 +141,6 @@ public class UserPrincipalImpl implements UserPrincipal {
 
         public UserPrincipalImplBuilder setRoles(Set<GrantedAuthority> roles) {
             Validate.notEmpty(roles, NOT_EMPTY);
-            Validate.noNullElements(roles, NO_NULL_ELEMENTS);
             this.roles.addAll(roles);
             return this;
         }
