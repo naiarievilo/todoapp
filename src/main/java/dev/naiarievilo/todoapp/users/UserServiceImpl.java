@@ -75,9 +75,7 @@ public class UserServiceImpl implements UserService {
         if (userExists(email))
             throw new UserAlreadyExistsException(email);
 
-
         Role defaultRole = roleService.getRole(ROLE_USER);
-
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setPassword(passwordEncoder.encode(userCreationDTO.password()));
@@ -85,7 +83,6 @@ public class UserServiceImpl implements UserService {
 
         newUser = userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);
-
         return UserPrincipalImpl.withUser(newUser);
     }
 
