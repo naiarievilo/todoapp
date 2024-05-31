@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users.info;
+package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
 import jakarta.persistence.*;
@@ -61,6 +61,7 @@ public class UserInfo {
         this.lastName = lastName;
     }
 
+    @Nullable
     public String getAvatarUrl() {
         return avatarUrl;
     }

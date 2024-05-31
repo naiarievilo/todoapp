@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users.info;
+package dev.naiarievilo.todoapp.users_info;
 
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
 

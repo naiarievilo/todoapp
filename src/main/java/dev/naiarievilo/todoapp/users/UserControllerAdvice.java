@@ -1,6 +1,5 @@
 package dev.naiarievilo.todoapp.users;
 
-import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;

@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users.exceptions;
+package dev.naiarievilo.todoapp.users;
 
 public class EmailAlreadyRegisteredException extends UserAlreadyExistsException {
 
