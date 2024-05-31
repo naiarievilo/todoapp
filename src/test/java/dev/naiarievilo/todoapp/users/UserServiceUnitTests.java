@@ -12,10 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -36,10 +33,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceUnitTests {
 
-    private static final String NEW_EMAIL = "jane@example.com";
-    private static final String NEW_PASSWORD = "newSecurePassword";
-
-    private final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -54,6 +47,8 @@ class UserServiceUnitTests {
     private UserPrincipal userPrincipal;
     private UserCreationDTO userCreationDTO;
     private Role userRole;
+    @Captor
+    private ArgumentCaptor<User> userCaptor;
 
     @BeforeEach
     void setUpUser() {

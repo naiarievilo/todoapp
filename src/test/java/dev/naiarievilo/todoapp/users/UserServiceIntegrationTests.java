@@ -30,9 +30,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional(readOnly = true)
 class UserServiceIntegrationTests {
 
-    private static final String NEW_EMAIL = "jane@example.com";
-    private static final String NEW_PASSWORD = "newSecurePassword";
-
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -131,6 +128,7 @@ class UserServiceIntegrationTests {
         principal = UserPrincipalImpl.withUser(user);
 
         User returnedUser = userService.getUserByPrincipal(principal);
+        assertNotNull(returnedUser);
         assertEquals(user, returnedUser);
     }
 
