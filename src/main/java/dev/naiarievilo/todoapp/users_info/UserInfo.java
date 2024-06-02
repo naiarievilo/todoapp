@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 import org.springframework.lang.Nullable;
 
-@Entity
+@Entity(name = "UserInfo")
 @Table(name = "users_info")
 public class UserInfo {
 

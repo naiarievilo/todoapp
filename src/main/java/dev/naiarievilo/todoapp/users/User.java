@@ -11,7 +11,7 @@ import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Entity
+@Entity(name = "User")
 @Table(name = "users")
 public class User {
 

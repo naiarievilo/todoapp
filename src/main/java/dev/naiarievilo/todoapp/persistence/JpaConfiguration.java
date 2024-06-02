@@ -5,7 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EnableJpaRepositories(value = "dev.naiarievilo.todoapp", repositoryBaseClass = BaseJpaRepositoryImpl.class)
+@EnableJpaRepositories(value = {"io.hypersistence.utils.spring.repository", "dev.naiarievilo.todoapp"},
+    repositoryBaseClass = BaseJpaRepositoryImpl.class)
 public class JpaConfiguration {
 
 }

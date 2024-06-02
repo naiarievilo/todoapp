@@ -9,7 +9,7 @@ import org.hibernate.annotations.NaturalId;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Entity
+@Entity(name = "Role")
 @Table(name = "roles")
 public class Role {
 
