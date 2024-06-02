@@ -49,19 +49,22 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void createRole(Roles role) {
-        String roleName = role.name();
-        String description = role.description();
+        if (roleExists(role)) {
+            throw new RoleAlreadyExistsException(role.name());
+        }
 
         Role newRole = new Role();
-        newRole.setName(roleName);
-        newRole.setDescription(description);
-
+        newRole.setName(role.name());
+        newRole.setDescription(role.description());
         roleRepository.persist(newRole);
     }
 
     @Override
     @Transactional
     public void deleteRole(Roles role) {
+        if (!roleExists(role)) {
+            throw new RoleNotFoundException(role.name());
+        }
         roleRepository.deleteByName(role.name());
     }
 

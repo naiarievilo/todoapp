@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.roles;
 
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -14,4 +15,8 @@ public interface RoleRepository extends BaseJpaRepository<Role, Long> {
     List<Role> findAll();
 
     void deleteByName(String role);
+
+    @Modifying
+    @Query(value = "DELETE FROM roles", nativeQuery = true)
+    void deleteAll();
 }
