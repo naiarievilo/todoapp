@@ -15,22 +15,26 @@ public class EmailPasswordAuthenticationToken extends AbstractAuthenticationToke
     public EmailPasswordAuthenticationToken(Object principal, Object credentials,
         Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
+        super.setAuthenticated(true);
+
         this.principal = principal;
         this.credentials = credentials;
-        super.setAuthenticated(true);
     }
 
     public EmailPasswordAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
+        super.setAuthenticated(true);
+
         this.principal = principal;
         this.credentials = null;
     }
 
     public EmailPasswordAuthenticationToken(Object principal, Object credentials) {
         super(null);
+        super.setAuthenticated(false);
+
         this.principal = principal;
         this.credentials = credentials;
-        super.setAuthenticated(false);
     }
 
     public static EmailPasswordAuthenticationToken unauthenticated(Object principal, Object credentials) {

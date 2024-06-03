@@ -36,8 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authorization.replaceFirst(BEARER_PREFIX, "");
-        EmailPasswordAuthenticationToken authentication =
-            (EmailPasswordAuthenticationToken) jwtService.getAuthentication(token);
+        var authentication = (EmailPasswordAuthenticationToken) jwtService.getAuthentication(token);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
