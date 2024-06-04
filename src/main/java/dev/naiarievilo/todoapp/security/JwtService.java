@@ -4,8 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +42,26 @@ public class JwtService {
         this.issuer = issuer;
     }
 
+    public String createAccessToken(String refreshToken) {
+        Validate.notBlank(refreshToken);
+
+        DecodedJWT decodedJwt = jwtVerifier.verify(refreshToken);
+        String id = decodedJwt.getSubject();
+        String email = decodedJwt.getClaim(EMAIL_CLAIM).asString();
+        String[] roles = decodedJwt.getClaim(ROLES_CLAIM).asArray(String.class);
+
+        Instant now = Instant.now();
+        JWTCreator.Builder jwtBuilder = JWT.create()
+            .withSubject(id)
+            .withIssuer(issuer)
+            .withIssuedAt(now)
+            .withClaim(EMAIL_CLAIM, email)
+            .withArrayClaim(ROLES_CLAIM, roles)
+            .withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
+
+        return jwtBuilder.sign(algorithm);
+    }
+
     public Map<String, String> createAccessAndRefreshTokens(UserPrincipal userPrincipal) {
         Map<String, String> tokens = new HashMap<>();
         tokens.put(ACCESS_TOKEN, createToken(userPrincipal, TokenTypes.ACCESS_TOKEN));
@@ -51,7 +69,7 @@ public class JwtService {
         return tokens;
     }
 
-    public String createToken(UserPrincipal userPrincipal, TokenTypes tokenType) {
+    private String createToken(UserPrincipal userPrincipal, TokenTypes tokenType) {
         String id = String.valueOf(userPrincipal.getId());
         String email = userPrincipal.getEmail();
         String[] roles = userPrincipal.getAuthorities().stream()
@@ -77,7 +95,7 @@ public class JwtService {
         return jwtBuilder.sign(algorithm);
     }
 
-    public Authentication getAuthentication(String token) throws JWTDecodeException {
+    public Authentication getAuthentication(String token) {
         Validate.notBlank(token, NOT_BLANK);
         DecodedJWT decodedJWT = verifyToken(token);
 
@@ -86,7 +104,7 @@ public class JwtService {
         return EmailPasswordAuthenticationToken.authenticated(email, roles);
     }
 
-    public DecodedJWT verifyToken(String token) throws JWTVerificationException {
+    public DecodedJWT verifyToken(String token) {
         Validate.notBlank(token, NOT_BLANK);
         return jwtVerifier.verify(token);
     }

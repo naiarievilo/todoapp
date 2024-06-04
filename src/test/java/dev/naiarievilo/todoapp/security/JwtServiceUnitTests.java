@@ -118,48 +118,32 @@ class JwtServiceUnitTests {
     }
 
     @Test
-    @DisplayName("createToken(): Creates token when user principal and token type are valid")
-    void createToken_PrincipalAndTokenTypeAreValid_CreatesToken() {
-        Long id = userPrincipal.getId();
-        String email = userPrincipal.getEmail();
-        List<String> roles = userPrincipal.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .toList();
+    @DisplayName("createAccessToken(): Creates access token when refresh token is valid")
+    void createAccessToken_RefreshTokenIsValid_CreatesAccessToken() {
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        String refreshToken = tokens.get(REFRESH_TOKEN);
 
-        String accessToken = jwtService.createToken(userPrincipal, TokenTypes.ACCESS_TOKEN);
-        String refreshToken = jwtService.createToken(userPrincipal, TokenTypes.REFRESH_TOKEN);
-
-        assertDoesNotThrow(() -> Validate.notBlank(accessToken));
-        assertDoesNotThrow(() -> Validate.notBlank(refreshToken));
-
-        assertDoesNotThrow(() -> jwtVerifier.verify(accessToken));
-        DecodedJWT decodedAccessToken = jwtVerifier.verify(accessToken);
-        assertDoesNotThrow(() -> jwtVerifier.verify(refreshToken));
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
+        Long id = Long.valueOf(decodedRefreshToken.getSubject());
+        String email = decodedRefreshToken.getClaim(EMAIL_CLAIM).asString();
+        List<String> roles = decodedRefreshToken.getClaim(ROLES_CLAIM).asList(String.class);
+
+        String newAccessToken = jwtService.createAccessToken(refreshToken);
+        assertDoesNotThrow(() -> Validate.notBlank(newAccessToken));
+
+        assertDoesNotThrow(() -> jwtVerifier.verify(newAccessToken));
+        DecodedJWT decodedAccessToken = jwtVerifier.verify(newAccessToken);
 
         assertEquals(id, Long.valueOf(decodedAccessToken.getSubject()));
-        assertEquals(id, Long.valueOf(decodedRefreshToken.getSubject()));
-
-        assertEquals(JWT_ISSUER, decodedAccessToken.getIssuer());
-        assertEquals(JWT_ISSUER, decodedRefreshToken.getIssuer());
-
         assertEquals(email, decodedAccessToken.getClaim(EMAIL_CLAIM).asString());
-        assertEquals(email, decodedRefreshToken.getClaim(EMAIL_CLAIM).asString());
+        assertEquals(decodedRefreshToken.getIssuer(), decodedAccessToken.getIssuer());
 
-        assertEquals(roles, decodedAccessToken.getClaim(ROLES_CLAIM).asList(String.class));
-        assertEquals(roles, decodedRefreshToken.getClaim(ROLES_CLAIM).asList(String.class));
+        List<String> accessTokenRoles = decodedAccessToken.getClaim(ROLES_CLAIM).asList(String.class);
+        assertTrue(roles.containsAll(accessTokenRoles) && accessTokenRoles.containsAll(roles));
 
         Instant accessTokenIssuedAt = decodedAccessToken.getIssuedAtAsInstant();
         Instant accessTokenExpiresAt = decodedAccessToken.getExpiresAtAsInstant();
-
-        Instant refreshTokenIssuedAt = decodedRefreshToken.getIssuedAtAsInstant();
-        Instant refreshTokenExpiresAt = decodedRefreshToken.getExpiresAtAsInstant();
-
-        assertEquals(accessTokenIssuedAt, refreshTokenIssuedAt);
-        assertTrue(accessTokenExpiresAt.isBefore(refreshTokenExpiresAt));
         assertEquals(Duration.ofMinutes(JWT_EXPIRATION), Duration.between(accessTokenIssuedAt, accessTokenExpiresAt));
-        assertEquals(Duration.ofMinutes(JWT_REFRESH_EXPIRATION),
-            Duration.between(refreshTokenIssuedAt, refreshTokenExpiresAt));
     }
 
     @Test
