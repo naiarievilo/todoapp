@@ -45,34 +45,36 @@ public class JwtService {
     }
 
     public Map<String, String> createAccessAndRefreshTokens(UserPrincipal userPrincipal) {
-        Long id = userPrincipal.getId();
-        String email = userPrincipal.getEmail();
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put(ACCESS_TOKEN, createToken(userPrincipal, TokenTypes.ACCESS_TOKEN));
+        tokens.put(REFRESH_TOKEN, createToken(userPrincipal, TokenTypes.REFRESH_TOKEN));
+        return tokens;
+    }
 
+    public String createToken(UserPrincipal userPrincipal, TokenTypes tokenType) {
+        String id = String.valueOf(userPrincipal.getId());
+        String email = userPrincipal.getEmail();
         String[] roles = userPrincipal.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .toArray(String[]::new);
 
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(String.valueOf(id))
+            .withSubject(id)
             .withIssuer(issuer)
             .withIssuedAt(now)
             .withClaim(EMAIL_CLAIM, email)
             .withArrayClaim(ROLES_CLAIM, roles);
 
-        String accessToken = jwtBuilder
-            .withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()))
-            .sign(algorithm);
+        if (tokenType.equals(TokenTypes.ACCESS_TOKEN)) {
+            jwtBuilder.withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
+        }
 
-        String refreshToken = jwtBuilder
-            .withExpiresAt(now.plusMillis(refreshTokenExpiration.toMillis()))
-            .sign(algorithm);
+        if (tokenType.equals(TokenTypes.REFRESH_TOKEN)) {
+            jwtBuilder.withExpiresAt(now.plusMillis(refreshTokenExpiration.toMillis()));
+        }
 
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put(ACCESS_TOKEN, accessToken);
-        tokens.put(REFRESH_TOKEN, refreshToken);
-
-        return tokens;
+        return jwtBuilder.sign(algorithm);
     }
 
     public Authentication getAuthentication(String token) throws JWTDecodeException {
