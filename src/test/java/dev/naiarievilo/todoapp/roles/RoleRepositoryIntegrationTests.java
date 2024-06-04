@@ -1,6 +1,5 @@
 package dev.naiarievilo.todoapp.roles;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,20 +20,6 @@ class RoleRepositoryIntegrationTests {
 
     @Autowired
     private RoleRepository roleRepository;
-
-    private Role userRole;
-    private Role adminRole;
-
-    @BeforeEach
-    void setUp() {
-        userRole = new Role();
-        userRole.setName(ROLE_USER.name());
-        userRole.setDescription(ROLE_USER.description());
-
-        adminRole = new Role();
-        adminRole.setName(ROLE_ADMIN.name());
-        adminRole.setDescription(ROLE_ADMIN.description());
-    }
 
     @Test
     @DisplayName("findByName(): Returns empty `Optional<Role>` when role is not found")

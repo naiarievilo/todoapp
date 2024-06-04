@@ -83,10 +83,11 @@ class RoleServiceIntegrationTests {
     @DisplayName("getRoles(): " + RETURNS_ROLES_WHEN_ROLES_EXIST)
     void getRoles_RolesExist_ReturnRoles() {
         Set<Roles> roles = new LinkedHashSet<>(List.of(ROLE_ADMIN, ROLE_USER));
+        Set<Role> entityRoles = new LinkedHashSet<>(List.of(adminRole, userRole));
 
         Set<Role> returnedRoles = roleService.getRoles(roles);
-        assertEquals(2, returnedRoles.size());
-        assertTrue(returnedRoles.contains(adminRole) && returnedRoles.contains(userRole));
+        assertEquals(roles.size(), returnedRoles.size());
+        assertTrue(returnedRoles.containsAll(entityRoles));
     }
 
     @Test
@@ -103,7 +104,7 @@ class RoleServiceIntegrationTests {
 
         Set<Role> returnedRoles = roleService.getAllRoles();
         assertEquals(roles.size(), returnedRoles.size());
-        assertTrue(roles.containsAll(returnedRoles) && returnedRoles.containsAll(roles));
+        assertTrue(roles.containsAll(returnedRoles));
     }
 
     @Test

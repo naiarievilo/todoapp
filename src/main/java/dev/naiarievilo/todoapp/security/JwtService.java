@@ -11,6 +11,7 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -29,14 +30,14 @@ public class JwtService {
     private final Algorithm algorithm;
     private final String issuer;
     private final Duration refreshTokenExpiration;
-    private final JWTVerifier verifier;
+    private final JWTVerifier jwtVerifier;
 
     public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.expires-in}") Integer accessTokenExpiration,
         @Value("${jwt.refresh-expires-in}") Integer refreshTokenExpiration, @Value("${jwt.issuer}") String issuer) {
         this.algorithm = Algorithm.HMAC256(secret);
         this.accessTokenExpiration = Duration.ofMinutes(accessTokenExpiration);
         this.refreshTokenExpiration = Duration.ofMinutes(refreshTokenExpiration);
-        this.verifier = JWT.require(this.algorithm)
+        this.jwtVerifier = JWT.require(this.algorithm)
             .withClaimPresence(EMAIL_CLAIM)
             .withClaimPresence(ROLES_CLAIM)
             .build();
@@ -79,13 +80,13 @@ public class JwtService {
         DecodedJWT decodedJWT = verifyToken(token);
 
         String email = decodedJWT.getClaim(EMAIL_CLAIM).asString();
-        List<GrantedAuthority> roles = decodedJWT.getClaim(ROLES_CLAIM).asList(GrantedAuthority.class);
+        List<SimpleGrantedAuthority> roles = decodedJWT.getClaim(ROLES_CLAIM).asList(SimpleGrantedAuthority.class);
         return EmailPasswordAuthenticationToken.authenticated(email, roles);
     }
 
     public DecodedJWT verifyToken(String token) throws JWTVerificationException {
         Validate.notBlank(token, NOT_BLANK);
-        return verifier.verify(token);
+        return jwtVerifier.verify(token);
     }
 
 }
