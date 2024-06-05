@@ -86,8 +86,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(UserPrincipal userPrincipal) {
-        User user = getUserByPrincipal(userPrincipal);
+    public void deleteUser(String email) {
+        User user = getUserByEmail(email);
         user.removeAllRoles();
 
         userInfoService.deleteUserInfo(user.getId());

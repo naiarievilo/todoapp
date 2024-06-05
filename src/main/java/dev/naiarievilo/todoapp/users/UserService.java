@@ -15,7 +15,7 @@ public interface UserService {
 
     UserPrincipal createUser(UserCreationDTO userCreationDTO);
 
-    void deleteUser(UserPrincipal userPrincipal);
+    void deleteUser(String email);
 
     UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail);
 

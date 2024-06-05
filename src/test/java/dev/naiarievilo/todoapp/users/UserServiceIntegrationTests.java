@@ -152,7 +152,8 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("deleteUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void deleteUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(principal));
+        String email = principal.getEmail();
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(email));
     }
 
     @Test
@@ -162,8 +163,9 @@ class UserServiceIntegrationTests {
         userRepository.persist(user);
         userInfoService.createUserInfo(userCreationDTO, user);
         principal = UserPrincipalImpl.withUser(user);
+        String email = principal.getEmail();
 
-        userService.deleteUser(principal);
+        userService.deleteUser(email);
         assertTrue(userRepository.findByEmail(principal.getEmail()).isEmpty());
         assertFalse(userInfoService.userInfoExists(principal.getId()));
     }

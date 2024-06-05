@@ -194,7 +194,7 @@ class UserServiceUnitTests {
         String email = userPrincipal.getEmail();
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userPrincipal));
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(email));
         verify(userRepository).findByEmail(email);
         verify(userRepository, never()).delete(any(User.class));
         verifyNoInteractions(userInfoService);
@@ -206,7 +206,7 @@ class UserServiceUnitTests {
         String email = userPrincipal.getEmail();
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
 
-        userService.deleteUser(userPrincipal);
+        userService.deleteUser(email);
 
         InOrder invokeInOrder = inOrder(userRepository, userInfoService);
         invokeInOrder.verify(userRepository).findByEmail(email);
