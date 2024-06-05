@@ -15,7 +15,7 @@ import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.IS_INST
 
 public class EmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
-    private static final String BAD_CREDENTIALS = "Incorrect email and/or password";
+    public static final String BAD_CREDENTIALS = "Incorrect email and/or password";
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
