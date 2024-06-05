@@ -1,19 +1,18 @@
 package dev.naiarievilo.todoapp.users;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.JwtService;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -23,7 +22,7 @@ import static dev.naiarievilo.todoapp.security.JwtConstants.*;
 @RequestMapping("/users")
 public class UserController {
 
-    private static final String REFRESH_TOKEN_HEADER = "Refresh-Token";
+    public static final String REFRESH_TOKEN_HEADER = "Refresh-Token";
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -55,7 +54,6 @@ public class UserController {
 
         UserPrincipal userPrincipal = userService.loadUserByEmail(userAuthenticationDTO.email());
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
-
         return ResponseEntity
             .status(HttpStatus.OK)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
@@ -63,23 +61,21 @@ public class UserController {
             .build();
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<Void> refreshUserAccessToken(HttpServletRequest request) {
-        DecodedJWT decodedJWT = jwtService.verifyToken(request.getHeader(HttpHeaders.AUTHORIZATION));
-
-        UserPrincipal userPrincipal =
-            userService.loadUserByEmail(decodedJWT.getClaim(EMAIL_CLAIM).asString());
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
-
+    @PutMapping("/re-authenticate")
+    public ResponseEntity<Void> getNewAccessToken(@NotBlank @RequestHeader("Authorization") String refreshToken) {
+        String newAccessToken = jwtService.createAccessToken(refreshToken);
         return ResponseEntity
             .status(HttpStatus.OK)
-            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
-            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN))
+            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + newAccessToken)
             .build();
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteUser() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication userAuthenticated = context.getAuthentication();
+
+        userService.deleteUser(String.valueOf(userAuthenticated.getPrincipal()));
         return ResponseEntity.noContent().build();
     }
 }
