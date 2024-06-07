@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UserPrincipal userPrincipal;
         try {
             verifiedJWT = jwtService.verifyToken(token);
-            userPrincipal = userService.loadUserByEmail(verifiedJWT.getSubject());
+            userPrincipal = userService.loadUserPrincipalByEmail(verifiedJWT.getSubject());
 
         } catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         var authentication = EmailPasswordAuthenticationToken.authenticated(
-            userPrincipal.getEmail(), userPrincipal.getAuthorities());
+            userPrincipal.getEmail(), userPrincipal.getPassword(), userPrincipal.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();

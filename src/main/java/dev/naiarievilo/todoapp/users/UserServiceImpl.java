@@ -39,6 +39,21 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
+    @Transactional
+    public Authentication updateEmail(String oldEmail, String newEmail) {
+        if (userExists(newEmail)) {
+            throw new EmailAlreadyRegisteredException(newEmail);
+        }
+
+        User user = this.getUserByEmail(oldEmail);
+        user.setEmail(newEmail);
+        userRepository.update(user);
+
+        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
+            user.getPassword(), UserServiceImpl.getRolesFromUser(user));
+    }
+
     public static Set<GrantedAuthority> getRolesFromUser(User user) {
         return user.getRoles().stream()
             .map(Role::getName)
@@ -52,7 +67,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserPrincipal loadUserByEmail(String email) {
+    public UserPrincipal loadUserPrincipalByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
         return UserPrincipalImpl.withUser(user);
     }
@@ -99,60 +114,46 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
-    @Override
-    @Transactional
-    public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
-        if (userExists(newEmail)) {
-            throw new EmailAlreadyRegisteredException(newEmail);
-        }
-
-        User user = this.getUserByPrincipal(userPrincipal);
-        user.setEmail(newEmail);
-        userRepository.update(user);
-
-        return UserPrincipalImpl.withUser(user);
-    }
 
     @Override
     @Transactional
-    public UserPrincipal updatePassword(UserPrincipal userPrincipal, String newPassword) {
-        User user = getUserByPrincipal(userPrincipal);
+    public Authentication updatePassword(String email, String newPassword) {
+        User user = this.getUserByEmail(email);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.update(user);
 
-        return UserPrincipalImpl.withUser(user);
+        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
+            user.getPassword(), UserServiceImpl.getRolesFromUser(user));
     }
 
     @Override
     @Transactional
-    public UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role) {
-        if (userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
-            return userPrincipal;
+    public Authentication addRoleToUser(Authentication authentication, Roles role) {
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
+            return authentication;
         }
 
-        User user = getUserByPrincipal(userPrincipal);
+        User user = this.getUserByEmail((String) authentication.getPrincipal());
         Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(), UserServiceImpl.getRolesFromUser(user));
     }
 
     @Override
     @Transactional
-    public UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role) {
-        if (!userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
-            return userPrincipal;
-        }
-
+    public Authentication removeRoleFromUser(Authentication authentication, Roles role) {
         if (role.name().equals(ROLE_USER.name())) {
             throw new UserRoleRemovalProhibitedException();
+        } else if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
+            return authentication;
         }
 
-        User user = getUserByPrincipal(userPrincipal);
+        User user = getUserByEmail((String) authentication.getPrincipal());
         Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(), UserServiceImpl.getRolesFromUser(user));
     }
 
     @Override

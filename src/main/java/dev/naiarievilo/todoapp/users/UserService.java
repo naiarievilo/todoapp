@@ -8,7 +8,7 @@ public interface UserService {
 
     boolean userExists(String email);
 
-    UserPrincipal loadUserByEmail(String email);
+    UserPrincipal loadUserPrincipalByEmail(String email);
 
     User getUserByEmail(String email);
 
@@ -18,13 +18,13 @@ public interface UserService {
 
     void deleteUser(String email);
 
-    UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail);
+    Authentication updateEmail(String oldEmail, String newEmail);
 
-    UserPrincipal updatePassword(UserPrincipal userPrincipal, String newPassword);
+    Authentication updatePassword(String email, String newPassword);
 
-    UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role);
+    Authentication addRoleToUser(Authentication authentication, Roles role);
 
-    UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role);
+    Authentication removeRoleFromUser(Authentication authentication, Roles role);
 
     UserPrincipal lockUser(UserPrincipal userPrincipal);
 
