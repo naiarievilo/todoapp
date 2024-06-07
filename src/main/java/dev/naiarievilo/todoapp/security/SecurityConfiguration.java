@@ -3,6 +3,8 @@ package dev.naiarievilo.todoapp.security;
 import dev.naiarievilo.todoapp.users.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -31,11 +33,13 @@ public class SecurityConfiguration {
         http
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/users/*").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/users/create", "/users/authenticate", "/users/re-authenticate").permitAll()
+                .requestMatchers("/users/delete").hasRole("USER")
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -50,7 +54,6 @@ public class SecurityConfiguration {
 
         UrlBasedCorsConfigurationSource corsSource = new UrlBasedCorsConfigurationSource();
         corsSource.registerCorsConfiguration("/**", corsConfiguration);
-
         return corsSource;
     }
 
@@ -60,6 +63,13 @@ public class SecurityConfiguration {
             new EmailPasswordAuthenticationProvider(userService, passwordEncoder);
 
         return new ProviderManager(authenticationProvider);
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+            .role("ADMIN").implies("USER")
+            .build();
     }
 
     @Bean

@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 public class UsersTestConstants {
 
+    public static final String DEFAULT_CONTENT_TYPE = "application/json";
     public static final String EMAIL = "johnDoe@example.com";
     public static final String FIRST_NAME = "John";
     public static final Long ID = 1L;
@@ -13,6 +14,4 @@ public class UsersTestConstants {
     public static final String NEW_PASSWORD = "newSecurePassword";
     public static final String PASSWORD = "securePassword";
     public static final String CONFIRM_PASSWORD = PASSWORD;
-
-
 }
