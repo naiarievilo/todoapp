@@ -2,7 +2,6 @@ package dev.naiarievilo.todoapp.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.naiarievilo.todoapp.security.JwtService;
-import dev.naiarievilo.todoapp.security.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -166,8 +166,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("getNewAccessToken(): " + STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_REFRESH_TOKEN_VALID)
     void getNewAccessToken_RefreshTokenIsValid_ReturnsNewAccessToken() throws Exception {
-        UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        Authentication authentication = userService.createUser(userCreationDTO);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
 
         mockMvc
             .perform(put("/users/re-authenticate")
@@ -183,8 +183,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("deleteUser(): " + STATUS_204_DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() throws Exception {
-        UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        Authentication authentication = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(authentication).get(ACCESS_TOKEN);
 
         mockMvc
             .perform(delete("/users/delete")
@@ -197,8 +197,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("deleteUser(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_NOT_FOUND)
     void deleteUser_UserDoesNotExist_ReturnsErrorMessage() throws Exception {
-        UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        Authentication authentication = userService.createUser(userCreationDTO);
+        String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(authentication).get(ACCESS_TOKEN);
 
         mockMvc
             .perform(delete("/users/delete")

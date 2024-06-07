@@ -3,6 +3,7 @@ package dev.naiarievilo.todoapp.users;
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
+import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
 import dev.naiarievilo.todoapp.users_info.UserInfoService;
@@ -12,11 +13,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,6 +44,8 @@ class UserServiceUnitTests {
     private PasswordEncoder passwordEncoder;
     @InjectMocks
     private UserServiceImpl userService;
+    private Authentication authentication;
+
     private User user;
     private UserPrincipal userPrincipal;
     private UserCreationDTO userCreationDTO;
@@ -66,6 +71,9 @@ class UserServiceUnitTests {
 
         userPrincipal = UserPrincipalImpl.withUser(user);
         userCreationDTO = new UserCreationDTO(EMAIL, PASSWORD, CONFIRM_PASSWORD, FIRST_NAME, LAST_NAME);
+
+        authentication =
+            EmailPasswordAuthenticationToken.authenticated(userPrincipal.getEmail(), userPrincipal.getAuthorities());
     }
 
     @Test
@@ -174,10 +182,10 @@ class UserServiceUnitTests {
         given(passwordEncoder.encode(password)).willReturn("encodedPassword");
         given(userRepository.persist(user)).willReturn(user);
 
-        UserPrincipal returnedPrincipal = userService.createUser(userCreationDTO);
-        Set<GrantedAuthority> authorities = returnedPrincipal.getAuthorities();
+        Authentication returnedAuthentication = userService.createUser(userCreationDTO);
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-        assertEquals(userPrincipal, returnedPrincipal);
+        assertEquals(authentication, returnedAuthentication);
         assertTrue(authorities.size() == 1 && authorities.contains(userRoleAuthority));
 
         InOrder invokeInOrder = inOrder(roleService, passwordEncoder, userRepository, userInfoService);

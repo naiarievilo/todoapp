@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
+import org.springframework.security.core.Authentication;
 
 public interface UserService {
 
@@ -13,7 +14,7 @@ public interface UserService {
 
     User getUserByPrincipal(UserPrincipal userPrincipal);
 
-    UserPrincipal createUser(UserCreationDTO userCreationDTO);
+    Authentication createUser(UserCreationDTO userCreationDTO);
 
     void deleteUser(String email);
 

@@ -8,17 +8,15 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static dev.naiarievilo.todoapp.security.JwtConstants.*;
+import static dev.naiarievilo.todoapp.security.JwtConstants.ACCESS_TOKEN;
+import static dev.naiarievilo.todoapp.security.JwtConstants.REFRESH_TOKEN;
 import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
 
 @Service
@@ -35,73 +33,48 @@ public class JwtService {
         this.algorithm = Algorithm.HMAC256(secret);
         this.accessTokenExpiration = Duration.ofMinutes(accessTokenExpiration);
         this.refreshTokenExpiration = Duration.ofMinutes(refreshTokenExpiration);
-        this.jwtVerifier = JWT.require(this.algorithm)
-            .withClaimPresence(EMAIL_CLAIM)
-            .withClaimPresence(ROLES_CLAIM)
-            .build();
+        this.jwtVerifier = JWT.require(this.algorithm).build();
         this.issuer = issuer;
     }
 
     public String createAccessToken(String refreshToken) {
         Validate.notBlank(refreshToken);
-
         DecodedJWT decodedJwt = jwtVerifier.verify(refreshToken);
-        String id = decodedJwt.getSubject();
-        String email = decodedJwt.getClaim(EMAIL_CLAIM).asString();
-        String[] roles = decodedJwt.getClaim(ROLES_CLAIM).asArray(String.class);
 
+        String email = decodedJwt.getSubject();
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(id)
+            .withSubject(email)
             .withIssuer(issuer)
             .withIssuedAt(now)
-            .withClaim(EMAIL_CLAIM, email)
-            .withArrayClaim(ROLES_CLAIM, roles)
             .withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
 
         return jwtBuilder.sign(algorithm);
     }
 
-    public Map<String, String> createAccessAndRefreshTokens(UserPrincipal userPrincipal) {
+    public Map<String, String> createAccessAndRefreshTokens(Authentication authentication) {
         Map<String, String> tokens = new HashMap<>();
-        tokens.put(ACCESS_TOKEN, createToken(userPrincipal, TokenTypes.ACCESS_TOKEN));
-        tokens.put(REFRESH_TOKEN, createToken(userPrincipal, TokenTypes.REFRESH_TOKEN));
+        tokens.put(ACCESS_TOKEN, createToken(authentication, TokenTypes.ACCESS_TOKEN));
+        tokens.put(REFRESH_TOKEN, createToken(authentication, TokenTypes.REFRESH_TOKEN));
         return tokens;
     }
 
-    private String createToken(UserPrincipal userPrincipal, TokenTypes tokenType) {
-        String id = String.valueOf(userPrincipal.getId());
-        String email = userPrincipal.getEmail();
-        String[] roles = userPrincipal.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .toArray(String[]::new);
+    private String createToken(Authentication authentication, TokenTypes tokenType) {
+        String email = (String) authentication.getPrincipal();
 
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(id)
+            .withSubject(email)
             .withIssuer(issuer)
-            .withIssuedAt(now)
-            .withClaim(EMAIL_CLAIM, email)
-            .withArrayClaim(ROLES_CLAIM, roles);
+            .withIssuedAt(now);
 
         if (tokenType.equals(TokenTypes.ACCESS_TOKEN)) {
             jwtBuilder.withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
-        }
-
-        if (tokenType.equals(TokenTypes.REFRESH_TOKEN)) {
+        } else if (tokenType.equals(TokenTypes.REFRESH_TOKEN)) {
             jwtBuilder.withExpiresAt(now.plusMillis(refreshTokenExpiration.toMillis()));
         }
 
         return jwtBuilder.sign(algorithm);
-    }
-
-    public Authentication getAuthentication(String token) {
-        Validate.notBlank(token, NOT_BLANK);
-        DecodedJWT decodedJWT = verifyToken(token);
-
-        String email = decodedJWT.getClaim(EMAIL_CLAIM).asString();
-        List<SimpleGrantedAuthority> roles = decodedJWT.getClaim(ROLES_CLAIM).asList(SimpleGrantedAuthority.class);
-        return EmailPasswordAuthenticationToken.authenticated(email, roles);
     }
 
     public DecodedJWT verifyToken(String token) {

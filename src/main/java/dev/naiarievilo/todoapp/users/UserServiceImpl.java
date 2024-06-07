@@ -4,9 +4,11 @@ import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
+import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
 import dev.naiarievilo.todoapp.users_info.UserInfoService;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -68,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
+    public Authentication createUser(UserCreationDTO userCreationDTO) {
         String email = userCreationDTO.email();
         if (userExists(email))
             throw new UserAlreadyExistsException(email);
@@ -81,7 +83,10 @@ public class UserServiceImpl implements UserService {
 
         newUser = userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);
-        return UserPrincipalImpl.withUser(newUser);
+
+        return EmailPasswordAuthenticationToken.authenticated(
+            newUser.getEmail(), Set.of(new SimpleGrantedAuthority(defaultRole.getName()))
+        );
     }
 
     @Override

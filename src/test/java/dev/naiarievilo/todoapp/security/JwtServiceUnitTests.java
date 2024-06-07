@@ -1,26 +1,25 @@
 package dev.naiarievilo.todoapp.security;
 
 import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.users.User;
+import dev.naiarievilo.todoapp.users.UserServiceImpl;
 import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
-import static dev.naiarievilo.todoapp.security.JwtConstants.*;
+import static dev.naiarievilo.todoapp.security.JwtConstants.ACCESS_TOKEN;
+import static dev.naiarievilo.todoapp.security.JwtConstants.REFRESH_TOKEN;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +33,8 @@ class JwtServiceUnitTests {
     private final JwtService jwtService;
     private final JWTVerifier jwtVerifier;
 
-    private UserPrincipal userPrincipal;
+    private Authentication authentication;
+    private User user;
 
     JwtServiceUnitTests() {
         jwtService = new JwtService(JWT_SECRET, JWT_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ISSUER);
@@ -55,7 +55,7 @@ class JwtServiceUnitTests {
         Role userRole = new Role();
         userRole.setName(ROLE_USER.name());
 
-        User user = new User();
+        user = new User();
         user.setId(ID);
         user.setEmail(EMAIL);
         user.setPassword(PASSWORD);
@@ -63,19 +63,15 @@ class JwtServiceUnitTests {
         user.setIsEnabled(true);
         user.setIsLocked(false);
 
-        userPrincipal = UserPrincipalImpl.withUser(user);
+        authentication = EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
+            UserServiceImpl.getRolesFromUser(user));
     }
 
     @Test
     @DisplayName("createAccessAndRefreshTokens(): Returns access and refresh tokens when user principal is not null")
     void createAccessAndRefreshTokens_UserPrincipalIsNotNull_CreatesAccessAndRefreshTokens() {
-        Long id = userPrincipal.getId();
-        String email = userPrincipal.getEmail();
-        List<String> roles = userPrincipal.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .toList();
-
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        String email = user.getEmail();
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
 
         assertNotNull(tokens);
         assertEquals(2, tokens.size());
@@ -92,17 +88,11 @@ class JwtServiceUnitTests {
         assertDoesNotThrow(() -> jwtVerifier.verify(refreshToken));
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
 
-        assertEquals(id, Long.valueOf(decodedAccessToken.getSubject()));
-        assertEquals(id, Long.valueOf(decodedRefreshToken.getSubject()));
-
         assertEquals(JWT_ISSUER, decodedAccessToken.getIssuer());
         assertEquals(JWT_ISSUER, decodedRefreshToken.getIssuer());
 
-        assertEquals(email, decodedAccessToken.getClaim(EMAIL_CLAIM).asString());
-        assertEquals(email, decodedRefreshToken.getClaim(EMAIL_CLAIM).asString());
-
-        assertEquals(roles, decodedAccessToken.getClaim(ROLES_CLAIM).asList(String.class));
-        assertEquals(roles, decodedRefreshToken.getClaim(ROLES_CLAIM).asList(String.class));
+        assertEquals(email, decodedAccessToken.getSubject());
+        assertEquals(email, decodedRefreshToken.getSubject());
 
         Instant accessTokenIssuedAt = decodedAccessToken.getIssuedAtAsInstant();
         Instant accessTokenExpiresAt = decodedAccessToken.getExpiresAtAsInstant();
@@ -120,13 +110,11 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("createAccessToken(): Creates access token when refresh token is valid")
     void createAccessToken_RefreshTokenIsValid_CreatesAccessToken() {
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
         String refreshToken = tokens.get(REFRESH_TOKEN);
 
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
-        Long id = Long.valueOf(decodedRefreshToken.getSubject());
-        String email = decodedRefreshToken.getClaim(EMAIL_CLAIM).asString();
-        List<String> roles = decodedRefreshToken.getClaim(ROLES_CLAIM).asList(String.class);
+        String email = decodedRefreshToken.getSubject();
 
         String newAccessToken = jwtService.createAccessToken(refreshToken);
         assertDoesNotThrow(() -> Validate.notBlank(newAccessToken));
@@ -134,36 +122,12 @@ class JwtServiceUnitTests {
         assertDoesNotThrow(() -> jwtVerifier.verify(newAccessToken));
         DecodedJWT decodedAccessToken = jwtVerifier.verify(newAccessToken);
 
-        assertEquals(id, Long.valueOf(decodedAccessToken.getSubject()));
-        assertEquals(email, decodedAccessToken.getClaim(EMAIL_CLAIM).asString());
+        assertEquals(email, decodedAccessToken.getSubject());
         assertEquals(decodedRefreshToken.getIssuer(), decodedAccessToken.getIssuer());
-
-        List<String> accessTokenRoles = decodedAccessToken.getClaim(ROLES_CLAIM).asList(String.class);
-        assertTrue(roles.containsAll(accessTokenRoles) && accessTokenRoles.containsAll(roles));
 
         Instant accessTokenIssuedAt = decodedAccessToken.getIssuedAtAsInstant();
         Instant accessTokenExpiresAt = decodedAccessToken.getExpiresAtAsInstant();
         assertEquals(Duration.ofMinutes(JWT_EXPIRATION), Duration.between(accessTokenIssuedAt, accessTokenExpiresAt));
-    }
-
-    @Test
-    @DisplayName("getAuthentication(): Throws `JWTDecodeException` when token is not valid")
-    void getAuthentication_TokenIsNotValid_ThrowsJWTDecodeException() {
-        assertThrows(JWTDecodeException.class, () -> jwtService.getAuthentication("notValidToken"));
-    }
-
-    @Test
-    @DisplayName("getAuthentication(): Returns `Authentication` when token is valid")
-    void getAuthentication_TokenIsValid_ReturnsAuthentication() {
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
-        String accessToken = tokens.get(ACCESS_TOKEN);
-
-        Authentication authentication = jwtService.getAuthentication(accessToken);
-        assertInstanceOf(EmailPasswordAuthenticationToken.class, authentication);
-        assertEquals(userPrincipal.getEmail(), authentication.getPrincipal());
-        assertEquals(userPrincipal.getAuthorities().size(), authentication.getAuthorities().size());
-        assertTrue(userPrincipal.getAuthorities().containsAll(authentication.getAuthorities()));
-        assertTrue(authentication.isAuthenticated());
     }
 
     @Test
@@ -175,7 +139,7 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("verifyToken(): Returns `DecodedJWT` when token is valid")
     void verifyToken_TokenIsValid_ReturnsDecodedJWT() {
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
         String accessToken = tokens.get(ACCESS_TOKEN);
 
         DecodedJWT decodedJwt = jwtService.verifyToken(accessToken);

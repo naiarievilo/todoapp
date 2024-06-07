@@ -1,5 +1,9 @@
 package dev.naiarievilo.todoapp.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import dev.naiarievilo.todoapp.users.UserNotFoundException;
+import dev.naiarievilo.todoapp.users.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import static dev.naiarievilo.todoapp.security.JwtConstants.BEARER_PREFIX;
 
@@ -20,9 +25,11 @@ import static dev.naiarievilo.todoapp.security.JwtConstants.BEARER_PREFIX;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UserService userService;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserService userService) {
         this.jwtService = jwtService;
+        this.userService = userService;
     }
 
     @Override
@@ -36,7 +43,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authorization.replaceFirst(BEARER_PREFIX, "");
-        var authentication = (EmailPasswordAuthenticationToken) jwtService.getAuthentication(token);
+
+        DecodedJWT verifiedJWT;
+        UserPrincipal userPrincipal;
+        try {
+            verifiedJWT = jwtService.verifyToken(token);
+            userPrincipal = userService.loadUserByEmail(verifiedJWT.getSubject());
+
+        } catch (JWTVerificationException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            PrintWriter bodyWriter = response.getWriter();
+            bodyWriter.println("JWT is not valid");
+            return;
+        } catch (UserNotFoundException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            PrintWriter bodyWriter = response.getWriter();
+            bodyWriter.println(e.getMessage());
+            return;
+        }
+
+        var authentication = EmailPasswordAuthenticationToken.authenticated(
+            userPrincipal.getEmail(), userPrincipal.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();

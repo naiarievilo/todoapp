@@ -34,7 +34,7 @@ public class SecurityConfiguration {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/users/create", "/users/authenticate", "/users/re-authenticate").permitAll()
-                .requestMatchers("/users/delete").hasRole("USER")
+                .anyRequest().authenticated()
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)

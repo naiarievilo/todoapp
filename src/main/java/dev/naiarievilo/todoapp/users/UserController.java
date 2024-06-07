@@ -2,7 +2,6 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.JwtService;
-import dev.naiarievilo.todoapp.security.UserPrincipal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
@@ -36,8 +35,8 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<Void> createUser(@Valid @RequestBody UserCreationDTO userCreationDTO) {
-        UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        Authentication authentication = userService.createUser(userCreationDTO);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -48,12 +47,10 @@ public class UserController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<Void> authenticateUser(@Valid @RequestBody UserAuthenticationDTO userAuthenticationDTO) {
-        authenticationManager.authenticate(EmailPasswordAuthenticationToken.unauthenticated(
-            userAuthenticationDTO.email(), userAuthenticationDTO.password()
-        ));
+        var authenticatedToken = authenticationManager.authenticate(EmailPasswordAuthenticationToken.unauthenticated(
+            userAuthenticationDTO.email(), userAuthenticationDTO.password()));
 
-        UserPrincipal userPrincipal = userService.loadUserByEmail(userAuthenticationDTO.email());
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authenticatedToken);
         return ResponseEntity
             .status(HttpStatus.OK)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
