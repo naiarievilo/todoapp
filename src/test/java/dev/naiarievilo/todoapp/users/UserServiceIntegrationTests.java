@@ -6,6 +6,10 @@ import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
+import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
+import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
 import dev.naiarievilo.todoapp.users_info.UserInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +53,7 @@ class UserServiceIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        userCreationDTO = new UserCreationDTO(EMAIL, PASSWORD, CONFIRM_PASSWORD, FIRST_NAME, LAST_NAME);
+        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
         Role userRole = roleService.getRole(ROLE_USER);
         adminRole = roleService.getRole(ROLE_ADMIN);

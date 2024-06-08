@@ -1,8 +1,8 @@
 package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.UserRepository;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class UserInfoIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        userCreationDTO = new UserCreationDTO(EMAIL, PASSWORD, CONFIRM_PASSWORD, FIRST_NAME, LAST_NAME);
+        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
         if (user == null) {
             user = loadUser(userCreationDTO);
         }

@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.users.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

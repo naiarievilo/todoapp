@@ -2,8 +2,8 @@ package dev.naiarievilo.todoapp.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import dev.naiarievilo.todoapp.users.UserNotFoundException;
 import dev.naiarievilo.todoapp.users.UserService;
+import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import static dev.naiarievilo.todoapp.security.JwtConstants.BEARER_PREFIX;
+import static dev.naiarievilo.todoapp.security.JwtConstants.JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -51,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             PrintWriter bodyWriter = response.getWriter();
-            bodyWriter.println("JWT is not valid");
+            bodyWriter.println(JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED);
             return;
         } catch (UserNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);

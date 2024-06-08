@@ -1,9 +1,9 @@
 package dev.naiarievilo.todoapp.security;
 
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users.UserNotFoundException;
 import dev.naiarievilo.todoapp.users.UserService;
 import dev.naiarievilo.todoapp.users.UserServiceImpl;
+import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
 import org.apache.commons.lang3.Validate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;

@@ -6,6 +6,10 @@ import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
+import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
+import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
 import dev.naiarievilo.todoapp.users_info.UserInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +60,7 @@ class UserServiceUnitTests {
 
     @BeforeEach
     void setUpUser() {
-        userCreationDTO = new UserCreationDTO(EMAIL, PASSWORD, CONFIRM_PASSWORD, FIRST_NAME, LAST_NAME);
+        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
         userRole = new Role();
         userRole.setId(1L);
@@ -70,8 +74,8 @@ class UserServiceUnitTests {
 
         user = new User();
         user.setId(1L);
-        user.setEmail(EMAIL);
-        user.setPassword(PASSWORD);
+        user.setEmail(EMAIL_1);
+        user.setPassword(PASSWORD_1);
         user.addRole(userRole);
 
         userPrincipal = UserPrincipalImpl.withUser(user);
@@ -83,51 +87,51 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("userExists(): " + RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST)
     void userExists_UserDoesNotExist_ReturnsFalse() {
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
-        assertFalse(userService.userExists(EMAIL));
-        verify(userRepository).findByEmail(EMAIL);
+        given(userRepository.findByEmail(EMAIL_1)).willReturn(Optional.empty());
+        assertFalse(userService.userExists(EMAIL_1));
+        verify(userRepository).findByEmail(EMAIL_1);
     }
 
     @Test
     @DisplayName("userExists(): " + RETURNS_TRUE_WHEN_USER_EXISTS)
     void userExists_UserExists_ReturnsTrue() {
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
-        assertTrue(userService.userExists(EMAIL));
-        verify(userRepository).findByEmail(EMAIL);
+        given(userRepository.findByEmail(EMAIL_1)).willReturn(Optional.of(user));
+        assertTrue(userService.userExists(EMAIL_1));
+        verify(userRepository).findByEmail(EMAIL_1);
     }
 
     @Test
     @DisplayName("loadUserPrincipalByEmail(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void loadUserPrincipalByEmail_UserDoesNotExist_ThrowsUserPrincipalNotFoundException() {
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> userService.loadUserPrincipalByEmail(EMAIL));
-        verify(userRepository).findByEmail(EMAIL);
+        given(userRepository.findByEmail(EMAIL_1)).willReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> userService.loadUserPrincipalByEmail(EMAIL_1));
+        verify(userRepository).findByEmail(EMAIL_1);
     }
 
     @Test
     @DisplayName("loadUserPrincipalByEmail(): " + RETURNS_PRINCIPAL_WHEN_USER_EXISTS)
     void loadUserPrincipalByEmail_UserExists_ReturnsUserPrincipalPrincipal() {
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
-        UserPrincipal returnedPrincipal = userService.loadUserPrincipalByEmail(EMAIL);
+        given(userRepository.findByEmail(EMAIL_1)).willReturn(Optional.of(user));
+        UserPrincipal returnedPrincipal = userService.loadUserPrincipalByEmail(EMAIL_1);
         assertEquals(userPrincipal, returnedPrincipal);
-        verify(userRepository).findByEmail(EMAIL);
+        verify(userRepository).findByEmail(EMAIL_1);
     }
 
     @Test
     @DisplayName("getUserByEmail(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void getUserByEmail_UserDoesNotExist_ThrowsUserNotFoundException() {
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> userService.getUserByEmail(EMAIL));
-        verify(userRepository).findByEmail(EMAIL);
+        given(userRepository.findByEmail(EMAIL_1)).willReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> userService.getUserByEmail(EMAIL_1));
+        verify(userRepository).findByEmail(EMAIL_1);
     }
 
     @Test
     @DisplayName("getUserByEmail(): " + RETURNS_USER_WHEN_USER_EXISTS)
     void getUserByEmail_UserExists_ReturnsUser() {
-        given(userRepository.findByEmail(EMAIL)).willReturn(Optional.of(user));
-        User returnedUser = userService.getUserByEmail(EMAIL);
+        given(userRepository.findByEmail(EMAIL_1)).willReturn(Optional.of(user));
+        User returnedUser = userService.getUserByEmail(EMAIL_1);
         assertEquals(user, returnedUser);
-        verify(userRepository).findByEmail(EMAIL);
+        verify(userRepository).findByEmail(EMAIL_1);
     }
 
     @Test

@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import org.springframework.security.core.Authentication;
 
 public interface UserService {

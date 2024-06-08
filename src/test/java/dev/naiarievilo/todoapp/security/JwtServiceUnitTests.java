@@ -56,9 +56,9 @@ class JwtServiceUnitTests {
         userRole.setName(ROLE_USER.name());
 
         user = new User();
-        user.setId(ID);
-        user.setEmail(EMAIL);
-        user.setPassword(PASSWORD);
+        user.setId(ID_1);
+        user.setEmail(EMAIL_1);
+        user.setPassword(PASSWORD_1);
         user.addRole(userRole);
         user.setIsEnabled(true);
         user.setIsLocked(false);

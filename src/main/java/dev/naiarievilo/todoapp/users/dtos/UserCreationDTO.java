@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.users.dtos;
 
 import dev.naiarievilo.todoapp.validation.PasswordMatching;
 import jakarta.validation.constraints.Email;

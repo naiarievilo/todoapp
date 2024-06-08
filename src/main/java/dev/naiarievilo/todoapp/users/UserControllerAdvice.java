@@ -1,6 +1,10 @@
 package dev.naiarievilo.todoapp.users;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
+import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
+import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +16,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
+import static dev.naiarievilo.todoapp.security.JwtConstants.JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED;
+
 @RestControllerAdvice(basePackageClasses = UserController.class)
 public class UserControllerAdvice {
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
@@ -40,9 +51,14 @@ public class UserControllerAdvice {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public ResponseEntity<String> handleEmailAlreadyRegistered(EmailAlreadyRegisteredException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
     @ExceptionHandler(JWTVerificationException.class)
     public ResponseEntity<String> handleJWTVerificationException(JWTVerificationException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED);
     }
 
 }

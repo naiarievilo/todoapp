@@ -2,15 +2,18 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.JwtService;
+import dev.naiarievilo.todoapp.users.dtos.UpdateCredentialsDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserAuthenticationDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users.dtos.groups.UpdateEmail;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -72,5 +75,20 @@ public class UserController {
         var token = (EmailPasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         userService.deleteUser(token.getPrincipal());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/update-email")
+    public ResponseEntity<Void> updateEmail(@RequestBody @Validated(UpdateEmail.class) UpdateCredentialsDTO
+        updateCredentialsDTO) {
+        var token = (EmailPasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        var newToken = (EmailPasswordAuthenticationToken) userService.updateEmail(token.getPrincipal(),
+            updateCredentialsDTO.email());
+
+        Map<String, String> newTokens = jwtService.createAccessAndRefreshTokens(newToken);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + newTokens.get(ACCESS_TOKEN))
+            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + newTokens.get(REFRESH_TOKEN))
+            .build();
     }
 }

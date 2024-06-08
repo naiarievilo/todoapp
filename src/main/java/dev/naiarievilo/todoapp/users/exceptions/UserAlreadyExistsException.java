@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users;
+package dev.naiarievilo.todoapp.users.exceptions;
 
 public class UserAlreadyExistsException extends RuntimeException {
 
