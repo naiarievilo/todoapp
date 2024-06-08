@@ -3,12 +3,13 @@ package dev.naiarievilo.todoapp.users;
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.JwtService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +58,7 @@ public class UserController {
             .build();
     }
 
-    @PutMapping("/re-authenticate")
+    @PutMapping("/reauthenticate")
     public ResponseEntity<Void> getNewAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String refreshToken) {
         String newAccessToken = jwtService.createAccessToken(refreshToken);
         return ResponseEntity
@@ -68,10 +69,8 @@ public class UserController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteUser() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication userAuthenticated = context.getAuthentication();
-
-        userService.deleteUser(String.valueOf(userAuthenticated.getPrincipal()));
+        var token = (EmailPasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        userService.deleteUser(token.getPrincipal());
         return ResponseEntity.noContent().build();
     }
 }

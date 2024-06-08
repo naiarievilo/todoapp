@@ -9,55 +9,52 @@ import java.util.Collection;
 
 public class EmailPasswordAuthenticationToken extends AbstractAuthenticationToken {
 
-    private transient Object principal;
-    private transient Object credentials;
+    private final transient String principal;
+    private final transient String credentials;
 
-    public EmailPasswordAuthenticationToken(Object principal, Object credentials,
+    public EmailPasswordAuthenticationToken(String principal, String credentials,
         Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         super.setAuthenticated(true);
-
         this.principal = principal;
         this.credentials = credentials;
     }
 
-    public EmailPasswordAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
+    public EmailPasswordAuthenticationToken(String principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         super.setAuthenticated(true);
-
         this.principal = principal;
         this.credentials = null;
     }
 
-    public EmailPasswordAuthenticationToken(Object principal, Object credentials) {
+    public EmailPasswordAuthenticationToken(String principal, String credentials) {
         super(null);
         super.setAuthenticated(false);
-
         this.principal = principal;
         this.credentials = credentials;
     }
 
-    public static EmailPasswordAuthenticationToken unauthenticated(Object principal, Object credentials) {
+    public static EmailPasswordAuthenticationToken unauthenticated(String principal, String credentials) {
         return new EmailPasswordAuthenticationToken(principal, credentials);
     }
 
-    public static EmailPasswordAuthenticationToken authenticated(Object principal, Collection<?
+    public static EmailPasswordAuthenticationToken authenticated(String principal, Collection<?
         extends GrantedAuthority> authorities) {
         return new EmailPasswordAuthenticationToken(principal, authorities);
     }
 
-    public static EmailPasswordAuthenticationToken authenticated(Object principal, Object credentials,
+    public static EmailPasswordAuthenticationToken authenticated(String principal, String credentials,
         Collection<? extends GrantedAuthority> authorities) {
         return new EmailPasswordAuthenticationToken(principal, credentials, authorities);
     }
 
     @Override
-    public Object getCredentials() {
+    public String getCredentials() {
         return credentials;
     }
 
     @Override
-    public Object getPrincipal() {
+    public String getPrincipal() {
         return principal;
     }
 

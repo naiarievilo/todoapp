@@ -154,7 +154,7 @@ class UserControllerIntegrationTests {
     @DisplayName("getNewAccessToken(): " + STATUS_401_RETURNS_ERROR_MESSAGE_WHEN_REFRESH_TOKEN_NOT_VALID)
     void getNewAccessToken_RefreshTokenIsNotValid_ReturnsErrorMessage() throws Exception {
         mockMvc
-            .perform(put("/users/re-authenticate")
+            .perform(put("/users/reauthenticate")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + "invalidToken")
             )
             .andExpect(status().isUnauthorized());
@@ -169,7 +169,7 @@ class UserControllerIntegrationTests {
             BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(authentication).get(REFRESH_TOKEN);
 
         mockMvc
-            .perform(put("/users/re-authenticate")
+            .perform(put("/users/reauthenticate")
                 .header(HttpHeaders.AUTHORIZATION, refreshToken)
             )
             .andExpectAll(

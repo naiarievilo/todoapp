@@ -45,7 +45,7 @@ class UserServiceIntegrationTests {
     private UserPrincipal userPrincipal;
     private Role adminRole;
     private UserCreationDTO userCreationDTO;
-    private Authentication authentication;
+    private EmailPasswordAuthenticationToken authentication;
 
     @BeforeEach
     void setUp() {
@@ -185,14 +185,14 @@ class UserServiceIntegrationTests {
         otherUser.setPassword(NEW_PASSWORD);
         userRepository.persist(otherUser);
 
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
         assertThrows(EmailAlreadyRegisteredException.class, () -> userService.updateEmail(email, NEW_EMAIL));
     }
 
     @Test
     @DisplayName("updateEmail():" + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void updateEmail_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
         assertThrows(UserNotFoundException.class, () -> userService.updateEmail(email, NEW_EMAIL));
     }
 
@@ -201,7 +201,7 @@ class UserServiceIntegrationTests {
     @DisplayName("updateEmail(): " + UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED)
     void updateEmail_NewEmailNotRegistered_UpdatesEmail() {
         userRepository.persist(user);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
 
         Authentication returnedAuthentication = userService.updateEmail(email, NEW_EMAIL);
         assertEquals(NEW_EMAIL, returnedAuthentication.getPrincipal());
@@ -211,7 +211,7 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("updatePassword(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void updatePassword_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
         assertThrows(UserNotFoundException.class, () -> userService.updatePassword(email, NEW_PASSWORD));
     }
 
@@ -220,10 +220,10 @@ class UserServiceIntegrationTests {
     @DisplayName("updatePassword(): " + UPDATES_PASSWORD_WHEN_USER_EXISTS)
     void updatePassword_UserExists_UpdatesPassword() {
         userRepository.persist(user);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
 
-        Authentication returnedAuthentication = userService.updatePassword(email, NEW_PASSWORD);
-        assertTrue(passwordEncoder.matches(NEW_PASSWORD, (String) returnedAuthentication.getCredentials()));
+        var returnedAuthentication = (EmailPasswordAuthenticationToken) userService.updatePassword(email, NEW_PASSWORD);
+        assertTrue(passwordEncoder.matches(NEW_PASSWORD, returnedAuthentication.getCredentials()));
 
         User updatedUser = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(UserNotFoundException::new);
         assertTrue(passwordEncoder.matches(NEW_PASSWORD, updatedUser.getPassword()));
@@ -287,7 +287,7 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("lockUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void lockUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
         assertThrows(UserNotFoundException.class, () -> userService.lockUser(email));
     }
 
@@ -296,7 +296,7 @@ class UserServiceIntegrationTests {
     @DisplayName("lockUser(): " + LOCKS_USER_WHEN_USER_NOT_LOCKED)
     void lockUser_UserNotLocked_LocksUser() {
         userRepository.persist(user);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
 
         userService.lockUser(email);
         User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
@@ -307,7 +307,7 @@ class UserServiceIntegrationTests {
     @DisplayName("unlockUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void unlockUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.setIsLocked(true);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
         assertThrows(UserNotFoundException.class, () -> userService.unlockUser(email));
     }
 
@@ -317,7 +317,7 @@ class UserServiceIntegrationTests {
     void unlockUser_UserLocked_UnlocksUser() {
         user.setIsLocked(true);
         userRepository.persist(user);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
 
         userService.unlockUser(email);
         User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
@@ -327,7 +327,7 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("disableUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void disableUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
         assertThrows(UserNotFoundException.class, () -> userService.disableUser(email));
     }
 
@@ -336,7 +336,7 @@ class UserServiceIntegrationTests {
     @DisplayName("disabledUser(): " + DISABLES_USER_WHEN_USER_ENABLED)
     void disabledUser_UserEnabled_DisabledUser() {
         userRepository.persist(user);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
 
         userService.disableUser(email);
         User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
@@ -347,7 +347,7 @@ class UserServiceIntegrationTests {
     @DisplayName("enableUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void enableUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.setIsEnabled(false);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
         assertThrows(UserNotFoundException.class, () -> userService.enableUser(email));
     }
 
@@ -357,7 +357,7 @@ class UserServiceIntegrationTests {
     void enableUser_UserDisabled_EnablesUser() {
         user.setIsEnabled(false);
         userRepository.persist(user);
-        String email = (String) authentication.getPrincipal();
+        String email = authentication.getPrincipal();
 
         userService.enableUser(email);
         User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
