@@ -18,7 +18,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -72,13 +73,11 @@ class UserServiceUnitTests {
         user.setEmail(EMAIL);
         user.setPassword(PASSWORD);
         user.addRole(userRole);
-        user.setIsEnabled(true);
-        user.setIsLocked(false);
-        user.setFailedLoginAttempts(0);
+
         userPrincipal = UserPrincipalImpl.withUser(user);
 
-        authentication =
-            EmailPasswordAuthenticationToken.authenticated(userPrincipal.getEmail(), userPrincipal.getAuthorities());
+        authentication = EmailPasswordAuthenticationToken.authenticated(userPrincipal.getEmail(),
+            userPrincipal.getPassword(), userPrincipal.getAuthorities());
     }
 
     @Test
@@ -170,25 +169,33 @@ class UserServiceUnitTests {
     void createUser_UserDoestNotExist_CreatesUser() {
         String email = userCreationDTO.email();
         String password = userCreationDTO.password();
+        String encodedPassword = "encodedPassword";
         GrantedAuthority userRoleAuthority = new SimpleGrantedAuthority(ROLE_USER.name());
 
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
         given(roleService.getRole(ROLE_USER)).willReturn(userRole);
-        given(passwordEncoder.encode(password)).willReturn("encodedPassword");
+        given(passwordEncoder.encode(password)).willReturn(encodedPassword);
         given(userRepository.persist(user)).willReturn(user);
 
         Authentication returnedAuthentication = userService.createUser(userCreationDTO);
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
         assertEquals(authentication, returnedAuthentication);
+        assertEquals(encodedPassword, returnedAuthentication.getCredentials());
+
+        Collection<? extends GrantedAuthority> authorities = returnedAuthentication.getAuthorities();
         assertTrue(authorities.size() == 1 && authorities.contains(userRoleAuthority));
 
         InOrder invokeInOrder = inOrder(roleService, passwordEncoder, userRepository, userInfoService);
         invokeInOrder.verify(userRepository).findByEmail(email);
         invokeInOrder.verify(roleService).getRole(ROLE_USER);
         invokeInOrder.verify(passwordEncoder).encode(password);
-        invokeInOrder.verify(userRepository).persist(user);
+        invokeInOrder.verify(userRepository).persist(userCaptor.capture());
         invokeInOrder.verify(userInfoService).createUserInfo(userCreationDTO, user);
+
+        User userCaptured = userCaptor.getValue();
+        assertEquals(encodedPassword, userCaptured.getPassword());
+        assertTrue(userCaptured.getIsEnabled());
+        assertFalse(userCaptured.getIsLocked());
+        assertEquals(LocalDate.now(), userCaptured.getCreatedOn());
     }
 
     @Test
@@ -527,7 +534,7 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("addLoginAttempt(): " + ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void addLoginAttempt_UserIsNotNull_AddsLoginAttempt() {
-        LocalTime oldLocalTime = LocalTime.now();
+        LocalDateTime oldLocalTime = LocalDateTime.now();
         user.setFailedLoginTime(oldLocalTime);
         int oldLoginAttempts = user.getFailedLoginAttempts();
 

@@ -7,7 +7,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NaturalId;
 import org.springframework.lang.Nullable;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -33,12 +34,15 @@ public class User {
     @Column(name = "is_locked", nullable = false)
     private boolean isLocked = false;
 
+    @Column(name = "created_on", nullable = false, updatable = false)
+    private LocalDate createdOn = LocalDate.now();
+
     @Column(name = "failed_login_attempts", nullable = false)
     private int failedLoginAttempts = 0;
 
     @Nullable
     @Column(name = "failed_login_time")
-    private LocalTime failedLoginTime;
+    private LocalDateTime failedLoginTime;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
@@ -86,6 +90,14 @@ public class User {
         this.isEnabled = isEnabled;
     }
 
+    public LocalDate getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(LocalDate createdOn) {
+        this.createdOn = createdOn;
+    }
+
     public int getFailedLoginAttempts() {
         return failedLoginAttempts;
     }
@@ -98,11 +110,11 @@ public class User {
         failedLoginAttempts++;
     }
 
-    public LocalTime getFailedLoginTime() {
+    public LocalDateTime getFailedLoginTime() {
         return failedLoginTime;
     }
 
-    public void setFailedLoginTime(@Nullable LocalTime failedLoginTime) {
+    public void setFailedLoginTime(@Nullable LocalDateTime failedLoginTime) {
         this.failedLoginTime = failedLoginTime;
     }
 

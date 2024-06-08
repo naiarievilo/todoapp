@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -96,11 +96,11 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(passwordEncoder.encode(userCreationDTO.password()));
         newUser.addRole(defaultRole);
 
-        newUser = userRepository.persist(newUser);
+        userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);
 
-        return EmailPasswordAuthenticationToken.authenticated(
-            newUser.getEmail(), Set.of(new SimpleGrantedAuthority(defaultRole.getName()))
+        return EmailPasswordAuthenticationToken.authenticated(newUser.getEmail(), newUser.getPassword(),
+            Set.of(new SimpleGrantedAuthority(defaultRole.getName()))
         );
     }
 
@@ -208,7 +208,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void addLoginAttempt(User user) {
         user.incrementFailedLoginAttempts();
-        user.setFailedLoginTime(LocalTime.now());
+        user.setFailedLoginTime(LocalDateTime.now());
         userRepository.update(user);
     }
 

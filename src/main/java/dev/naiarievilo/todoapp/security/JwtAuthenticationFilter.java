@@ -43,13 +43,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authorization.replaceFirst(BEARER_PREFIX, "");
-
         DecodedJWT verifiedJWT;
         UserPrincipal userPrincipal;
         try {
             verifiedJWT = jwtService.verifyToken(token);
             userPrincipal = userService.loadUserPrincipalByEmail(verifiedJWT.getSubject());
-
         } catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             PrintWriter bodyWriter = response.getWriter();

@@ -44,13 +44,18 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: "created_on"
+                  type: "DATE"
+                  constraints:
+                    nullable: false
+              - column:
                   name: "failed_login_attempts"
                   type: "INT"
                   constraints:
                     nullable: false
               - column:
                   name: "failed_login_time"
-                  type: "TIME"
+                  type: "TIMESTAMP"
 
   - changeSet:
       id: "create-users_info-table"

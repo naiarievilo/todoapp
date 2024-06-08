@@ -18,7 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
@@ -58,6 +58,7 @@ class UserServiceIntegrationTests {
         user.setEmail(userCreationDTO.email());
         user.setPassword(userCreationDTO.password());
         user.addRole(userRole);
+
         userPrincipal = UserPrincipalImpl.withUser(user);
 
         authentication =
@@ -367,10 +368,10 @@ class UserServiceIntegrationTests {
     @Transactional
     @DisplayName("addLoginAttempt(): " + ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void addLoginAttempt_UserNotNull_AddsLoginAttempt() {
-        user.setFailedLoginTime(LocalTime.now());
+        user.setFailedLoginTime(LocalDateTime.now());
         userRepository.persist(user);
         int oldLoginAttempts = user.getFailedLoginAttempts();
-        LocalTime oldFailedLoginTime = user.getFailedLoginTime();
+        LocalDateTime oldFailedLoginTime = user.getFailedLoginTime();
 
         userService.addLoginAttempt(user);
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
