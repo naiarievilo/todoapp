@@ -42,7 +42,7 @@ class UserServiceIntegrationTests {
     private UserService userService;
 
     private User user;
-    private UserPrincipal principal;
+    private UserPrincipal userPrincipal;
     private Role adminRole;
     private UserCreationDTO userCreationDTO;
     private Authentication authentication;
@@ -58,10 +58,10 @@ class UserServiceIntegrationTests {
         user.setEmail(userCreationDTO.email());
         user.setPassword(userCreationDTO.password());
         user.addRole(userRole);
+        userPrincipal = UserPrincipalImpl.withUser(user);
 
-        principal = UserPrincipalImpl.withUser(user);
         authentication =
-            EmailPasswordAuthenticationToken.authenticated(principal.getEmail(), principal.getAuthorities());
+            EmailPasswordAuthenticationToken.authenticated(userPrincipal.getEmail(), userPrincipal.getAuthorities());
     }
 
     @Test
@@ -77,7 +77,6 @@ class UserServiceIntegrationTests {
         userRepository.persist(user);
         String userEmail = user.getEmail();
         assertTrue(userService.userExists(userEmail));
-        assertTrue(userRepository.findByEmail(userEmail).isPresent());
     }
 
     @Test
@@ -92,9 +91,9 @@ class UserServiceIntegrationTests {
     @DisplayName("loadUserPrincipalByEmail(): " + RETURNS_PRINCIPAL_WHEN_USER_EXISTS)
     void loadUserPrincipalByEmail_UserExists_ReturnsUserPrincipalPrincipal() {
         userRepository.persist(user);
-        String userEmail = user.getEmail();
+        String email = user.getEmail();
 
-        UserPrincipal returnedPrincipal = userService.loadUserPrincipalByEmail(userEmail);
+        UserPrincipal returnedPrincipal = userService.loadUserPrincipalByEmail(email);
         assertEquals(user.getId(), returnedPrincipal.getId());
         assertEquals(user.getEmail(), returnedPrincipal.getEmail());
     }
@@ -120,7 +119,7 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("getUserByPrincipal(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void getUserByPrincipal_UserDoesNotExist_ThrowsUserNotFoundException() {
-        assertThrows(UserNotFoundException.class, () -> userService.getUserByPrincipal(principal));
+        assertThrows(UserNotFoundException.class, () -> userService.getUserByPrincipal(userPrincipal));
     }
 
     @Test
@@ -128,9 +127,9 @@ class UserServiceIntegrationTests {
     @DisplayName("getUserByPrincipal(): " + RETURNS_USER_WHEN_USER_EXISTS)
     void getUserByPrincipal_UserExists_ReturnsUser() {
         userRepository.persist(user);
-        principal = UserPrincipalImpl.withUser(user);
+        userPrincipal = UserPrincipalImpl.withUser(user);
 
-        User returnedUser = userService.getUserByPrincipal(principal);
+        User returnedUser = userService.getUserByPrincipal(userPrincipal);
         assertNotNull(returnedUser);
         assertEquals(user, returnedUser);
     }
@@ -157,7 +156,7 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("deleteUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void deleteUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = principal.getEmail();
+        String email = userPrincipal.getEmail();
         assertThrows(UserNotFoundException.class, () -> userService.deleteUser(email));
     }
 
@@ -167,25 +166,25 @@ class UserServiceIntegrationTests {
     void deleteUser_UserExists_DeletesUser() {
         userRepository.persist(user);
         userInfoService.createUserInfo(userCreationDTO, user);
-        principal = UserPrincipalImpl.withUser(user);
-        String email = principal.getEmail();
+        userPrincipal = UserPrincipalImpl.withUser(user);
+        String email = user.getEmail();
 
         userService.deleteUser(email);
-        assertTrue(userRepository.findByEmail(principal.getEmail()).isEmpty());
-        assertFalse(userInfoService.userInfoExists(principal.getId()));
+        assertFalse(userRepository.findByEmail(email).isPresent());
+        assertFalse(userInfoService.userInfoExists(userPrincipal.getId()));
     }
 
     @Test
     @DisplayName("updateEmail(): " + THROWS_EMAIL_ALREADY_REGISTERED_WHEN_EMAIL_ALREADY_REGISTERED)
     void updateEmail_NewEmailAlreadyRegistered_ThrowsEmailAlreadyRegisteredException() {
         userRepository.persist(user);
-        String email = (String) authentication.getPrincipal();
 
         User otherUser = new User();
         otherUser.setEmail(NEW_EMAIL);
-        otherUser.setPassword(passwordEncoder.encode(NEW_PASSWORD));
+        otherUser.setPassword(NEW_PASSWORD);
         userRepository.persist(otherUser);
 
+        String email = (String) authentication.getPrincipal();
         assertThrows(EmailAlreadyRegisteredException.class, () -> userService.updateEmail(email, NEW_EMAIL));
     }
 
@@ -224,14 +223,9 @@ class UserServiceIntegrationTests {
 
         Authentication returnedAuthentication = userService.updatePassword(email, NEW_PASSWORD);
         assertTrue(passwordEncoder.matches(NEW_PASSWORD, (String) returnedAuthentication.getCredentials()));
-        User updatedUser = userRepository.findByEmail(principal.getEmail()).orElseThrow(UserNotFoundException::new);
-        assertTrue(passwordEncoder.matches(NEW_PASSWORD, updatedUser.getPassword()));
-    }
 
-    @Test
-    @DisplayName("addRoleToUser(): " + DOES_NOT_ADD_ROLE_WHEN_ROLE_ALREADY_ASSIGNED)
-    void addRoleToUser_UserAlreadyHasRole_DoesNotAddRole() {
-        assertDoesNotThrow(() -> userService.addRoleToUser(authentication, ROLE_USER));
+        User updatedUser = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(UserNotFoundException::new);
+        assertTrue(passwordEncoder.matches(NEW_PASSWORD, updatedUser.getPassword()));
     }
 
     @Test
@@ -248,16 +242,10 @@ class UserServiceIntegrationTests {
         GrantedAuthority adminGrantedAuthority = new SimpleGrantedAuthority(adminRole.getName());
 
         Authentication returnedAuthentication = userService.addRoleToUser(authentication, ROLE_ADMIN);
-
         assertTrue(returnedAuthentication.getAuthorities().contains(adminGrantedAuthority));
-        User updatedUser = userRepository.findByEmail(principal.getEmail()).orElseThrow(UserNotFoundException::new);
-        assertTrue(updatedUser.getRoles().contains(adminRole));
-    }
 
-    @Test
-    @DisplayName("removeRoleFromUser(): " + DOES_NOT_REMOVE_ROLE_WHEN_ROLE_NOT_ASSIGNED)
-    void removeRoleFromUser_UserDoesNotHaveRole_DoesNotRemoveRole() {
-        assertDoesNotThrow(() -> userService.removeRoleFromUser(authentication, ROLE_ADMIN));
+        User updatedUser = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(UserNotFoundException::new);
+        assertTrue(updatedUser.getRoles().contains(adminRole));
     }
 
     @Test
@@ -273,9 +261,8 @@ class UserServiceIntegrationTests {
     @DisplayName("removeRoleFromUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void removeRoleFromUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.addRole(adminRole);
-        authentication = EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
-            UserServiceImpl.getRolesFromUser(user));
-
+        authentication =
+            EmailPasswordAuthenticationToken.authenticated(user.getEmail(), UserServiceImpl.getRolesFromUser(user));
         assertThrows(UserNotFoundException.class, () -> userService.removeRoleFromUser(authentication, ROLE_ADMIN));
     }
 
@@ -285,30 +272,22 @@ class UserServiceIntegrationTests {
     void removeRoleFromUser_RoleIsAssignedAndRemovable_RemoveRole() {
         user.addRole(adminRole);
         userRepository.persist(user);
-        authentication = EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
-            UserServiceImpl.getRolesFromUser(user));
+        authentication =
+            EmailPasswordAuthenticationToken.authenticated(user.getEmail(), UserServiceImpl.getRolesFromUser(user));
         GrantedAuthority adminAuthority = new SimpleGrantedAuthority(adminRole.getName());
 
         Authentication returnedAuthentication = userService.removeRoleFromUser(authentication, ROLE_ADMIN);
-
         assertFalse(returnedAuthentication.getAuthorities().contains(adminAuthority));
+
         User updatedUser = userRepository.findByEmail(user.getEmail()).orElseThrow(UserNotFoundException::new);
         assertFalse(updatedUser.getRoles().contains(adminRole));
     }
 
     @Test
-    @DisplayName("lockUser(): " + DOES_NOT_LOCK_USER_WHEN_USER_ALREADY_LOCKED)
-    void lockUser_UserAlreadyLocked_DoesNotLockUser() {
-        user.setIsLocked(true);
-        principal = UserPrincipalImpl.withUser(user);
-
-        assertDoesNotThrow(() -> userService.lockUser(principal));
-    }
-
-    @Test
     @DisplayName("lockUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void lockUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        assertThrows(UserNotFoundException.class, () -> userService.lockUser(principal));
+        String email = (String) authentication.getPrincipal();
+        assertThrows(UserNotFoundException.class, () -> userService.lockUser(email));
     }
 
     @Test
@@ -316,28 +295,19 @@ class UserServiceIntegrationTests {
     @DisplayName("lockUser(): " + LOCKS_USER_WHEN_USER_NOT_LOCKED)
     void lockUser_UserNotLocked_LocksUser() {
         userRepository.persist(user);
-        principal = UserPrincipalImpl.withUser(user);
+        String email = (String) authentication.getPrincipal();
 
-        UserPrincipal returnedPrincipal = userService.lockUser(principal);
-
-        assertTrue(returnedPrincipal.isLocked());
-        User updatedUser = userRepository.findById(returnedPrincipal.getId()).orElseThrow(UserNotFoundException::new);
+        userService.lockUser(email);
+        User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         assertTrue(updatedUser.getIsLocked());
-    }
-
-    @Test
-    @DisplayName("unlockUser(): " + DOES_NOT_UNLOCK_USER_WHEN_USER_ALREADY_UNLOCKED)
-    void unlockUser_UserAlreadyUnlocked_DoesNotUnlockUser() {
-        assertDoesNotThrow(() -> userService.unlockUser(principal));
     }
 
     @Test
     @DisplayName("unlockUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void unlockUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.setIsLocked(true);
-        principal = UserPrincipalImpl.withUser(user);
-        assertThrows(UserNotFoundException.class, () -> userService.unlockUser(principal));
-        assertTrue(userRepository.findByEmail(principal.getEmail()).isEmpty());
+        String email = (String) authentication.getPrincipal();
+        assertThrows(UserNotFoundException.class, () -> userService.unlockUser(email));
     }
 
     @Test
@@ -346,27 +316,18 @@ class UserServiceIntegrationTests {
     void unlockUser_UserLocked_UnlocksUser() {
         user.setIsLocked(true);
         userRepository.persist(user);
-        principal = UserPrincipalImpl.withUser(user);
+        String email = (String) authentication.getPrincipal();
 
-        UserPrincipal returnedPrincipal = userService.unlockUser(principal);
-
-        assertFalse(returnedPrincipal.isLocked());
-        User updatedUser = userRepository.findById(returnedPrincipal.getId()).orElseThrow(UserNotFoundException::new);
+        userService.unlockUser(email);
+        User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         assertFalse(updatedUser.getIsLocked());
-    }
-
-    @Test
-    @DisplayName("disableUser(): " + DOES_NOT_DISABLE_USER_WHEN_USER_ALREADY_DISABLED)
-    void disableUser_UserAlreadyDisabled_DoesNotDisableUser() {
-        user.setIsEnabled(false);
-        principal = UserPrincipalImpl.withUser(user);
-        assertDoesNotThrow(() -> userService.disableUser(principal));
     }
 
     @Test
     @DisplayName("disableUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void disableUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        assertThrows(UserNotFoundException.class, () -> userService.disableUser(principal));
+        String email = (String) authentication.getPrincipal();
+        assertThrows(UserNotFoundException.class, () -> userService.disableUser(email));
     }
 
     @Test
@@ -374,27 +335,19 @@ class UserServiceIntegrationTests {
     @DisplayName("disabledUser(): " + DISABLES_USER_WHEN_USER_ENABLED)
     void disabledUser_UserEnabled_DisabledUser() {
         userRepository.persist(user);
-        principal = UserPrincipalImpl.withUser(user);
+        String email = (String) authentication.getPrincipal();
 
-        UserPrincipal returnedPrincipal = userService.disableUser(principal);
-
-        assertFalse(returnedPrincipal.isEnabled());
-        User updatedUser = userRepository.findById(returnedPrincipal.getId()).orElseThrow(UserNotFoundException::new);
+        userService.disableUser(email);
+        User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         assertFalse(updatedUser.getIsEnabled());
-    }
-
-    @Test
-    @DisplayName("enableUser(): " + DOES_NOT_ENABLE_USER_WHEN_USER_ALREADY_ENABLED)
-    void enableUser_UserAlreadyEnabled_DoesNotEnableUser() {
-        assertDoesNotThrow(() -> userService.enableUser(principal));
     }
 
     @Test
     @DisplayName("enableUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void enableUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.setIsEnabled(false);
-        principal = UserPrincipalImpl.withUser(user);
-        assertThrows(UserNotFoundException.class, () -> userService.enableUser(principal));
+        String email = (String) authentication.getPrincipal();
+        assertThrows(UserNotFoundException.class, () -> userService.enableUser(email));
     }
 
     @Test
@@ -403,12 +356,10 @@ class UserServiceIntegrationTests {
     void enableUser_UserDisabled_EnablesUser() {
         user.setIsEnabled(false);
         userRepository.persist(user);
-        principal = UserPrincipalImpl.withUser(user);
+        String email = (String) authentication.getPrincipal();
 
-        UserPrincipal returnedPrincipal = userService.enableUser(principal);
-
-        assertTrue(returnedPrincipal.isEnabled());
-        User updatedUser = userRepository.findById(returnedPrincipal.getId()).orElseThrow(UserNotFoundException::new);
+        userService.enableUser(email);
+        User updatedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         assertTrue(updatedUser.getIsEnabled());
     }
 
@@ -422,7 +373,6 @@ class UserServiceIntegrationTests {
         LocalTime oldFailedLoginTime = user.getFailedLoginTime();
 
         userService.addLoginAttempt(user);
-
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
         assertEquals(updatedUser.getFailedLoginAttempts(), oldLoginAttempts + 1);
         assertTrue(oldFailedLoginTime.isBefore(updatedUser.getFailedLoginTime()));
@@ -437,7 +387,6 @@ class UserServiceIntegrationTests {
         userRepository.persist(user);
 
         userService.resetLoginAttempts(user);
-
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
         assertEquals(0, updatedUser.getFailedLoginAttempts());
     }

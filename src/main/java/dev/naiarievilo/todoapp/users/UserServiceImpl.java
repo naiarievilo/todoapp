@@ -41,12 +41,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Authentication updateEmail(String oldEmail, String newEmail) {
+    public Authentication updateEmail(String currentEmail, String newEmail) {
         if (userExists(newEmail)) {
             throw new EmailAlreadyRegisteredException(newEmail);
         }
 
-        User user = this.getUserByEmail(oldEmail);
+        User user = this.getUserByEmail(currentEmail);
         user.setEmail(newEmail);
         userRepository.update(user);
 
@@ -158,54 +158,50 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserPrincipal lockUser(UserPrincipal userPrincipal) {
-        if (userPrincipal.isLocked()) {
-            return userPrincipal;
+    public void lockUser(String email) {
+        User user = this.getUserByEmail(email);
+        if (user.getIsLocked()) {
+            return;
         }
 
-        User user = getUserByPrincipal(userPrincipal);
         user.setIsLocked(true);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public UserPrincipal unlockUser(UserPrincipal userPrincipal) {
-        if (!userPrincipal.isLocked()) {
-            return userPrincipal;
+    public void unlockUser(String email) {
+        User user = this.getUserByEmail(email);
+        if (!user.getIsLocked()) {
+            return;
         }
 
-        User user = getUserByPrincipal(userPrincipal);
         user.setIsLocked(false);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public UserPrincipal disableUser(UserPrincipal userPrincipal) {
-        if (!userPrincipal.isEnabled()) {
-            return userPrincipal;
+    public void disableUser(String email) {
+        User user = this.getUserByEmail(email);
+        if (!user.getIsEnabled()) {
+            return;
         }
 
-        User user = getUserByPrincipal(userPrincipal);
         user.setIsEnabled(false);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public UserPrincipal enableUser(UserPrincipal userPrincipal) {
-        if (userPrincipal.isEnabled()) {
-            return userPrincipal;
+    public void enableUser(String email) {
+        User user = this.getUserByEmail(email);
+        if (user.getIsEnabled()) {
+            return;
         }
 
-        User user = getUserByPrincipal(userPrincipal);
         user.setIsEnabled(true);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
     }
 
     @Override

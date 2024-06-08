@@ -18,7 +18,7 @@ public interface UserService {
 
     void deleteUser(String email);
 
-    Authentication updateEmail(String oldEmail, String newEmail);
+    Authentication updateEmail(String currentEmail, String newEmail);
 
     Authentication updatePassword(String email, String newPassword);
 
@@ -26,13 +26,13 @@ public interface UserService {
 
     Authentication removeRoleFromUser(Authentication authentication, Roles role);
 
-    UserPrincipal lockUser(UserPrincipal userPrincipal);
+    void lockUser(String email);
 
-    UserPrincipal unlockUser(UserPrincipal userPrincipal);
+    void unlockUser(String email);
 
-    UserPrincipal disableUser(UserPrincipal userPrincipal);
+    void disableUser(String email);
 
-    UserPrincipal enableUser(UserPrincipal userPrincipal);
+    void enableUser(String email);
 
     void addLoginAttempt(User user);
 
