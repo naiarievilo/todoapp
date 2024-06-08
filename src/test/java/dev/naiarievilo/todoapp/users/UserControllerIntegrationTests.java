@@ -13,8 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 import static dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationProvider.BAD_CREDENTIALS;
 import static dev.naiarievilo.todoapp.security.JwtConstants.*;
 import static dev.naiarievilo.todoapp.users.UserController.REFRESH_TOKEN_HEADER;
@@ -157,7 +155,7 @@ class UserControllerIntegrationTests {
     void getNewAccessToken_RefreshTokenIsNotValid_ReturnsErrorMessage() throws Exception {
         mockMvc
             .perform(put("/users/re-authenticate")
-                .header(HttpHeaders.AUTHORIZATION, "invalid")
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + "invalidToken")
             )
             .andExpect(status().isUnauthorized());
     }
@@ -167,11 +165,12 @@ class UserControllerIntegrationTests {
     @DisplayName("getNewAccessToken(): " + STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_REFRESH_TOKEN_VALID)
     void getNewAccessToken_RefreshTokenIsValid_ReturnsNewAccessToken() throws Exception {
         Authentication authentication = userService.createUser(userCreationDTO);
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
+        String refreshToken =
+            BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(authentication).get(REFRESH_TOKEN);
 
         mockMvc
             .perform(put("/users/re-authenticate")
-                .header(HttpHeaders.AUTHORIZATION, tokens.get(REFRESH_TOKEN))
+                .header(HttpHeaders.AUTHORIZATION, refreshToken)
             )
             .andExpectAll(
                 status().isOk(),

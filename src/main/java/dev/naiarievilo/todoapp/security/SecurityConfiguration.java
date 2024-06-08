@@ -33,7 +33,7 @@ public class SecurityConfiguration {
         http
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/users/create", "/users/authenticate", "/users/re-authenticate").permitAll()
+                .requestMatchers("/users/create", "/users/authenticate").permitAll()
                 .anyRequest().authenticated()
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))

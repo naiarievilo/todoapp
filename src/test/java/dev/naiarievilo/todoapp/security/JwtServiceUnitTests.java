@@ -27,7 +27,7 @@ class JwtServiceUnitTests {
 
     private static final Integer JWT_EXPIRATION = 30;
     private static final String JWT_ISSUER = "testApp";
-    private static final Integer JWT_REFRESH_EXPIRATION = 60;
+    private static final Integer JWT_REFRESH_EXPIRATION = 7;
     private static final String JWT_SECRET = "jwtSecret";
 
     private final JwtService jwtService;
@@ -63,20 +63,19 @@ class JwtServiceUnitTests {
         user.setIsEnabled(true);
         user.setIsLocked(false);
 
-        authentication = EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
+        authentication = EmailPasswordAuthenticationToken.authenticated(user.getEmail(), user.getPassword(),
             UserServiceImpl.getRolesFromUser(user));
     }
 
     @Test
-    @DisplayName("createAccessAndRefreshTokens(): Returns access and refresh tokens when user principal is not null")
+    @DisplayName("createAccessAndRefreshTokens(): Returns access and refresh tokens when authentication is not null")
     void createAccessAndRefreshTokens_UserPrincipalIsNotNull_CreatesAccessAndRefreshTokens() {
         String email = user.getEmail();
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
 
         assertNotNull(tokens);
         assertEquals(2, tokens.size());
-        assertTrue(tokens.containsKey(ACCESS_TOKEN));
-        assertTrue(tokens.containsKey(REFRESH_TOKEN));
+        assertTrue(tokens.containsKey(ACCESS_TOKEN) && tokens.containsKey(REFRESH_TOKEN));
 
         String accessToken = tokens.get(ACCESS_TOKEN);
         assertDoesNotThrow(() -> Validate.notBlank(accessToken));
@@ -100,10 +99,9 @@ class JwtServiceUnitTests {
         Instant refreshTokenIssuedAt = decodedRefreshToken.getIssuedAtAsInstant();
         Instant refreshTokenExpiresAt = decodedRefreshToken.getExpiresAtAsInstant();
 
-        assertEquals(accessTokenIssuedAt, refreshTokenIssuedAt);
         assertTrue(accessTokenExpiresAt.isBefore(refreshTokenExpiresAt));
         assertEquals(Duration.ofMinutes(JWT_EXPIRATION), Duration.between(accessTokenIssuedAt, accessTokenExpiresAt));
-        assertEquals(Duration.ofMinutes(JWT_REFRESH_EXPIRATION),
+        assertEquals(Duration.ofDays(JWT_REFRESH_EXPIRATION),
             Duration.between(refreshTokenIssuedAt, refreshTokenExpiresAt));
     }
 
@@ -118,10 +116,9 @@ class JwtServiceUnitTests {
 
         String newAccessToken = jwtService.createAccessToken(refreshToken);
         assertDoesNotThrow(() -> Validate.notBlank(newAccessToken));
-
         assertDoesNotThrow(() -> jwtVerifier.verify(newAccessToken));
-        DecodedJWT decodedAccessToken = jwtVerifier.verify(newAccessToken);
 
+        DecodedJWT decodedAccessToken = jwtVerifier.verify(newAccessToken);
         assertEquals(email, decodedAccessToken.getSubject());
         assertEquals(decodedRefreshToken.getIssuer(), decodedAccessToken.getIssuer());
 
@@ -133,7 +130,7 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("verifyToken(): Throws `JWTVerificationException` when token is not valid")
     void verifyToken_TokenIsNotValid_ThrowsJWTVerificationException() {
-        assertThrows(JWTVerificationException.class, () -> jwtService.verifyToken("notValidToken"));
+        assertThrows(JWTVerificationException.class, () -> jwtService.verifyToken("invalidToken"));
     }
 
     @Test

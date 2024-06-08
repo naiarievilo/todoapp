@@ -15,8 +15,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.naiarievilo.todoapp.security.JwtConstants.ACCESS_TOKEN;
-import static dev.naiarievilo.todoapp.security.JwtConstants.REFRESH_TOKEN;
+import static dev.naiarievilo.todoapp.security.JwtConstants.*;
 import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
 
 @Service
@@ -32,14 +31,15 @@ public class JwtService {
         @Value("${jwt.refresh-expires-in}") Integer refreshTokenExpiration, @Value("${jwt.issuer}") String issuer) {
         this.algorithm = Algorithm.HMAC256(secret);
         this.accessTokenExpiration = Duration.ofMinutes(accessTokenExpiration);
-        this.refreshTokenExpiration = Duration.ofMinutes(refreshTokenExpiration);
+        this.refreshTokenExpiration = Duration.ofDays(refreshTokenExpiration);
         this.jwtVerifier = JWT.require(this.algorithm).build();
         this.issuer = issuer;
     }
 
     public String createAccessToken(String refreshToken) {
         Validate.notBlank(refreshToken);
-        DecodedJWT decodedJwt = jwtVerifier.verify(refreshToken);
+        refreshToken = refreshToken.replace(BEARER_PREFIX, "");
+        DecodedJWT decodedJwt = this.verifyToken(refreshToken);
 
         String email = decodedJwt.getSubject();
         Instant now = Instant.now();
@@ -50,6 +50,11 @@ public class JwtService {
             .withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
 
         return jwtBuilder.sign(algorithm);
+    }
+
+    public DecodedJWT verifyToken(String token) {
+        Validate.notBlank(token, NOT_BLANK);
+        return jwtVerifier.verify(token);
     }
 
     public Map<String, String> createAccessAndRefreshTokens(Authentication authentication) {
@@ -75,11 +80,6 @@ public class JwtService {
         }
 
         return jwtBuilder.sign(algorithm);
-    }
-
-    public DecodedJWT verifyToken(String token) {
-        Validate.notBlank(token, NOT_BLANK);
-        return jwtVerifier.verify(token);
     }
 
 }

@@ -3,7 +3,6 @@ package dev.naiarievilo.todoapp.users;
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.JwtService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +58,7 @@ public class UserController {
     }
 
     @PutMapping("/re-authenticate")
-    public ResponseEntity<Void> getNewAccessToken(@NotBlank @RequestHeader("Authorization") String refreshToken) {
+    public ResponseEntity<Void> getNewAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String refreshToken) {
         String newAccessToken = jwtService.createAccessToken(refreshToken);
         return ResponseEntity
             .status(HttpStatus.OK)
