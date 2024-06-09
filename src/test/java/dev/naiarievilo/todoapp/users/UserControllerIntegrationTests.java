@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.naiarievilo.todoapp.security.ErrorDetails;
 import dev.naiarievilo.todoapp.security.JwtService;
 import dev.naiarievilo.todoapp.users.dtos.UpdateCredentialsDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserAuthenticationDTO;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,17 +28,18 @@ import static dev.naiarievilo.todoapp.users.UserControllerTestCaseMessages.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.EMAIL_MUST_BE_VALID;
 import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.PASSWORD_MUST_BE_PROVIDED;
-import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional(readOnly = true)
 class UserControllerIntegrationTests {
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
+    @Autowired
+    ObjectMapper objectMapper;
     @Autowired
     UserService userService;
     @Autowired
@@ -48,6 +51,7 @@ class UserControllerIntegrationTests {
     private UserCreationDTO userCreationDTO;
     private UserCreationDTO otherUserCreationDTO;
     private UserAuthenticationDTO userAuthenticationDTO;
+    private Exception exception;
 
     @BeforeEach
     void setUp() {
@@ -59,18 +63,22 @@ class UserControllerIntegrationTests {
     @Test
     @DisplayName("createUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_USER_CREATION_DTO_NOT_VALID)
     void createUser_UserCreationDTONotValid_ReturnsErrorMessage() throws Exception {
-        UserCreationDTO invalidUserCreationDTO =
-            new UserCreationDTO("notAValidEmail", PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
+        var invalidUserCreationDTO = new UserCreationDTO("notAValidEmail", PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1,
+            LAST_NAME_1);
 
-        mockMvc
+        String responseBody = mockMvc
             .perform(post("/users/create")
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(invalidUserCreationDTO))
+                .content(objectMapper.writeValueAsString(invalidUserCreationDTO))
             )
-            .andExpectAll(
-                status().isBadRequest(),
-                content().string(EMAIL_MUST_BE_VALID)
-            );
+            .andExpect(status().isBadRequest())
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(EMAIL_MUST_BE_VALID));
     }
 
     @Test
@@ -80,7 +88,7 @@ class UserControllerIntegrationTests {
         mockMvc
             .perform(post("/users/create")
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(userCreationDTO))
+                .content(objectMapper.writeValueAsString(userCreationDTO))
             )
             .andExpectAll(
                 status().isCreated(),
@@ -94,17 +102,21 @@ class UserControllerIntegrationTests {
     @DisplayName("createUser(): " + STATUS_409_RETURNS_ERROR_MESSAGE_WHEN_USER_ALREADY_EXISTS)
     void createUser_UserAlreadyExists_ReturnsErrorMessage() throws Exception {
         userService.createUser(userCreationDTO);
-        var userAlreadyExistsException = new UserAlreadyExistsException(userCreationDTO.email());
+        exception = new UserAlreadyExistsException(userCreationDTO.email());
 
-        mockMvc
+        String responseBody = mockMvc
             .perform(post("/users/create")
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(userCreationDTO))
+                .content(objectMapper.writeValueAsString(userCreationDTO))
             )
-            .andExpectAll(
-                status().isConflict(),
-                content().string(userAlreadyExistsException.getMessage())
-            );
+            .andExpect(status().isConflict())
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.CONFLICT.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.CONFLICT.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(exception.getMessage()));
     }
 
     @Test
@@ -112,15 +124,19 @@ class UserControllerIntegrationTests {
     void authenticateUser_UserAuthenticationDTONotValid_ReturnsErrorMessage() throws Exception {
         UserAuthenticationDTO InvalidUserAuthenticationDTO = new UserAuthenticationDTO(EMAIL_1, " ");
 
-        mockMvc
+        String responseBody = mockMvc
             .perform(post("/users/authenticate")
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(InvalidUserAuthenticationDTO))
+                .content(objectMapper.writeValueAsString(InvalidUserAuthenticationDTO))
             )
-            .andExpectAll(
-                status().isBadRequest(),
-                content().string(PASSWORD_MUST_BE_PROVIDED)
-            );
+            .andExpect(status().isBadRequest())
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(PASSWORD_MUST_BE_PROVIDED));
     }
 
     @Test
@@ -130,15 +146,19 @@ class UserControllerIntegrationTests {
         userService.createUser(userCreationDTO);
         UserAuthenticationDTO withWrongPassword = new UserAuthenticationDTO(EMAIL_1, "wrongPassword");
 
-        mockMvc
+        String content = mockMvc
             .perform(post("/users/authenticate")
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(withWrongPassword))
+                .content(objectMapper.writeValueAsString(withWrongPassword))
             )
-            .andExpectAll(
-                status().isBadRequest(),
-                content().string(BAD_CREDENTIALS)
-            );
+            .andExpectAll(status().isBadRequest())
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(content, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(BAD_CREDENTIALS));
     }
 
     @Test
@@ -150,7 +170,7 @@ class UserControllerIntegrationTests {
         mockMvc
             .perform(post("/users/authenticate")
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(userAuthenticationDTO))
+                .content(objectMapper.writeValueAsString(userAuthenticationDTO))
             )
             .andExpectAll(
                 status().isOk(),
@@ -162,14 +182,19 @@ class UserControllerIntegrationTests {
     @Test
     @DisplayName("getNewAccessToken(): " + STATUS_401_RETURNS_ERROR_MESSAGE_WHEN_REFRESH_TOKEN_NOT_VALID)
     void getNewAccessToken_RefreshTokenNotValid_ReturnsErrorMessage() throws Exception {
-        mockMvc
+        String responseBody = mockMvc
             .perform(put("/users/reauthenticate")
+                .contentType(DEFAULT_CONTENT_TYPE)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + "invalidToken")
             )
-            .andExpectAll(
-                status().isUnauthorized(),
-                content().string(containsString(JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED))
-            );
+            .andExpect(status().isUnauthorized())
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.UNAUTHORIZED.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED));
     }
 
     @Test
@@ -210,7 +235,7 @@ class UserControllerIntegrationTests {
     void deleteUser_UserDoesNotExist_ReturnsErrorMessage() throws Exception {
         Authentication authentication = userService.createUser(userCreationDTO);
         String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(authentication).get(ACCESS_TOKEN);
-        var userNotFoundException = new UserNotFoundException(userCreationDTO.email());
+        exception = new UserNotFoundException(userCreationDTO.email());
 
         mockMvc
             .perform(delete("/users/delete")
@@ -218,14 +243,19 @@ class UserControllerIntegrationTests {
             )
             .andExpect(status().isNoContent());
 
-        mockMvc
+        String responseBody = mockMvc
             .perform(delete("/users/delete")
+                .contentType(DEFAULT_CONTENT_TYPE)
                 .header(HttpHeaders.AUTHORIZATION, accessToken)
             )
-            .andExpectAll(
-                status().isNotFound(),
-                content().string(containsString(userNotFoundException.getMessage()))
-            );
+            .andExpect(status().isNotFound())
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.NOT_FOUND.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(exception.getMessage()));
     }
 
     @Test
@@ -236,17 +266,20 @@ class UserControllerIntegrationTests {
         String accessToken = jwtService.createAccessAndRefreshTokens(authentication).get(ACCESS_TOKEN);
         var updateCredentialsDTO = new UpdateCredentialsDTO("invalidEmail", "", "", "");
 
-        mockMvc
+        String responseBody = mockMvc
             .perform(post("/users/update-email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(updateCredentialsDTO))
+                .content(objectMapper.writeValueAsString(updateCredentialsDTO))
             )
-            .andExpectAll(
-                status().isBadRequest(),
-                content().string(containsString(EMAIL_MUST_BE_VALID))
-            );
+            .andExpect(status().isBadRequest())
+            .andReturn().getResponse().getContentAsString();
 
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(EMAIL_MUST_BE_VALID));
     }
 
     @Test
@@ -256,19 +289,24 @@ class UserControllerIntegrationTests {
         userService.createUser(otherUserCreationDTO);
         Authentication authentication = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(authentication).get(ACCESS_TOKEN);
-        var emailAlreadyRegisteredException = new EmailAlreadyRegisteredException(otherUserCreationDTO.email());
+
+        exception = new EmailAlreadyRegisteredException(otherUserCreationDTO.email());
         var updateCredentialsDTO = new UpdateCredentialsDTO(otherUserCreationDTO.email(), "", "", "");
 
-        mockMvc
+        String responseBody = mockMvc
             .perform(post("/users/update-email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(updateCredentialsDTO))
+                .content(objectMapper.writeValueAsString(updateCredentialsDTO))
             )
-            .andExpectAll(
-                status().isConflict(),
-                content().string(emailAlreadyRegisteredException.getMessage())
-            );
+            .andExpect(status().isConflict())
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.CONFLICT.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.CONFLICT.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(exception.getMessage()));
     }
 
     @Test
@@ -283,7 +321,7 @@ class UserControllerIntegrationTests {
             .perform(post("/users/update-email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(DEFAULT_CONTENT_TYPE)
-                .content(mapper.writeValueAsString(updateCredentialsDTO))
+                .content(objectMapper.writeValueAsString(updateCredentialsDTO))
             )
             .andExpectAll(
                 status().isOk(),
