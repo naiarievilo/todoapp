@@ -7,7 +7,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -57,19 +56,17 @@ public class JwtService {
         return jwtVerifier.verify(token);
     }
 
-    public Map<String, String> createAccessAndRefreshTokens(Authentication authentication) {
+    public Map<String, String> createAccessAndRefreshTokens(UserPrincipal userPrincipal) {
         Map<String, String> tokens = new HashMap<>();
-        tokens.put(ACCESS_TOKEN, createToken(authentication, TokenTypes.ACCESS_TOKEN));
-        tokens.put(REFRESH_TOKEN, createToken(authentication, TokenTypes.REFRESH_TOKEN));
+        tokens.put(ACCESS_TOKEN, createToken(userPrincipal, TokenTypes.ACCESS_TOKEN));
+        tokens.put(REFRESH_TOKEN, createToken(userPrincipal, TokenTypes.REFRESH_TOKEN));
         return tokens;
     }
 
-    private String createToken(Authentication authentication, TokenTypes tokenType) {
-        String email = (String) authentication.getPrincipal();
-
+    private String createToken(UserPrincipal userPrincipal, TokenTypes tokenType) {
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(email)
+            .withSubject(userPrincipal.getEmail())
             .withIssuer(issuer)
             .withIssuedAt(now);
 

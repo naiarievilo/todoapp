@@ -40,6 +40,8 @@ class UserServiceTestCaseMessages {
         "Returns `true` when user exists";
     static final String RETURNS_USER_WHEN_USER_EXISTS =
         "Returns `User` when user exists";
+    static final String THROWS_BAD_CREDENTIALS_WHEN_CURRENT_PASSWORD_INCORRECT =
+        "Throws `BadCredentialsException` when current password is incorrect";
     static final String THROWS_EMAIL_ALREADY_REGISTERED_WHEN_EMAIL_ALREADY_REGISTERED =
         "Throws `EmailAlreadyRegisteredException` when new email is registered";
     static final String THROWS_USER_ALREADY_EXISTS_WHEN_USER_ALREADY_EXISTS =
@@ -52,6 +54,6 @@ class UserServiceTestCaseMessages {
         "Unlocks user when user is locked";
     static final String UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED =
         "Updates user's email when new email is not already registered";
-    static final String UPDATES_PASSWORD_WHEN_USER_EXISTS =
-        "Updates password when user exists";
+    static final String UPDATES_PASSWORD_WHEN_CURRENT_PASSWORD_CORRECT =
+        "Updates password when current password is correct";
 }

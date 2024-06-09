@@ -4,7 +4,6 @@ import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
-import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
@@ -12,7 +11,7 @@ import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
 import dev.naiarievilo.todoapp.users_info.UserInfoService;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,26 +42,37 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
-    @Transactional
-    public Authentication updateEmail(String currentEmail, String newEmail) {
-        if (userExists(newEmail)) {
-            throw new EmailAlreadyRegisteredException(newEmail);
-        }
-
-        User user = this.getUserByEmail(currentEmail);
-        user.setEmail(newEmail);
-        userRepository.update(user);
-
-        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
-            user.getPassword(), UserServiceImpl.getRolesFromUser(user));
-    }
-
     public static Set<GrantedAuthority> getRolesFromUser(User user) {
         return user.getRoles().stream()
             .map(Role::getName)
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    @Transactional
+    public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
+        if (userExists(newEmail)) {
+            throw new EmailAlreadyRegisteredException(newEmail);
+        }
+
+        User user = this.getUserByEmail(userPrincipal.getEmail());
+        user.setEmail(newEmail);
+        userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
+    }
+
+    @Override
+    @Transactional
+    public UserPrincipal unlockUser(UserPrincipal userPrincipal) {
+        if (!userPrincipal.isLocked()) {
+            return userPrincipal;
+        }
+        User user = this.getUserByEmail(userPrincipal.getEmail());
+
+        user.setIsLocked(false);
+        userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
@@ -89,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Authentication createUser(UserCreationDTO userCreationDTO) {
+    public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
         String email = userCreationDTO.email();
         if (userExists(email))
             throw new UserAlreadyExistsException(email);
@@ -103,15 +113,13 @@ public class UserServiceImpl implements UserService {
         userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);
 
-        return EmailPasswordAuthenticationToken.authenticated(newUser.getEmail(), newUser.getPassword(),
-            Set.of(new SimpleGrantedAuthority(defaultRole.getName()))
-        );
+        return UserPrincipalImpl.withUser(newUser);
     }
 
     @Override
     @Transactional
-    public void deleteUser(String email) {
-        User user = getUserByEmail(email);
+    public void deleteUser(UserPrincipal userPrincipal) {
+        User user = getUserByEmail(userPrincipal.getEmail());
         user.removeAllRoles();
 
         userInfoService.deleteUserInfo(user.getId());
@@ -121,91 +129,83 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Authentication updatePassword(String email, String newPassword) {
-        User user = this.getUserByEmail(email);
+    public UserPrincipal updatePassword(UserPrincipal userPrincipal, String currentPassword, String newPassword) {
+        User user = this.getUserByEmail(userPrincipal.getEmail());
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new BadCredentialsException("Incorrect current password");
+        }
+
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.update(user);
-
-        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(),
-            user.getPassword(), UserServiceImpl.getRolesFromUser(user));
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public Authentication addRoleToUser(Authentication authentication, Roles role) {
-        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
-            return authentication;
+    public UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role) {
+        if (userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
+            return userPrincipal;
         }
 
-        User user = this.getUserByEmail((String) authentication.getPrincipal());
+        User user = this.getUserByEmail(userPrincipal.getEmail());
         Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
         userRepository.update(user);
-        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(), UserServiceImpl.getRolesFromUser(user));
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public Authentication removeRoleFromUser(Authentication authentication, Roles role) {
+    public UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role) {
         if (role.name().equals(ROLE_USER.name())) {
             throw new UserRoleRemovalProhibitedException();
-        } else if (!authentication.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
-            return authentication;
+        } else if (!userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
+            return userPrincipal;
         }
 
-        User user = getUserByEmail((String) authentication.getPrincipal());
+        User user = getUserByEmail(userPrincipal.getEmail());
         Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
         userRepository.update(user);
-        return EmailPasswordAuthenticationToken.authenticated(user.getEmail(), UserServiceImpl.getRolesFromUser(user));
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public void lockUser(String email) {
-        User user = this.getUserByEmail(email);
-        if (user.getIsLocked()) {
-            return;
+    public UserPrincipal lockUser(UserPrincipal userPrincipal) {
+        if (userPrincipal.isLocked()) {
+            return userPrincipal;
         }
 
+        User user = this.getUserByEmail(userPrincipal.getEmail());
         user.setIsLocked(true);
         userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
+
 
     @Override
     @Transactional
-    public void unlockUser(String email) {
-        User user = this.getUserByEmail(email);
-        if (!user.getIsLocked()) {
-            return;
+    public UserPrincipal disableUser(UserPrincipal userPrincipal) {
+        if (!userPrincipal.isEnabled()) {
+            return userPrincipal;
         }
-
-        user.setIsLocked(false);
-        userRepository.update(user);
-    }
-
-    @Override
-    @Transactional
-    public void disableUser(String email) {
-        User user = this.getUserByEmail(email);
-        if (!user.getIsEnabled()) {
-            return;
-        }
-
+        User user = this.getUserByEmail(userPrincipal.getEmail());
         user.setIsEnabled(false);
         userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override
     @Transactional
-    public void enableUser(String email) {
-        User user = this.getUserByEmail(email);
-        if (user.getIsEnabled()) {
-            return;
+    public UserPrincipal enableUser(UserPrincipal userPrincipal) {
+        if (userPrincipal.isEnabled()) {
+            return userPrincipal;
         }
-
+        User user = this.getUserByEmail(userPrincipal.getEmail());
         user.setIsEnabled(true);
         userRepository.update(user);
+        return UserPrincipalImpl.withUser(user);
     }
 
     @Override

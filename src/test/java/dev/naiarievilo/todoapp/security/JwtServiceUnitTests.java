@@ -5,12 +5,10 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users.UserServiceImpl;
 import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
@@ -33,8 +31,7 @@ class JwtServiceUnitTests {
     private final JwtService jwtService;
     private final JWTVerifier jwtVerifier;
 
-    private Authentication authentication;
-    private User user;
+    private UserPrincipal userPrincipal;
 
     JwtServiceUnitTests() {
         jwtService = new JwtService(JWT_SECRET, JWT_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ISSUER);
@@ -55,7 +52,7 @@ class JwtServiceUnitTests {
         Role userRole = new Role();
         userRole.setName(ROLE_USER.name());
 
-        user = new User();
+        User user = new User();
         user.setId(ID_1);
         user.setEmail(EMAIL_1);
         user.setPassword(PASSWORD_1);
@@ -63,15 +60,14 @@ class JwtServiceUnitTests {
         user.setIsEnabled(true);
         user.setIsLocked(false);
 
-        authentication = EmailPasswordAuthenticationToken.authenticated(user.getEmail(), user.getPassword(),
-            UserServiceImpl.getRolesFromUser(user));
+        userPrincipal = UserPrincipalImpl.withUser(user);
     }
 
     @Test
     @DisplayName("createAccessAndRefreshTokens(): Returns access and refresh tokens when authentication is not null")
     void createAccessAndRefreshTokens_UserPrincipalIsNotNull_CreatesAccessAndRefreshTokens() {
-        String email = user.getEmail();
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
+        String email = userPrincipal.getEmail();
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
 
         assertNotNull(tokens);
         assertEquals(2, tokens.size());
@@ -108,7 +104,7 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("createAccessToken(): Creates access token when refresh token is valid")
     void createAccessToken_RefreshTokenIsValid_CreatesAccessToken() {
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
         String refreshToken = tokens.get(REFRESH_TOKEN);
 
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
@@ -136,7 +132,7 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("verifyToken(): Returns `DecodedJWT` when token is valid")
     void verifyToken_TokenIsValid_ReturnsDecodedJWT() {
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
         String accessToken = tokens.get(ACCESS_TOKEN);
 
         DecodedJWT decodedJwt = jwtService.verifyToken(accessToken);

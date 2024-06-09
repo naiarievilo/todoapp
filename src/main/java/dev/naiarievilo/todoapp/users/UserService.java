@@ -3,7 +3,6 @@ package dev.naiarievilo.todoapp.users;
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
-import org.springframework.security.core.Authentication;
 
 public interface UserService {
 
@@ -15,25 +14,25 @@ public interface UserService {
 
     User getUserByPrincipal(UserPrincipal userPrincipal);
 
-    Authentication createUser(UserCreationDTO userCreationDTO);
+    UserPrincipal createUser(UserCreationDTO userCreationDTO);
 
-    void deleteUser(String email);
+    void deleteUser(UserPrincipal userPrincipal);
 
-    Authentication updateEmail(String currentEmail, String newEmail);
+    UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail);
 
-    Authentication updatePassword(String email, String newPassword);
+    UserPrincipal updatePassword(UserPrincipal userPrincipal, String currentPassword, String newPassword);
 
-    Authentication addRoleToUser(Authentication authentication, Roles role);
+    UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role);
 
-    Authentication removeRoleFromUser(Authentication authentication, Roles role);
+    UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role);
 
-    void lockUser(String email);
+    UserPrincipal lockUser(UserPrincipal userPrincipal);
 
-    void unlockUser(String email);
+    UserPrincipal unlockUser(UserPrincipal userPrincipal);
 
-    void disableUser(String email);
+    UserPrincipal disableUser(UserPrincipal userPrincipal);
 
-    void enableUser(String email);
+    UserPrincipal enableUser(UserPrincipal userPrincipal);
 
     void addLoginAttempt(User user);
 
