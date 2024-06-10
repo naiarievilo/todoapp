@@ -50,29 +50,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
-        if (userExists(newEmail)) {
-            throw new EmailAlreadyRegisteredException(newEmail);
-        }
-
-        User user = this.getUserByEmail(userPrincipal.getEmail());
-        user.setEmail(newEmail);
-        userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
-    }
-
-    @Override
-    @Transactional
-    public UserPrincipal unlockUser(UserPrincipal userPrincipal) {
-        if (!userPrincipal.isLocked()) {
-            return userPrincipal;
-        }
-        User user = this.getUserByEmail(userPrincipal.getEmail());
-
-        user.setIsLocked(false);
-        userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+    public boolean userExists(Long id) {
+        return userRepository.findById(id).isPresent();
     }
 
     @Override
@@ -81,9 +60,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserPrincipal loadUserPrincipalByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
-        return UserPrincipalImpl.withUser(user);
+    public UserPrincipal loadUserPrincipalById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        return UserPrincipalImpl.fromUser(user);
     }
 
     @Override
@@ -92,17 +71,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByPrincipal(UserPrincipal userPrincipal) {
-        String email = userPrincipal.getEmail();
-        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Override
     @Transactional
     public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
         String email = userCreationDTO.email();
-        if (userExists(email))
+        if (userExists(email)) {
             throw new UserAlreadyExistsException(email);
+        }
 
         Role defaultRole = roleService.getRole(ROLE_USER);
         User newUser = new User();
@@ -113,31 +92,43 @@ public class UserServiceImpl implements UserService {
         userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);
 
-        return UserPrincipalImpl.withUser(newUser);
+        return UserPrincipalImpl.fromUser(newUser);
     }
 
     @Override
     @Transactional
     public void deleteUser(UserPrincipal userPrincipal) {
-        User user = getUserByEmail(userPrincipal.getEmail());
+        User user = getUserById(userPrincipal.getId());
         user.removeAllRoles();
 
         userInfoService.deleteUserInfo(user.getId());
         userRepository.delete(user);
     }
 
+    @Override
+    @Transactional
+    public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
+        if (userExists(newEmail)) {
+            throw new EmailAlreadyRegisteredException(newEmail);
+        }
+
+        User user = getUserById(userPrincipal.getId());
+        user.setEmail(newEmail);
+        userRepository.update(user);
+        return UserPrincipalImpl.fromUser(user);
+    }
 
     @Override
     @Transactional
     public UserPrincipal updatePassword(UserPrincipal userPrincipal, String currentPassword, String newPassword) {
-        User user = this.getUserByEmail(userPrincipal.getEmail());
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(currentPassword, userPrincipal.getPassword())) {
             throw new BadCredentialsException("Incorrect current password");
         }
 
+        User user = getUserById(userPrincipal.getId());
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return UserPrincipalImpl.fromUser(user);
     }
 
     @Override
@@ -147,11 +138,11 @@ public class UserServiceImpl implements UserService {
             return userPrincipal;
         }
 
-        User user = this.getUserByEmail(userPrincipal.getEmail());
+        User user = getUserById(userPrincipal.getId());
         Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return UserPrincipalImpl.fromUser(user);
     }
 
     @Override
@@ -163,11 +154,11 @@ public class UserServiceImpl implements UserService {
             return userPrincipal;
         }
 
-        User user = getUserByEmail(userPrincipal.getEmail());
+        User user = getUserById(userPrincipal.getId());
         Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return UserPrincipalImpl.fromUser(user);
     }
 
     @Override
@@ -177,12 +168,24 @@ public class UserServiceImpl implements UserService {
             return userPrincipal;
         }
 
-        User user = this.getUserByEmail(userPrincipal.getEmail());
+        User user = getUserById(userPrincipal.getId());
         user.setIsLocked(true);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return UserPrincipalImpl.fromUser(user);
     }
 
+    @Override
+    @Transactional
+    public UserPrincipal unlockUser(UserPrincipal userPrincipal) {
+        if (!userPrincipal.isLocked()) {
+            return userPrincipal;
+        }
+        User user = getUserById(userPrincipal.getId());
+
+        user.setIsLocked(false);
+        userRepository.update(user);
+        return UserPrincipalImpl.fromUser(user);
+    }
 
     @Override
     @Transactional
@@ -190,10 +193,10 @@ public class UserServiceImpl implements UserService {
         if (!userPrincipal.isEnabled()) {
             return userPrincipal;
         }
-        User user = this.getUserByEmail(userPrincipal.getEmail());
+        User user = getUserById(userPrincipal.getId());
         user.setIsEnabled(false);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return UserPrincipalImpl.fromUser(user);
     }
 
     @Override
@@ -202,10 +205,10 @@ public class UserServiceImpl implements UserService {
         if (userPrincipal.isEnabled()) {
             return userPrincipal;
         }
-        User user = this.getUserByEmail(userPrincipal.getEmail());
+        User user = getUserById(userPrincipal.getId());
         user.setIsEnabled(true);
         userRepository.update(user);
-        return UserPrincipalImpl.withUser(user);
+        return UserPrincipalImpl.fromUser(user);
     }
 
     @Override

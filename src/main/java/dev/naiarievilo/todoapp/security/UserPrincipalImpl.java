@@ -37,24 +37,22 @@ public class UserPrincipalImpl implements UserPrincipal {
         this.isEnabled = isEnabled;
     }
 
-    public static UserPrincipalImplBuilder withEmail(String email) {
-        Validate.notBlank(email, NOT_BLANK);
-        return builder().setEmail(email);
+    public static UserPrincipal fromUser(User user) {
+        return withUser(user).build();
     }
 
-    public static UserPrincipalImplBuilder builder() {
-        return new UserPrincipalImplBuilder();
-    }
-
-    public static UserPrincipal withUser(User user) {
+    public static UserPrincipalImplBuilder withUser(User user) {
         return builder()
             .setId(user.getId())
             .setEmail(user.getEmail())
             .setPassword(user.getPassword())
             .setRoles(UserServiceImpl.getRolesFromUser(user))
             .setLocked(user.getIsLocked())
-            .setEnabled(user.getIsEnabled())
-            .build();
+            .setEnabled(user.getIsEnabled());
+    }
+
+    public static UserPrincipalImplBuilder builder() {
+        return new UserPrincipalImplBuilder();
     }
 
     @Override

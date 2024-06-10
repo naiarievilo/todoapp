@@ -6,13 +6,15 @@ import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 
 public interface UserService {
 
+    boolean userExists(Long id);
+
     boolean userExists(String email);
 
-    UserPrincipal loadUserPrincipalByEmail(String email);
+    UserPrincipal loadUserPrincipalById(Long id);
 
     User getUserByEmail(String email);
 
-    User getUserByPrincipal(UserPrincipal userPrincipal);
+    User getUserById(Long id);
 
     UserPrincipal createUser(UserCreationDTO userCreationDTO);
 

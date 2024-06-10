@@ -84,14 +84,8 @@ public class UserController {
     @PutMapping("/update-email")
     public ResponseEntity<Void> updateEmail(@AuthenticationPrincipal UserPrincipal userPrincipal,
         @RequestBody @Validated(UpdateEmail.class) UserCredentialsUpdateDTO userCredentialsUpdateDTO) {
-        UserPrincipal updatedUserPrincipal = userService.updateEmail(userPrincipal, userCredentialsUpdateDTO.email());
-        Map<String, String> newTokens = jwtService.createAccessAndRefreshTokens(updatedUserPrincipal);
-
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + newTokens.get(ACCESS_TOKEN))
-            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + newTokens.get(REFRESH_TOKEN))
-            .build();
+        userService.updateEmail(userPrincipal, userCredentialsUpdateDTO.email());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PutMapping("/update-password")

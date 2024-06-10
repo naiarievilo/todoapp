@@ -60,13 +60,13 @@ class JwtServiceUnitTests {
         user.setIsEnabled(true);
         user.setIsLocked(false);
 
-        userPrincipal = UserPrincipalImpl.withUser(user);
+        userPrincipal = UserPrincipalImpl.fromUser(user);
     }
 
     @Test
     @DisplayName("createAccessAndRefreshTokens(): Returns access and refresh tokens when authentication is not null")
     void createAccessAndRefreshTokens_UserPrincipalIsNotNull_CreatesAccessAndRefreshTokens() {
-        String email = userPrincipal.getEmail();
+        String userId = userPrincipal.getId().toString();
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
 
         assertNotNull(tokens);
@@ -86,8 +86,8 @@ class JwtServiceUnitTests {
         assertEquals(JWT_ISSUER, decodedAccessToken.getIssuer());
         assertEquals(JWT_ISSUER, decodedRefreshToken.getIssuer());
 
-        assertEquals(email, decodedAccessToken.getSubject());
-        assertEquals(email, decodedRefreshToken.getSubject());
+        assertEquals(userId, decodedAccessToken.getSubject());
+        assertEquals(userId, decodedRefreshToken.getSubject());
 
         Instant accessTokenIssuedAt = decodedAccessToken.getIssuedAtAsInstant();
         Instant accessTokenExpiresAt = decodedAccessToken.getExpiresAtAsInstant();
@@ -108,14 +108,14 @@ class JwtServiceUnitTests {
         String refreshToken = tokens.get(REFRESH_TOKEN);
 
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
-        String email = decodedRefreshToken.getSubject();
+        String userId = decodedRefreshToken.getSubject();
 
         String newAccessToken = jwtService.createAccessToken(refreshToken);
         assertDoesNotThrow(() -> Validate.notBlank(newAccessToken));
         assertDoesNotThrow(() -> jwtVerifier.verify(newAccessToken));
 
         DecodedJWT decodedAccessToken = jwtVerifier.verify(newAccessToken);
-        assertEquals(email, decodedAccessToken.getSubject());
+        assertEquals(userId, decodedAccessToken.getSubject());
         assertEquals(decodedRefreshToken.getIssuer(), decodedAccessToken.getIssuer());
 
         Instant accessTokenIssuedAt = decodedAccessToken.getIssuedAtAsInstant();

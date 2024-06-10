@@ -40,10 +40,10 @@ public class JwtService {
         refreshToken = refreshToken.replace(BEARER_PREFIX, "");
         DecodedJWT decodedJwt = this.verifyToken(refreshToken);
 
-        String email = decodedJwt.getSubject();
+        String userId = decodedJwt.getSubject();
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(email)
+            .withSubject(userId)
             .withIssuer(issuer)
             .withIssuedAt(now)
             .withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
@@ -66,7 +66,7 @@ public class JwtService {
     private String createToken(UserPrincipal userPrincipal, TokenTypes tokenType) {
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(userPrincipal.getEmail())
+            .withSubject(userPrincipal.getId().toString())
             .withIssuer(issuer)
             .withIssuedAt(now);
 

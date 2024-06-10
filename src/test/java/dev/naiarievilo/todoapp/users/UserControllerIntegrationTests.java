@@ -247,7 +247,7 @@ class UserControllerIntegrationTests {
     void deleteUser_UserDoesNotExist_ReturnsErrorDetails() throws Exception {
         userPrincipal = userService.createUser(userCreationDTO);
         String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
-        exception = new UserNotFoundException(userCreationDTO.email());
+        exception = new UserNotFoundException(userPrincipal.getId());
 
         mockMvc
             .perform(delete("/users/delete")
@@ -329,26 +329,13 @@ class UserControllerIntegrationTests {
         String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
         var updateCredentialsDTO = new UserCredentialsUpdateDTO(NEW_EMAIL, null, null, null);
 
-        MockHttpServletResponse response = mockMvc.perform(put("/users/update-email")
+        mockMvc
+            .perform(put("/users/update-email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
             )
-            .andExpectAll(
-                status().isOk(),
-                header().exists(HttpHeaders.AUTHORIZATION),
-                header().exists(REFRESH_TOKEN_HEADER)
-            )
-            .andReturn().getResponse();
-
-        String returnedAccessToken = response.getHeader(HttpHeaders.AUTHORIZATION);
-        String refreshToken = response.getHeader(REFRESH_TOKEN_HEADER);
-        assertNotNull(refreshToken);
-        assertNotNull(returnedAccessToken);
-        assertTrue(returnedAccessToken.startsWith(BEARER_PREFIX));
-        assertTrue(refreshToken.startsWith(BEARER_PREFIX));
-        assertTrue(returnedAccessToken.replaceFirst(BEARER_PREFIX, "").matches(JWT_REGEX));
-        assertTrue(refreshToken.replaceFirst(BEARER_PREFIX, "").matches(JWT_REGEX));
+            .andExpect(status().isOk());
     }
 
     @Test

@@ -43,7 +43,7 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
         }
 
         userService.resetLoginAttempts(user);
-        return new UserPrincipalAuthenticationToken(UserPrincipalImpl.withUser(user));
+        return new UserPrincipalAuthenticationToken(UserPrincipalImpl.fromUser(user));
     }
 
     @Override

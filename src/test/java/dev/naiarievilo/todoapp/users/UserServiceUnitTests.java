@@ -76,12 +76,32 @@ class UserServiceUnitTests {
         user.setPassword(PASSWORD_1);
         user.addRole(userRole);
 
-        userPrincipal = UserPrincipalImpl.withUser(user);
+        userPrincipal = UserPrincipalImpl.fromUser(user);
     }
 
     @Test
-    @DisplayName("userExists(): " + RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST)
-    void userExists_UserDoesNotExist_ReturnsFalse() {
+    @DisplayName("userExists(Long id): " + RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST)
+    void userExistsById_UserDoesNotExist_ReturnsFalse() {
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.empty());
+
+        assertFalse(userService.userExists(id));
+        verify(userRepository).findById(id);
+    }
+
+    @Test
+    @DisplayName("userExists(Long id): " + RETURNS_TRUE_WHEN_USER_EXISTS)
+    void userExistsById_UserExists_ReturnsTrue() {
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
+
+        assertTrue(userService.userExists(id));
+        verify(userRepository).findById(id);
+    }
+
+    @Test
+    @DisplayName("userExists(String email): " + RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST)
+    void userExistsByEmail_UserDoesNotExist_ReturnsFalse() {
         String email = userPrincipal.getEmail();
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
 
@@ -90,8 +110,8 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("userExists(): " + RETURNS_TRUE_WHEN_USER_EXISTS)
-    void userExists_UserExists_ReturnsTrue() {
+    @DisplayName("userExists(String email): " + RETURNS_TRUE_WHEN_USER_EXISTS)
+    void userExistsByEmail_UserExists_ReturnsTrue() {
         String email = userPrincipal.getEmail();
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
 
@@ -100,24 +120,24 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("loadUserPrincipalByEmail(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
-    void loadUserPrincipalByEmail_UserDoesNotExist_ThrowsUserPrincipalNotFoundException() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+    @DisplayName("loadUserPrincipalById(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
+    void loadUserPrincipalById_UserDoesNotExist_ThrowsUserPrincipalNotFoundException() {
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.loadUserPrincipalByEmail(email));
-        verify(userRepository).findByEmail(email);
+        assertThrows(UserNotFoundException.class, () -> userService.loadUserPrincipalById(id));
+        verify(userRepository).findById(id);
     }
 
     @Test
-    @DisplayName("loadUserPrincipalByEmail(): " + RETURNS_PRINCIPAL_WHEN_USER_EXISTS)
-    void loadUserPrincipalByEmail_UserExists_ReturnsUserPrincipalPrincipal() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+    @DisplayName("loadUserPrincipalById(): " + RETURNS_PRINCIPAL_WHEN_USER_EXISTS)
+    void loadUserPrincipalById_UserExists_ReturnsUserPrincipalPrincipal() {
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
-        UserPrincipal returnedUserPrincipal = userService.loadUserPrincipalByEmail(email);
+        UserPrincipal returnedUserPrincipal = userService.loadUserPrincipalById(id);
         assertEquals(userPrincipal, returnedUserPrincipal);
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
     }
 
     @Test
@@ -142,24 +162,24 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getUserByPrincipal(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
-    void getUserByPrincipal_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+    @DisplayName("getUserById(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
+    void getUserById_UserDoesNotExist_ThrowsUserNotFoundException() {
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userService.getUserByPrincipal(userPrincipal));
-        verify(userRepository).findByEmail(email);
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(id));
+        verify(userRepository).findById(id);
     }
 
     @Test
-    @DisplayName("getUserByPrincipal(): " + RETURNS_USER_WHEN_USER_EXISTS)
-    void getUserByPrincipal_UserExists_ReturnsUser() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+    @DisplayName("getUserById(): " + RETURNS_USER_WHEN_USER_EXISTS)
+    void getUserById_UserExists_ReturnsUser() {
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
-        User returnedUser = userService.getUserByPrincipal(userPrincipal);
+        User returnedUser = userService.getUserById(id);
         assertEquals(user, returnedUser);
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
     }
 
     @Test
@@ -213,11 +233,11 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("deleteUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void deleteUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userPrincipal));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).delete(any(User.class));
         verifyNoInteractions(userInfoService);
     }
@@ -225,13 +245,13 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("deleteUser(): " + DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
         userService.deleteUser(userPrincipal);
 
         InOrder invokeInOrder = inOrder(userRepository, userInfoService);
-        invokeInOrder.verify(userRepository).findByEmail(email);
+        invokeInOrder.verify(userRepository).findById(id);
         invokeInOrder.verify(userInfoService).deleteUserInfo(user.getId());
         invokeInOrder.verify(userRepository).delete(userCaptor.capture());
         assertTrue(userCaptor.getValue().getRoles().isEmpty());
@@ -254,27 +274,27 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("updateEmail(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void updateEmail_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = userPrincipal.getEmail();
+        Long id = userPrincipal.getId();
         given(userRepository.findByEmail(NEW_EMAIL)).willReturn(Optional.empty());
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.updateEmail(userPrincipal, NEW_EMAIL));
         verify(userRepository).findByEmail(NEW_EMAIL);
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).update(any(User.class));
     }
 
     @Test
     @DisplayName("updateEmail(): " + UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED)
     void updateEmail_NewEmailIsNotRegistered_UpdatesEmail() {
-        String email = userPrincipal.getEmail();
+        Long id = userPrincipal.getId();
         given(userRepository.findByEmail(NEW_EMAIL)).willReturn(Optional.empty());
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
         UserPrincipal updatedUserPrincipal = userService.updateEmail(userPrincipal, NEW_EMAIL);
         assertEquals(NEW_EMAIL, updatedUserPrincipal.getEmail());
         verify(userRepository).findByEmail(NEW_EMAIL);
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository).update(userCaptor.capture());
         assertEquals(NEW_EMAIL, userCaptor.getValue().getEmail());
 
@@ -283,47 +303,48 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("updatePassword(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void updatePassword_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        Long id = userPrincipal.getId();
+        String password = userPrincipal.getPassword();
+        given(passwordEncoder.matches(PASSWORD_1, password)).willReturn(true);
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.updatePassword(userPrincipal, PASSWORD_1,
-            NEW_EMAIL));
-        verify(userRepository).findByEmail(email);
+            NEW_PASSWORD));
+        verify(passwordEncoder).matches(PASSWORD_1, password);
+        verify(userRepository).findById(id);
+        verify(passwordEncoder, never()).encode(NEW_PASSWORD);
         verify(userRepository, never()).update(any(User.class));
-        verifyNoInteractions(passwordEncoder);
     }
 
     @Test
     @DisplayName("updatePassword(): " + THROWS_BAD_CREDENTIALS_WHEN_CURRENT_PASSWORD_INCORRECT)
     void updatePassword_IncorrectCurrentPassword_ThrowsBadCredentialsException() {
-        String email = userPrincipal.getEmail();
+        Long id = userPrincipal.getId();
         String currentPassword = user.getPassword();
-
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
         given(passwordEncoder.matches(PASSWORD_1, currentPassword)).willReturn(false);
 
         assertThrows(BadCredentialsException.class, () -> userService.updatePassword(userPrincipal, PASSWORD_1,
-            NEW_EMAIL));
-        verify(userRepository).findByEmail(email);
+            NEW_PASSWORD));
         verify(passwordEncoder).matches(PASSWORD_1, currentPassword);
-        verify(passwordEncoder, never()).encode(anyString());
+        verify(userRepository, never()).findById(id);
+        verify(passwordEncoder, never()).encode(NEW_PASSWORD);
         verify(userRepository, never()).update(any(User.class));
     }
 
     @Test
     @DisplayName("updatePassword(): " + UPDATES_PASSWORD_WHEN_CURRENT_PASSWORD_CORRECT)
     void updatePassword_UserExistsAndCorrectOldPassword_UpdatesPassword() {
-        String email = userPrincipal.getEmail();
+        Long id = userPrincipal.getId();
         String currentPassword = user.getPassword();
         String newEncodedPassword = "newEncodedPassword";
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
         given(passwordEncoder.matches(PASSWORD_1, currentPassword)).willReturn(true);
         given(passwordEncoder.encode(NEW_PASSWORD)).willReturn(newEncodedPassword);
 
         UserPrincipal updatedUserPrincipal = userService.updatePassword(userPrincipal, PASSWORD_1, NEW_PASSWORD);
         assertEquals(newEncodedPassword, updatedUserPrincipal.getPassword());
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(passwordEncoder).matches(PASSWORD_1, currentPassword);
         verify(passwordEncoder).encode(NEW_PASSWORD);
         verify(userRepository).update(user);
@@ -340,11 +361,11 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("addRoleToUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void addRoleToUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.addRoleToUser(userPrincipal, ROLE_ADMIN));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).update(any(User.class));
         verifyNoInteractions(roleService);
     }
@@ -352,15 +373,15 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("addRoleToUser(): " + ADDS_ROLE_TO_USER_WHEN_ROLE_NOT_ASSIGNED)
     void addRoleToUser_UserDoesNotHaveRole_AddsRoleToUser() {
-        String email = userPrincipal.getEmail();
+        Long id = userPrincipal.getId();
         GrantedAuthority roleAdded = new SimpleGrantedAuthority(adminRole.getName());
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
         given(roleService.getRole(ROLE_ADMIN)).willReturn(adminRole);
 
         UserPrincipal updatedUserPrincipal = userService.addRoleToUser(userPrincipal, ROLE_ADMIN);
         assertTrue(updatedUserPrincipal.getAuthorities().contains(roleAdded));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(roleService).getRole(ROLE_ADMIN);
         verify(userRepository).update(userCaptor.capture());
         assertTrue(userCaptor.getValue().getRoles().contains(adminRole));
@@ -387,13 +408,13 @@ class UserServiceUnitTests {
     @DisplayName("removeRoleFromUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void removeRoleFromUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.addRole(adminRole);
-        userPrincipal = UserPrincipalImpl.withUser(user);
-        String email = userPrincipal.getEmail();
+        userPrincipal = UserPrincipalImpl.fromUser(user);
+        Long id = userPrincipal.getId();
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.removeRoleFromUser(userPrincipal, ROLE_ADMIN));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).update(any(User.class));
         verifyNoInteractions(roleService);
     }
@@ -402,16 +423,16 @@ class UserServiceUnitTests {
     @DisplayName("removeRoleFromUser(): " + REMOVES_ROLE_WHEN_ROLE_ASSIGNED_AND_REMOVABLE)
     void removeRoleFromUser_RoleIsAssignedAndRemovable_RemovesRole() {
         user.addRole(adminRole);
-        userPrincipal = UserPrincipalImpl.withUser(user);
-        String email = userPrincipal.getEmail();
+        userPrincipal = UserPrincipalImpl.fromUser(user);
+        Long id = userPrincipal.getId();
         GrantedAuthority roleToRemove = new SimpleGrantedAuthority(adminRole.getName());
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
         given(roleService.getRole(ROLE_ADMIN)).willReturn(adminRole);
 
         UserPrincipal updatedUserPrincipal = userService.removeRoleFromUser(userPrincipal, ROLE_ADMIN);
         assertFalse(updatedUserPrincipal.getAuthorities().contains(roleToRemove));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(roleService).getRole(ROLE_ADMIN);
         verify(userRepository).update(userCaptor.capture());
         assertFalse(userCaptor.getValue().getRoles().contains(adminRole));
@@ -421,7 +442,7 @@ class UserServiceUnitTests {
     @DisplayName("lockUser(): " + DOES_NOT_LOCK_USER_WHEN_USER_ALREADY_LOCKED)
     void lockUser_UserAlreadyLocked_DoesNotLockUser() {
         user.setIsLocked(true);
-        userPrincipal = UserPrincipalImpl.withUser(user);
+        userPrincipal = UserPrincipalImpl.fromUser(user);
 
         userService.lockUser(userPrincipal);
         verifyNoInteractions(userRepository);
@@ -430,11 +451,11 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("lockUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void lockUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.lockUser(userPrincipal));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).update(any(User.class));
     }
 
@@ -442,12 +463,12 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("lockUser(): " + LOCKS_USER_WHEN_USER_NOT_LOCKED)
     void lockUser_UserNotLocked_LocksUser() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
         UserPrincipal updatedUserPrincipal = userService.lockUser(userPrincipal);
         assertTrue(updatedUserPrincipal.isLocked());
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository).update(userCaptor.capture());
         assertTrue(userCaptor.getValue().getIsLocked());
     }
@@ -463,13 +484,13 @@ class UserServiceUnitTests {
     @DisplayName("unlockUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void unlockUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.setIsLocked(true);
-        userPrincipal = UserPrincipalImpl.withUser(user);
-        String email = userPrincipal.getEmail();
+        userPrincipal = UserPrincipalImpl.fromUser(user);
+        Long id = userPrincipal.getId();
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.unlockUser(userPrincipal));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).update(any(User.class));
     }
 
@@ -477,14 +498,14 @@ class UserServiceUnitTests {
     @DisplayName("unlockUser(): " + UNLOCKS_USER_WHEN_USER_LOCKED)
     void unlockUser_UserIsLocked_UnlocksUser() {
         user.setIsLocked(true);
-        userPrincipal = UserPrincipalImpl.withUser(user);
-        String email = userPrincipal.getEmail();
+        userPrincipal = UserPrincipalImpl.fromUser(user);
+        Long id = userPrincipal.getId();
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
         UserPrincipal updatedUserPrincipal = userService.unlockUser(userPrincipal);
         assertFalse(updatedUserPrincipal.isLocked());
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository).update(userCaptor.capture());
         assertFalse(userCaptor.getValue().getIsLocked());
     }
@@ -493,7 +514,7 @@ class UserServiceUnitTests {
     @DisplayName("disableUser(): " + DOES_NOT_DISABLE_USER_WHEN_USER_ALREADY_DISABLED)
     void disableUser_UserAlreadyDisabled_DoesNotDisableUser() {
         user.setIsEnabled(false);
-        userPrincipal = UserPrincipalImpl.withUser(user);
+        userPrincipal = UserPrincipalImpl.fromUser(user);
 
         userService.disableUser(userPrincipal);
         verifyNoInteractions(userRepository);
@@ -502,23 +523,23 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("disableUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void disableUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.disableUser(userPrincipal));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).update(any(User.class));
     }
 
     @Test
     @DisplayName("disableUser(): " + DISABLES_USER_WHEN_USER_ENABLED)
     void disableUser_UserEnabled_DisablesUser() {
-        String email = userPrincipal.getEmail();
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        Long id = userPrincipal.getId();
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
         UserPrincipal updatedUserPrincipal = userService.disableUser(userPrincipal);
         assertFalse(updatedUserPrincipal.isEnabled());
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository).update(userCaptor.capture());
         assertFalse(userCaptor.getValue().getIsEnabled());
     }
@@ -534,13 +555,13 @@ class UserServiceUnitTests {
     @DisplayName("enableUser(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void enableUser_UserDoesNotExist_ThrowsUserNotFoundException() {
         user.setIsEnabled(false);
-        userPrincipal = UserPrincipalImpl.withUser(user);
-        String email = userPrincipal.getEmail();
+        userPrincipal = UserPrincipalImpl.fromUser(user);
+        Long id = userPrincipal.getId();
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(userRepository.findById(id)).willReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.enableUser(userPrincipal));
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository, never()).update(any(User.class));
     }
 
@@ -548,14 +569,14 @@ class UserServiceUnitTests {
     @DisplayName("enableUser(): " + ENABLES_USER_WHEN_USER_DISABLED)
     void enableUser_UserDisabled_EnablesUser() {
         user.setIsEnabled(false);
-        userPrincipal = UserPrincipalImpl.withUser(user);
-        String email = userPrincipal.getEmail();
+        userPrincipal = UserPrincipalImpl.fromUser(user);
+        Long id = userPrincipal.getId();
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
 
         UserPrincipal updatedUserPrincipal = userService.enableUser(userPrincipal);
         assertTrue(updatedUserPrincipal.isEnabled());
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findById(id);
         verify(userRepository).update(userCaptor.capture());
         assertTrue(userCaptor.getValue().getIsEnabled());
     }

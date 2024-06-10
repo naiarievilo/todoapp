@@ -51,7 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UserPrincipal userPrincipal;
         try {
             verifiedJWT = jwtService.verifyToken(token);
-            userPrincipal = userService.loadUserPrincipalByEmail(verifiedJWT.getSubject());
+            Long userId = Long.valueOf(verifiedJWT.getSubject());
+            userPrincipal = userService.loadUserPrincipalById(userId);
 
         } catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
