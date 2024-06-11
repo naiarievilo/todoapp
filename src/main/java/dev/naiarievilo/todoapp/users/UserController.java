@@ -4,9 +4,10 @@ import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.JwtService;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalAuthenticationToken;
-import dev.naiarievilo.todoapp.users.dtos.UserAuthenticationDTO;
-import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
-import dev.naiarievilo.todoapp.users.dtos.UserCredentialsUpdateDTO;
+import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
+import dev.naiarievilo.todoapp.users.dtos.UpdateCredentialsDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserDTO;
+import dev.naiarievilo.todoapp.users.dtos.groups.AuthenticateUser;
 import dev.naiarievilo.todoapp.users.dtos.groups.UpdateEmail;
 import dev.naiarievilo.todoapp.users.dtos.groups.UpdatePassword;
 import jakarta.validation.Valid;
@@ -39,8 +40,8 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
-        UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
+    public ResponseEntity<Void> createUser(@RequestBody @Valid CreateUserDTO createUserDTO) {
+        UserPrincipal userPrincipal = userService.createUser(createUserDTO);
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
 
         return ResponseEntity
@@ -51,11 +52,9 @@ public class UserController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<Void> authenticateUser(@Valid @RequestBody UserAuthenticationDTO userAuthenticationDTO) {
+    public ResponseEntity<Void> authenticateUser(@RequestBody @Validated(AuthenticateUser.class) UserDTO userDTO) {
         var authentication = (UserPrincipalAuthenticationToken) authenticationManager.authenticate(
-            EmailPasswordAuthenticationToken.unauthenticated(
-                userAuthenticationDTO.email(), userAuthenticationDTO.password()
-            )
+            EmailPasswordAuthenticationToken.unauthenticated(userDTO.email(), userDTO.password())
         );
 
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication.getPrincipal());
@@ -83,16 +82,16 @@ public class UserController {
 
     @PutMapping("/update-email")
     public ResponseEntity<Void> updateEmail(@AuthenticationPrincipal UserPrincipal userPrincipal,
-        @RequestBody @Validated(UpdateEmail.class) UserCredentialsUpdateDTO userCredentialsUpdateDTO) {
-        userService.updateEmail(userPrincipal, userCredentialsUpdateDTO.newEmail());
+        @RequestBody @Validated(UpdateEmail.class) UpdateCredentialsDTO updateCredentialsDTO) {
+        userService.updateEmail(userPrincipal, updateCredentialsDTO.newEmail());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PutMapping("/update-password")
     public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal UserPrincipal userPrincipal,
-        @RequestBody @Validated(UpdatePassword.class) UserCredentialsUpdateDTO userCredentialsUpdateDTO) {
-        userService.updatePassword(userPrincipal, userCredentialsUpdateDTO.currentPassword(),
-            userCredentialsUpdateDTO.newPassword());
+        @RequestBody @Validated(UpdatePassword.class) UpdateCredentialsDTO updateCredentialsDTO) {
+        userService.updatePassword(userPrincipal, updateCredentialsDTO.currentPassword(),
+            updateCredentialsDTO.newPassword());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

@@ -7,7 +7,7 @@ import dev.naiarievilo.todoapp.validation.MatchingFields;
 import dev.naiarievilo.todoapp.validation.Password;
 
 @MatchingFields(targetField = "newPassword", matchingField = "confirmNewPassword", groups = UpdatePassword.class)
-public record UserCredentialsUpdateDTO(
+public record UpdateCredentialsDTO(
     @Email(groups = UpdateEmail.class)
     String newEmail,
 

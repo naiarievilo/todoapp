@@ -2,7 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
-import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
 
 public interface UserService {
 
@@ -16,7 +16,7 @@ public interface UserService {
 
     User getUserById(Long id);
 
-    UserPrincipal createUser(UserCreationDTO userCreationDTO);
+    UserPrincipal createUser(CreateUserDTO createUserDTO);
 
     void deleteUser(UserPrincipal userPrincipal);
 

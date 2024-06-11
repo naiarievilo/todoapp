@@ -5,7 +5,7 @@ import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
-import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -52,13 +52,13 @@ class UserServiceUnitTests {
     private ArgumentCaptor<User> userCaptor;
     private User user;
     private UserPrincipal userPrincipal;
-    private UserCreationDTO userCreationDTO;
+    private CreateUserDTO createUserDTO;
     private Role userRole;
     private Role adminRole;
 
     @BeforeEach
     void setUpUser() {
-        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
+        createUserDTO = new CreateUserDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
         userRole = new Role();
         userRole.setId(1L);
@@ -185,10 +185,10 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("createUser(): " + THROWS_USER_ALREADY_EXISTS_WHEN_USER_ALREADY_EXISTS)
     void createUser_UserAlreadyExists_ThrowsUserAlreadyExistException() {
-        String email = userCreationDTO.email();
+        String email = createUserDTO.email();
         given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
 
-        assertThrows(UserAlreadyExistsException.class, () -> userService.createUser(userCreationDTO));
+        assertThrows(UserAlreadyExistsException.class, () -> userService.createUser(createUserDTO));
         verify(userRepository).findByEmail(email);
         verify(userRepository, never()).update(any(User.class));
         verifyNoInteractions(roleService);
@@ -199,8 +199,8 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("createUser(): " + CREATES_USER_WHEN_USER_DOES_NOT_EXIST)
     void createUser_UserDoestNotExist_CreatesUser() {
-        String email = userCreationDTO.email();
-        String password = userCreationDTO.password();
+        String email = createUserDTO.email();
+        String password = createUserDTO.password();
         String encodedPassword = "encodedPassword";
         GrantedAuthority userRoleAuthority = new SimpleGrantedAuthority(ROLE_USER.name());
 
@@ -209,7 +209,7 @@ class UserServiceUnitTests {
         given(passwordEncoder.encode(password)).willReturn(encodedPassword);
         given(userRepository.persist(user)).willReturn(user);
 
-        UserPrincipal returnedUserPrincipal = userService.createUser(userCreationDTO);
+        UserPrincipal returnedUserPrincipal = userService.createUser(createUserDTO);
         assertEquals(userPrincipal, returnedUserPrincipal);
         assertEquals(encodedPassword, returnedUserPrincipal.getPassword());
 
@@ -221,7 +221,7 @@ class UserServiceUnitTests {
         invokeInOrder.verify(roleService).getRole(ROLE_USER);
         invokeInOrder.verify(passwordEncoder).encode(password);
         invokeInOrder.verify(userRepository).persist(userCaptor.capture());
-        invokeInOrder.verify(userInfoService).createUserInfo(userCreationDTO, user);
+        invokeInOrder.verify(userInfoService).createUserInfo(createUserDTO, user);
 
         User userCaptured = userCaptor.getValue();
         assertEquals(encodedPassword, userCaptured.getPassword());

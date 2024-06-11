@@ -6,7 +6,7 @@ import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
-import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -77,8 +77,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
-        String email = userCreationDTO.email();
+    public UserPrincipal createUser(CreateUserDTO createUserDTO) {
+        String email = createUserDTO.email();
         if (userExists(email)) {
             throw new UserAlreadyExistsException(email);
         }
@@ -86,11 +86,11 @@ public class UserServiceImpl implements UserService {
         Role defaultRole = roleService.getRole(ROLE_USER);
         User newUser = new User();
         newUser.setEmail(email);
-        newUser.setPassword(passwordEncoder.encode(userCreationDTO.password()));
+        newUser.setPassword(passwordEncoder.encode(createUserDTO.password()));
         newUser.addRole(defaultRole);
 
         userRepository.persist(newUser);
-        userInfoService.createUserInfo(userCreationDTO, newUser);
+        userInfoService.createUserInfo(createUserDTO, newUser);
 
         return UserPrincipalImpl.fromUser(newUser);
     }

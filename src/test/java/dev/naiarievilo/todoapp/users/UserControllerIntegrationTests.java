@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.naiarievilo.todoapp.security.ErrorDetails;
 import dev.naiarievilo.todoapp.security.JwtService;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
-import dev.naiarievilo.todoapp.users.dtos.UserAuthenticationDTO;
-import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
-import dev.naiarievilo.todoapp.users.dtos.UserCredentialsUpdateDTO;
+import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
+import dev.naiarievilo.todoapp.users.dtos.UpdateCredentialsDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -53,24 +53,24 @@ class UserControllerIntegrationTests {
     @Autowired
     MockMvc mockMvc;
 
-    private UserCreationDTO userCreationDTO;
-    private UserCreationDTO otherUserCreationDTO;
-    private UserAuthenticationDTO userAuthenticationDTO;
+    private CreateUserDTO createUserDTO;
+    private CreateUserDTO otherCreateUserDTO;
+    private UserDTO userDTO;
     private UserPrincipal userPrincipal;
     private Exception exception;
 
     @BeforeEach
     void setUp() {
-        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
-        otherUserCreationDTO = new UserCreationDTO(EMAIL_2, PASSWORD_2, CONFIRM_PASSWORD_2, FIRST_NAME_2, LAST_NAME_2);
-        userAuthenticationDTO = new UserAuthenticationDTO(userCreationDTO.email(), userCreationDTO.password());
+        createUserDTO = new CreateUserDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
+        otherCreateUserDTO = new CreateUserDTO(EMAIL_2, PASSWORD_2, CONFIRM_PASSWORD_2, FIRST_NAME_2, LAST_NAME_2);
+        userDTO = new UserDTO(null, createUserDTO.email(), createUserDTO.password());
     }
 
     @Test
     @DisplayName("createUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_USER_CREATION_DTO_NOT_VALID)
     void createUser_UserCreationDTONotValid_ReturnsErrorDetails() throws Exception {
         var invalidUserCreationDTO =
-            new UserCreationDTO("notAValidEmail", PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
+            new CreateUserDTO("notAValidEmail", PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
         String responseBody = mockMvc.perform(post("/users/create")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ class UserControllerIntegrationTests {
     void createUser_UserDoesNotExist_CreatesUser() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(post("/users/create")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userCreationDTO))
+                .content(objectMapper.writeValueAsString(createUserDTO))
             )
             .andExpectAll(
                 status().isCreated(),
@@ -116,12 +116,12 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("createUser(): " + STATUS_409_RETURNS_ERROR_MESSAGE_WHEN_USER_ALREADY_EXISTS)
     void createUser_UserAlreadyExists_ReturnsErrorDetails() throws Exception {
-        userService.createUser(userCreationDTO);
-        exception = new UserAlreadyExistsException(userCreationDTO.email());
+        userService.createUser(createUserDTO);
+        exception = new UserAlreadyExistsException(createUserDTO.email());
 
         String responseBody = mockMvc.perform(post("/users/create")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userCreationDTO))
+                .content(objectMapper.writeValueAsString(createUserDTO))
             )
             .andExpect(status().isConflict())
             .andReturn().getResponse().getContentAsString();
@@ -136,11 +136,11 @@ class UserControllerIntegrationTests {
     @Test
     @DisplayName("authenticateUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_USER_AUTHENTICATION_DTO_NOT_VALID)
     void authenticateUser_UserAuthenticationDTONotValid_ReturnsErrorDetails() throws Exception {
-        UserAuthenticationDTO InvalidUserAuthenticationDTO = new UserAuthenticationDTO(EMAIL_1, " ");
+        UserDTO invalidUserDTO = new UserDTO(null, EMAIL_1, " ");
 
         String responseBody = mockMvc.perform(post("/users/authenticate")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(InvalidUserAuthenticationDTO))
+                .content(objectMapper.writeValueAsString(invalidUserDTO))
             )
             .andExpect(status().isBadRequest())
             .andReturn().getResponse().getContentAsString();
@@ -157,13 +157,12 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("authenticateUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_EMAIL_OR_PASSWORD_INCORRECT)
     void authenticateUser_EmailOrPasswordIncorrect_ReturnsErrorDetails() throws Exception {
-        userService.createUser(userCreationDTO);
-        UserAuthenticationDTO wrongAuthenticationCredentials = new UserAuthenticationDTO(EMAIL_1,
-            "wrongSecurePassword123!?");
+        userService.createUser(createUserDTO);
+        UserDTO userDTOWithWrongPassword = new UserDTO(null, EMAIL_1, "wrongSecurePassword123!?");
 
         String content = mockMvc.perform(post("/users/authenticate")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(wrongAuthenticationCredentials))
+                .content(objectMapper.writeValueAsString(userDTOWithWrongPassword))
             )
             .andExpectAll(status().isBadRequest())
             .andReturn().getResponse().getContentAsString();
@@ -179,12 +178,12 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("authenticateUser(): " + STATUS_200_AUTHENTICATES_USER_WHEN_CREDENTIALS_ARE_VALID)
     void authenticateUser_CredentialsValid_AuthenticatesUser() throws Exception {
-        userService.createUser(userCreationDTO);
+        userService.createUser(createUserDTO);
 
         mockMvc
             .perform(post("/users/authenticate")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userAuthenticationDTO))
+                .content(objectMapper.writeValueAsString(userDTO))
             )
             .andExpectAll(
                 status().isOk(),
@@ -214,7 +213,7 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("getNewAccessToken(): " + STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_REFRESH_TOKEN_VALID)
     void getNewAccessToken_RefreshTokenValid_ReturnsNewAccessToken() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
+        userPrincipal = userService.createUser(createUserDTO);
         String refreshToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(REFRESH_TOKEN);
 
         String accessToken = mockMvc.perform(put("/users/reauthenticate")
@@ -235,7 +234,7 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("deleteUser(): " + STATUS_204_DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
+        userPrincipal = userService.createUser(createUserDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
 
         mockMvc
@@ -249,7 +248,7 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("deleteUser(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_NOT_FOUND)
     void deleteUser_UserDoesNotExist_ReturnsErrorDetails() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
+        userPrincipal = userService.createUser(createUserDTO);
         String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
         exception = new UserNotFoundException(userPrincipal.getId());
 
@@ -277,9 +276,9 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updateEmail(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_NEW_EMAIL_NOT_VALID)
     void updateEmail_EmailNotValid_ReturnsErrorDetails() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
+        userPrincipal = userService.createUser(createUserDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
-        var updateCredentialsDTO = new UserCredentialsUpdateDTO("invalidEmail", null, null, null);
+        var updateCredentialsDTO = new UpdateCredentialsDTO("invalidEmail", null, null, null);
 
         String responseBody = mockMvc.perform(put("/users/update-email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
@@ -301,12 +300,12 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updateEmail(): " + STATUS_409_RETURNS_ERROR_MESSAGE_WHEN_NEW_EMAIL_ALREADY_REGISTERED)
     void updateEmail_EmailAlreadyRegistered_ReturnsErrorDetails() throws Exception {
-        userService.createUser(otherUserCreationDTO);
-        userPrincipal = userService.createUser(userCreationDTO);
+        userService.createUser(otherCreateUserDTO);
+        userPrincipal = userService.createUser(createUserDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
 
-        exception = new EmailAlreadyRegisteredException(otherUserCreationDTO.email());
-        var updateCredentialsDTO = new UserCredentialsUpdateDTO(otherUserCreationDTO.email(), null, null, null);
+        exception = new EmailAlreadyRegisteredException(otherCreateUserDTO.email());
+        var updateCredentialsDTO = new UpdateCredentialsDTO(otherCreateUserDTO.email(), null, null, null);
 
         String responseBody = mockMvc.perform(put("/users/update-email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
@@ -330,9 +329,9 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updateEmail(): " + STATUS_200_UPDATES_USER_EMAIL_WHEN_NEW_EMAIL_VALID_AND_NOT_REGISTERED)
     void updateEmail_EmailValidAndNotRegistered_ReturnsNewAccessAndRefreshTokens() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
+        userPrincipal = userService.createUser(createUserDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
-        var updateCredentialsDTO = new UserCredentialsUpdateDTO(NEW_EMAIL, null, null, null);
+        var updateCredentialsDTO = new UpdateCredentialsDTO(NEW_EMAIL, null, null, null);
 
         mockMvc
             .perform(put("/users/update-email")
@@ -347,9 +346,9 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updatePassword(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updatePassword_NewPasswordNotValid_ReturnsErrorDetails() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
+        userPrincipal = userService.createUser(createUserDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
-        var updateCredentialsDTO = new UserCredentialsUpdateDTO(userCreationDTO.email(), "", "newPassword",
+        var updateCredentialsDTO = new UpdateCredentialsDTO(createUserDTO.email(), "", "newPassword",
             "confirm");
 
         List<String> expectedErrorMessages = List.of(

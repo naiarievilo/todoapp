@@ -1,7 +1,7 @@
 package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +27,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     @Transactional
-    public void createUserInfo(UserCreationDTO userCreationDTO, User user) {
+    public void createUserInfo(CreateUserDTO createUserDTO, User user) {
         Long userId = user.getId();
         if (userInfoExists(userId)) {
             throw new UserInfoAlreadyExistsException(userId);
@@ -36,8 +36,8 @@ public class UserInfoServiceImpl implements UserInfoService {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(userId);
         userInfo.setUser(user);
-        userInfo.setFirstName(userCreationDTO.firstName());
-        userInfo.setLastName(userCreationDTO.lastName());
+        userInfo.setFirstName(createUserDTO.firstName());
+        userInfo.setLastName(createUserDTO.lastName());
 
         userInfoRepository.persist(userInfo);
     }
