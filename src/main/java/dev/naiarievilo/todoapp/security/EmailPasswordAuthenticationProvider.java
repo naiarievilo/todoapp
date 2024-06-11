@@ -3,14 +3,11 @@ package dev.naiarievilo.todoapp.security;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserService;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
-import org.apache.commons.lang3.Validate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.IS_INSTANCE_OF;
 
 public class EmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
@@ -25,8 +22,6 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Validate.isInstanceOf(EmailPasswordAuthenticationToken.class, authentication, IS_INSTANCE_OF);
-
         String email = (String) authentication.getPrincipal();
         String password = (String) authentication.getCredentials();
 

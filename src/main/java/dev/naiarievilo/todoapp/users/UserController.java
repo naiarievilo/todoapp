@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createUser(@Valid @RequestBody UserCreationDTO userCreationDTO) {
+    public ResponseEntity<Void> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
         UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
 
@@ -84,12 +84,12 @@ public class UserController {
     @PutMapping("/update-email")
     public ResponseEntity<Void> updateEmail(@AuthenticationPrincipal UserPrincipal userPrincipal,
         @RequestBody @Validated(UpdateEmail.class) UserCredentialsUpdateDTO userCredentialsUpdateDTO) {
-        userService.updateEmail(userPrincipal, userCredentialsUpdateDTO.email());
+        userService.updateEmail(userPrincipal, userCredentialsUpdateDTO.newEmail());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity<String> updatePassword(@AuthenticationPrincipal UserPrincipal userPrincipal,
+    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal UserPrincipal userPrincipal,
         @RequestBody @Validated(UpdatePassword.class) UserCredentialsUpdateDTO userCredentialsUpdateDTO) {
         userService.updatePassword(userPrincipal, userCredentialsUpdateDTO.currentPassword(),
             userCredentialsUpdateDTO.newPassword());

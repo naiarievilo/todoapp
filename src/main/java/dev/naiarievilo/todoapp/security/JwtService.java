@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static dev.naiarievilo.todoapp.security.JwtConstants.*;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_BLANK;
 
 @Service
 public class JwtService {
@@ -36,7 +36,7 @@ public class JwtService {
     }
 
     public String createAccessToken(String refreshToken) {
-        Validate.notBlank(refreshToken);
+        Validate.notBlank(refreshToken, IS_BLANK, "refreshToken");
         refreshToken = refreshToken.replace(BEARER_PREFIX, "");
         DecodedJWT decodedJwt = this.verifyToken(refreshToken);
 
@@ -52,7 +52,7 @@ public class JwtService {
     }
 
     public DecodedJWT verifyToken(String token) {
-        Validate.notBlank(token, NOT_BLANK);
+        Validate.notBlank(token, IS_BLANK, "token");
         return jwtVerifier.verify(token);
     }
 

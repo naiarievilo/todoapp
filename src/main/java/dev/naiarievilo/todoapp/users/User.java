@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static dev.naiarievilo.todoapp.validation.ValidationLengths.EMAIL_MAX_LENGTH;
+
 @Entity(name = "User")
 @Table(name = "users")
 public class User {
@@ -22,7 +24,7 @@ public class User {
     private Long id;
 
     @NaturalId(mutable = true)
-    @Column(name = "email", unique = true, nullable = false, length = 320)
+    @Column(name = "email", unique = true, nullable = false, length = EMAIL_MAX_LENGTH)
     private String email;
 
     @Column(name = "password", nullable = false)

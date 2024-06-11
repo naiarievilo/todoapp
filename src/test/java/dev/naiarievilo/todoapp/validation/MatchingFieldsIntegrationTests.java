@@ -13,15 +13,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = {MethodValidationPostProcessor.class, LocalValidatorFactoryBean.class})
-class PasswordMatchingIntegrationTests {
+class MatchingFieldsIntegrationTests {
 
     @Autowired
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
     @Test
-    @DisplayName("@PasswordMatching: Returns constraint violation error when passwords don't match")
-    void passwordMatching_PasswordsDoNotMatch_DoesNotReturnConstraintViolationError() {
-        TestDTO testDTO = new TestDTO("password", "differentPassword");
+    @DisplayName("@MatchingFields: Returns constraint violation error when passwords don't match")
+    void targetFieldMatching_PasswordsDoNotMatch_DoesNotReturnConstraintViolationError() {
+        TestDTO testDTO = new TestDTO("targetField", "differentPassword");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
@@ -29,16 +29,16 @@ class PasswordMatchingIntegrationTests {
     }
 
     @Test
-    @DisplayName("@PasswordMatching: Does not return constraint violation error when passwords match")
-    void passwordMatching_PasswordsMatch_ReturnsConstraintViolationError() {
-        TestDTO testDTO = new TestDTO("password", "password");
+    @DisplayName("@MatchingFields: Does not return constraint violation error when passwords match")
+    void targetFieldMatching_PasswordsMatch_ReturnsConstraintViolationError() {
+        TestDTO testDTO = new TestDTO("targetField", "targetField");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
         assertFalse(errors.hasErrors());
     }
 
-    @PasswordMatching(password = "password", confirmPassword = "confirmPassword")
+    @MatchingFields(targetField = "password", matchingField = "confirmPassword")
     record TestDTO(
         String password,
         String confirmPassword

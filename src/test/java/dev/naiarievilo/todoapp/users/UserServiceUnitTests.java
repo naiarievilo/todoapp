@@ -285,6 +285,14 @@ class UserServiceUnitTests {
     }
 
     @Test
+    @DisplayName("updateEmail(): " + DOES_NOT_UPDATE_EMAIL_WHEN_NEW_EMAIL_NOT_NEW)
+    void updateEmail_NewEmailAndCurrentEmailEqual_DoesNotUpdateEmail() {
+        userService.updateEmail(userPrincipal, userPrincipal.getEmail());
+        verifyNoInteractions(userRepository);
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
     @DisplayName("updateEmail(): " + UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED)
     void updateEmail_NewEmailIsNotRegistered_UpdatesEmail() {
         Long id = userPrincipal.getId();
@@ -329,6 +337,17 @@ class UserServiceUnitTests {
         verify(userRepository, never()).findById(id);
         verify(passwordEncoder, never()).encode(NEW_PASSWORD);
         verify(userRepository, never()).update(any(User.class));
+    }
+
+    @Test
+    @DisplayName("updatePassword(): " + DOES_NOT_UPDATE_PASSWORD_WHEN_NEW_PASSWORD_NOT_NEW)
+    void updatePassword_NewPasswordEqualToCurrentPassword_DoesNotUpdatePassword() {
+        String currentPassword = userPrincipal.getPassword();
+        given(passwordEncoder.matches(currentPassword, currentPassword)).willReturn(true);
+        userService.updatePassword(userPrincipal, currentPassword, currentPassword);
+        verify(passwordEncoder).matches(currentPassword, PASSWORD_1);
+        verify(passwordEncoder, never()).encode(currentPassword);
+        verifyNoInteractions(userRepository);
     }
 
     @Test

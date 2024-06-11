@@ -108,7 +108,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
-        if (userExists(newEmail)) {
+        if (newEmail.equals(userPrincipal.getEmail())) {
+            return userPrincipal;
+        } else if (userExists(newEmail)) {
             throw new EmailAlreadyRegisteredException(newEmail);
         }
 
@@ -122,7 +124,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserPrincipal updatePassword(UserPrincipal userPrincipal, String currentPassword, String newPassword) {
         if (!passwordEncoder.matches(currentPassword, userPrincipal.getPassword())) {
-            throw new BadCredentialsException("Incorrect current password");
+            throw new BadCredentialsException("Incorrect current targetField");
+        } else if (newPassword.equals(currentPassword)) {
+            return userPrincipal;
         }
 
         User user = getUserById(userPrincipal.getId());

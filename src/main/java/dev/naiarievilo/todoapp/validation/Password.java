@@ -8,18 +8,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.PASSWORD_CONFIRMATION_MUST_MATCH;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 
-@Constraint(validatedBy = PasswordMatchingValidator.class)
-@Target(ElementType.TYPE)
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PasswordMatching {
+@Constraint(validatedBy = PasswordValidator.class)
+public @interface Password {
 
-    String password();
-
-    String confirmPassword();
-
-    String message() default PASSWORD_CONFIRMATION_MUST_MATCH;
+    String message() default MUST_BE_PROVIDED;
 
     Class<?>[] groups() default {};
 

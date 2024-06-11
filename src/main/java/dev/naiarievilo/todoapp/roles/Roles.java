@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_BLANK;
 
 public enum Roles {
     ROLE_ADMIN("Superuser role"),
@@ -38,7 +38,7 @@ public enum Roles {
     }
 
     public static boolean hasRole(String roleName) {
-        Validate.notBlank(roleName, NOT_BLANK);
+        Validate.notBlank(roleName, IS_BLANK, "roleName");
 
         for (Roles role : rolesSet) {
             if (role.name().equals(roleName)) {

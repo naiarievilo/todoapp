@@ -5,18 +5,21 @@ import dev.naiarievilo.todoapp.security.ErrorDetails;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
+import dev.naiarievilo.todoapp.validation.ValidationMessages;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
+import java.util.Objects;
 
 import static dev.naiarievilo.todoapp.security.JwtConstants.JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.COULD_NOT_BE_VALIDATED;
 
 @RestControllerAdvice(basePackageClasses = UserController.class)
 public class UserControllerAdvice {
@@ -30,10 +33,17 @@ public class UserControllerAdvice {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDetails> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         List<String> validationErrorMessages = e.getBindingResult().getAllErrors().stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .map(error -> {
+                if (error instanceof FieldError fieldError) {
+                    String field = fieldError.getField();
+                    String message = error.getDefaultMessage();
+                    return ValidationMessages.formatMessage(
+                        Objects.requireNonNullElse(message, COULD_NOT_BE_VALIDATED), field);
+                }
+                return error.getDefaultMessage();
+            })
             .toList();
         ErrorDetails errorDetails = new ErrorDetails(HttpStatus.BAD_REQUEST, validationErrorMessages);
-
         return ResponseEntity.badRequest().body(errorDetails);
     }
 
@@ -62,7 +72,7 @@ public class UserControllerAdvice {
     }
 
     @ExceptionHandler(JWTVerificationException.class)
-    public ResponseEntity<ErrorDetails> handleJWTVerificationException(JWTVerificationException e) {
+    public ResponseEntity<ErrorDetails> handleJWTVerificationException() {
         ErrorDetails errorDetails = new ErrorDetails(HttpStatus.UNAUTHORIZED, JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }

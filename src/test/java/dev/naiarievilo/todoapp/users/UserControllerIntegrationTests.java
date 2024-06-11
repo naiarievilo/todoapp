@@ -10,6 +10,7 @@ import dev.naiarievilo.todoapp.users.dtos.UserCredentialsUpdateDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
+import dev.naiarievilo.todoapp.validation.ValidationMessages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ import static dev.naiarievilo.todoapp.security.JwtConstants.*;
 import static dev.naiarievilo.todoapp.users.UserController.REFRESH_TOKEN_HEADER;
 import static dev.naiarievilo.todoapp.users.UserControllerTestCaseMessages.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.*;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -82,7 +83,8 @@ class UserControllerIntegrationTests {
         assertNotNull(errorDetails.getTimestamp());
         assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
         assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
-        assertTrue(errorDetails.getMessages().contains(EMAIL_MUST_BE_VALID));
+        String expectedErrorMessage = ValidationMessages.formatMessage(NOT_VALID, "email");
+        assertTrue(errorDetails.getMessages().contains(expectedErrorMessage));
     }
 
     @Test
@@ -147,7 +149,8 @@ class UserControllerIntegrationTests {
         assertNotNull(errorDetails.getTimestamp());
         assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
         assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
-        assertTrue(errorDetails.getMessages().contains(PASSWORD_MUST_BE_PROVIDED));
+        String expectedErrorMessage = ValidationMessages.formatMessage(MUST_BE_PROVIDED, "password");
+        assertTrue(errorDetails.getMessages().contains(expectedErrorMessage));
     }
 
     @Test
@@ -155,7 +158,8 @@ class UserControllerIntegrationTests {
     @DisplayName("authenticateUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_EMAIL_OR_PASSWORD_INCORRECT)
     void authenticateUser_EmailOrPasswordIncorrect_ReturnsErrorDetails() throws Exception {
         userService.createUser(userCreationDTO);
-        UserAuthenticationDTO wrongAuthenticationCredentials = new UserAuthenticationDTO(EMAIL_1, "wrongPassword");
+        UserAuthenticationDTO wrongAuthenticationCredentials = new UserAuthenticationDTO(EMAIL_1,
+            "wrongSecurePassword123!?");
 
         String content = mockMvc.perform(post("/users/authenticate")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -289,7 +293,8 @@ class UserControllerIntegrationTests {
         assertNotNull(errorDetails.getTimestamp());
         assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
         assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
-        assertTrue(errorDetails.getMessages().contains(EMAIL_MUST_BE_VALID));
+        String expectedErrorMessage = ValidationMessages.formatMessage(NOT_VALID, "newEmail");
+        assertTrue(errorDetails.getMessages().contains(expectedErrorMessage));
     }
 
     @Test
@@ -344,11 +349,12 @@ class UserControllerIntegrationTests {
     void updatePassword_NewPasswordNotValid_ReturnsErrorDetails() throws Exception {
         userPrincipal = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
-        var updateCredentialsDTO = new UserCredentialsUpdateDTO(userCreationDTO.email(), null, null, "");
+        var updateCredentialsDTO = new UserCredentialsUpdateDTO(userCreationDTO.email(), "", "newPassword",
+            "confirm");
 
         List<String> expectedErrorMessages = List.of(
-            CURRENT_PASSWORD_MUST_BE_PROVIDED, NEW_PASSWORD_MUST_BE_PROVIDED, PASSWORD_CONFIRMATION_MUST_BE_PROVIDED,
-            PASSWORD_CONFIRMATION_MUST_MATCH
+            ValidationMessages.formatMessage(MUST_BE_PROVIDED, "currentPassword"),
+            ValidationMessages.formatMessage(DOES_NOT_MATCH, "newPassword", "confirmNewPassword")
         );
 
         String responseBody = mockMvc.perform(put("/users/update-password")

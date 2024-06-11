@@ -24,6 +24,10 @@ class UserServiceTestCaseMessages {
         "Does not remove role from user when role is not assigned";
     static final String DOES_NOT_UNLOCK_USER_WHEN_USER_ALREADY_UNLOCKED =
         "Does not unlock user when user is already unlocked";
+    static final String DOES_NOT_UPDATE_EMAIL_WHEN_NEW_EMAIL_NOT_NEW =
+        "Does not update user's email when new email is equal to current email";
+    static final String DOES_NOT_UPDATE_PASSWORD_WHEN_NEW_PASSWORD_NOT_NEW =
+        "Does not update user's password when new password is equal to current password";
     static final String ENABLES_USER_WHEN_USER_DISABLED =
         "Enables user when user is disabled";
     static final String LOCKS_USER_WHEN_USER_NOT_LOCKED =
@@ -55,5 +59,5 @@ class UserServiceTestCaseMessages {
     static final String UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED =
         "Updates user's email when new email is not already registered";
     static final String UPDATES_PASSWORD_WHEN_CURRENT_PASSWORD_CORRECT =
-        "Updates password when current password is correct";
+        "Updates user's password when current password is correct";
 }

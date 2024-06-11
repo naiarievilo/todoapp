@@ -1,34 +1,30 @@
 package dev.naiarievilo.todoapp.users.dtos;
 
-import dev.naiarievilo.todoapp.validation.PasswordMatching;
-import jakarta.validation.constraints.Email;
+import dev.naiarievilo.todoapp.validation.Email;
+import dev.naiarievilo.todoapp.validation.MatchingFields;
+import dev.naiarievilo.todoapp.validation.Password;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.*;
 import static dev.naiarievilo.todoapp.validation.ValidationLengths.DEFAULT_MAX_LENGTH;
-import static dev.naiarievilo.todoapp.validation.ValidationLengths.EMAIL_MAX_LENGTH;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 
-@PasswordMatching(password = "password", confirmPassword = "confirmPassword")
+@MatchingFields(targetField = "password", matchingField = "confirmPassword")
 public record UserCreationDTO(
-    @Email(message = EMAIL_MUST_BE_VALID)
-    @NotBlank(message = EMAIL_MUST_BE_PROVIDED)
-    @Size(max = EMAIL_MAX_LENGTH)
+    @Email
     String email,
 
-    @NotBlank(message = PASSWORD_MUST_BE_PROVIDED)
-    @Size(max = DEFAULT_MAX_LENGTH)
+    @Password
     String password,
 
-    @NotBlank(message = PASSWORD_CONFIRMATION_MUST_BE_PROVIDED)
-    @Size(max = DEFAULT_MAX_LENGTH)
+    @Password
     String confirmPassword,
 
-    @NotBlank(message = FIRST_NAME_MUST_BE_PROVIDED)
+    @NotBlank(message = MUST_BE_PROVIDED)
     @Size(max = DEFAULT_MAX_LENGTH)
     String firstName,
 
-    @NotBlank(message = LAST_NAME_MUST_BE_PROVIDED)
+    @NotBlank(message = MUST_BE_PROVIDED)
     @Size(max = DEFAULT_MAX_LENGTH)
     String lastName
 ) {

@@ -12,8 +12,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_BLANK;
-import static dev.naiarievilo.todoapp.validation.ValidationErrorMessages.NOT_EMPTY;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_BLANK;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_EMPTY;
 
 public class UserPrincipalImpl implements UserPrincipal {
 
@@ -26,8 +26,8 @@ public class UserPrincipalImpl implements UserPrincipal {
 
     private UserPrincipalImpl(Long id, String email, String password, Set<GrantedAuthority> roles,
         boolean isLocked, boolean isEnabled) {
-        Validate.notBlank(email, NOT_BLANK);
-        Validate.notBlank(password, NOT_BLANK);
+        Validate.notBlank(email, IS_BLANK);
+        Validate.notBlank(password, IS_BLANK);
 
         this.id = id;
         this.email = email;
@@ -116,20 +116,20 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipalImplBuilder setEmail(String email) {
-            Validate.notBlank(email, NOT_BLANK);
+            Validate.notBlank(email, IS_BLANK);
             this.email = email;
             return this;
         }
 
         public UserPrincipalImplBuilder setPassword(String password) {
-            Validate.notBlank(password, NOT_BLANK);
+            Validate.notBlank(password, IS_BLANK);
             this.password = password;
             return this;
         }
 
 
         public UserPrincipalImplBuilder setRoles(Roles... roles) {
-            Validate.notEmpty(roles, NOT_EMPTY);
+            Validate.notEmpty(roles, IS_EMPTY);
 
             for (Roles role : roles) {
                 this.roles.add(new SimpleGrantedAuthority(role.name()));
@@ -138,7 +138,7 @@ public class UserPrincipalImpl implements UserPrincipal {
         }
 
         public UserPrincipalImplBuilder setRoles(Set<GrantedAuthority> roles) {
-            Validate.notEmpty(roles, NOT_EMPTY);
+            Validate.notEmpty(roles, IS_EMPTY);
             this.roles.addAll(roles);
             return this;
         }
