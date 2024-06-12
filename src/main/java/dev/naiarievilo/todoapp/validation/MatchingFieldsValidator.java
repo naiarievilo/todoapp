@@ -29,7 +29,7 @@ public class MatchingFieldsValidator implements ConstraintValidator<MatchingFiel
             constraintValidatorContext.disableDefaultConstraintViolation();
             constraintValidatorContext
                 .buildConstraintViolationWithTemplate(
-                    ValidationMessages.formatMessage(DOES_NOT_MATCH, targetField, matchingField)
+                    ValidationMessages.formatMessage(DOES_NOT_MATCH, matchingField, targetField)
                 )
                 .addConstraintViolation();
 

@@ -58,6 +58,11 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(UserService userService, PasswordEncoder passwordEncoder) {
         AuthenticationProvider authenticationProvider =
             new EmailPasswordAuthenticationProvider(userService, passwordEncoder);
@@ -70,11 +75,6 @@ public class SecurityConfiguration {
         return RoleHierarchyImpl.withDefaultRolePrefix()
             .role("ADMIN").implies("USER")
             .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }
 

@@ -2,7 +2,7 @@ package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserRepository;
-import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,28 +28,28 @@ class UserInfoIntegrationTests {
     @Autowired
     private UserInfoService userInfoService;
 
-    private CreateUserDTO createUserDTO;
+    private UserCreationDTO userCreationDTO;
     private UserInfo userInfo;
     private User user;
 
     @BeforeEach
     void setUp() {
-        createUserDTO = new CreateUserDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
+        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
         if (user == null) {
-            user = loadUser(createUserDTO);
+            user = loadUser(userCreationDTO);
         }
 
         userInfo = new UserInfo();
         userInfo.setId(user.getId());
         userInfo.setUser(user);
-        userInfo.setFirstName(createUserDTO.firstName());
-        userInfo.setLastName(createUserDTO.lastName());
+        userInfo.setFirstName(userCreationDTO.firstName());
+        userInfo.setLastName(userCreationDTO.lastName());
     }
 
-    private User loadUser(CreateUserDTO createUserDTO) {
+    private User loadUser(UserCreationDTO userCreationDTO) {
         User newUser = new User();
-        newUser.setEmail(createUserDTO.email());
-        newUser.setPassword(createUserDTO.password());
+        newUser.setEmail(userCreationDTO.email());
+        newUser.setPassword(userCreationDTO.password());
         newUser.setFailedLoginAttempts(0);
         return userRepository.persist(newUser);
     }
@@ -96,19 +96,19 @@ class UserInfoIntegrationTests {
     @DisplayName("createUserInfo(): " + THROWS_USER_INFO_ALREADY_EXISTS_WHEN_INFO_ALREADY_EXISTS)
     void createUserInfo_UserInfoAlreadyExists_ThrowsUserInfoAlreadyExists() {
         userInfoRepository.persist(userInfo);
-        assertThrows(UserInfoAlreadyExistsException.class, () -> userInfoService.createUserInfo(createUserDTO, user));
+        assertThrows(UserInfoAlreadyExistsException.class, () -> userInfoService.createUserInfo(userCreationDTO, user));
     }
 
     @Test
     @Transactional
     @DisplayName("createUserInfo(): " + CREATES_USER_INFO_WHEN_USER_INFO_DOES_NOT_EXIST)
     void createUserInfo_UserInfoDoesNotExist_CreatesUserInfo() {
-        userInfoService.createUserInfo(createUserDTO, user);
+        userInfoService.createUserInfo(userCreationDTO, user);
 
         UserInfo createdUserInfo =
             userInfoRepository.findById(userInfo.getId()).orElseThrow(UserInfoNotFoundException::new);
-        assertEquals(createUserDTO.firstName(), createdUserInfo.getFirstName());
-        assertEquals(createUserDTO.lastName(), createdUserInfo.getLastName());
+        assertEquals(userCreationDTO.firstName(), createdUserInfo.getFirstName());
+        assertEquals(userCreationDTO.lastName(), createdUserInfo.getLastName());
     }
 
     @Test

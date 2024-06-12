@@ -1,7 +1,7 @@
 package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 
 public interface UserInfoService {
 
@@ -9,7 +9,7 @@ public interface UserInfoService {
 
     UserInfo getUserInfoById(Long userId);
 
-    void createUserInfo(CreateUserDTO createUserDTO, User user);
+    void createUserInfo(UserCreationDTO userCreationDTO, User user);
 
     void deleteUserInfo(Long userId);
 

@@ -1,7 +1,7 @@
 package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,11 +35,11 @@ class UserInfoUnitTests {
     private ArgumentCaptor<UserInfo> userInfoCaptor;
     private UserInfo userInfo;
     private User user;
-    private CreateUserDTO createUserDTO;
+    private UserCreationDTO userCreationDTO;
 
     @BeforeEach
     void setUp() {
-        createUserDTO = new CreateUserDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
+        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
         user = new User();
         user.setId(ID_1);
@@ -47,8 +47,8 @@ class UserInfoUnitTests {
         userInfo = new UserInfo();
         userInfo.setId(user.getId());
         userInfo.setUser(user);
-        userInfo.setFirstName(createUserDTO.firstName());
-        userInfo.setLastName(createUserDTO.lastName());
+        userInfo.setFirstName(userCreationDTO.firstName());
+        userInfo.setLastName(userCreationDTO.lastName());
     }
 
     @Test
@@ -98,7 +98,7 @@ class UserInfoUnitTests {
         Long id = userInfo.getId();
         given(userInfoRepository.findById(id)).willReturn(Optional.of(userInfo));
 
-        assertThrows(UserInfoAlreadyExistsException.class, () -> userInfoService.createUserInfo(createUserDTO, user));
+        assertThrows(UserInfoAlreadyExistsException.class, () -> userInfoService.createUserInfo(userCreationDTO, user));
         verify(userInfoRepository).findById(id);
         verify(userInfoRepository, never()).persist(any(UserInfo.class));
     }
@@ -109,15 +109,15 @@ class UserInfoUnitTests {
         Long id = userInfo.getId();
         given(userInfoRepository.findById(id)).willReturn(Optional.empty());
 
-        userInfoService.createUserInfo(createUserDTO, user);
+        userInfoService.createUserInfo(userCreationDTO, user);
 
         verify(userInfoRepository).findById(id);
         verify(userInfoRepository).persist(userInfoCaptor.capture());
         UserInfo createdUserInfo = userInfoCaptor.getValue();
         assertEquals(user.getId(), createdUserInfo.getId());
         assertEquals(user, createdUserInfo.getUser());
-        assertEquals(createUserDTO.firstName(), createdUserInfo.getFirstName());
-        assertEquals(createUserDTO.lastName(), createdUserInfo.getLastName());
+        assertEquals(userCreationDTO.firstName(), createdUserInfo.getFirstName());
+        assertEquals(userCreationDTO.lastName(), createdUserInfo.getLastName());
     }
 
     @Test

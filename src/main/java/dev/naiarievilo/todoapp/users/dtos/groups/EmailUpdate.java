@@ -1,5 +1,5 @@
 package dev.naiarievilo.todoapp.users.dtos.groups;
 
-public interface UpdateEmail {
+public interface EmailUpdate {
 
 }

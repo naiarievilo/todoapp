@@ -5,8 +5,8 @@ import dev.naiarievilo.todoapp.validation.MatchingFields;
 import dev.naiarievilo.todoapp.validation.NotBlank;
 import dev.naiarievilo.todoapp.validation.Password;
 
-@MatchingFields(targetField = "password", matchingField = "confirmPassword")
-public record CreateUserDTO(
+@MatchingFields(targetField = "password", matchingField = "passwordConfirmation")
+public record UserCreationDTO(
 
     @Email
     String email,
@@ -15,7 +15,7 @@ public record CreateUserDTO(
     String password,
 
     @Password
-    String confirmPassword,
+    String passwordConfirmation,
 
     @NotBlank
     String firstName,

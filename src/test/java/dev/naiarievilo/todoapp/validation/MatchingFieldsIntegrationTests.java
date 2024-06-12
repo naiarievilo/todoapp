@@ -38,10 +38,10 @@ class MatchingFieldsIntegrationTests {
         assertFalse(errors.hasErrors());
     }
 
-    @MatchingFields(targetField = "password", matchingField = "confirmPassword")
+    @MatchingFields(targetField = "password", matchingField = "passwordConfirmation")
     record TestDTO(
         String password,
-        String confirmPassword
+        String passwordConfirmation
     ) {
 
     }

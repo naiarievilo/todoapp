@@ -5,7 +5,7 @@ import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
-import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -48,18 +48,18 @@ class UserServiceIntegrationTests {
     private UserPrincipal userPrincipal;
     private UserPrincipal staleUserPrincipal;
     private Role adminRole;
-    private CreateUserDTO createUserDTO;
+    private UserCreationDTO userCreationDTO;
 
     @BeforeEach
     void setUp() {
-        createUserDTO = new CreateUserDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
+        userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
         Role userRole = roleService.getRole(ROLE_USER);
         adminRole = roleService.getRole(ROLE_ADMIN);
 
         user = new User();
-        user.setEmail(createUserDTO.email());
-        user.setPassword(createUserDTO.password());
+        user.setEmail(userCreationDTO.email());
+        user.setPassword(userCreationDTO.password());
         user.addRole(userRole);
 
         userPrincipal = UserPrincipalImpl.fromUser(user);
@@ -155,18 +155,18 @@ class UserServiceIntegrationTests {
     @DisplayName("createUser(): " + THROWS_USER_ALREADY_EXISTS_WHEN_USER_ALREADY_EXISTS)
     void createUser_UserAlreadyExists_ThrowsUserAlreadyExistsException() {
         userRepository.persist(user);
-        assertThrows(UserAlreadyExistsException.class, () -> userService.createUser(createUserDTO));
+        assertThrows(UserAlreadyExistsException.class, () -> userService.createUser(userCreationDTO));
     }
 
     @Test
     @Transactional
     @DisplayName("createUser(): " + CREATES_USER_WHEN_USER_DOES_NOT_EXIST)
     void createUser_UserDoesNotExist_CreatesUser() {
-        UserPrincipal returnedUserPrincipal = userService.createUser(createUserDTO);
-        User createdUser = userRepository.findByEmail(createUserDTO.email()).orElseThrow(UserNotFoundException::new);
+        UserPrincipal returnedUserPrincipal = userService.createUser(userCreationDTO);
+        User createdUser = userRepository.findByEmail(userCreationDTO.email()).orElseThrow(UserNotFoundException::new);
         assertEquals(createdUser.getId(), returnedUserPrincipal.getId());
         assertEquals(createdUser.getEmail(), returnedUserPrincipal.getEmail());
-        assertTrue(passwordEncoder.matches(createUserDTO.password(), createdUser.getPassword()));
+        assertTrue(passwordEncoder.matches(userCreationDTO.password(), createdUser.getPassword()));
         assertTrue(userInfoService.userInfoExists(createdUser.getId()));
     }
 
@@ -181,7 +181,7 @@ class UserServiceIntegrationTests {
     @DisplayName("deleteUser(): " + DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() {
         userRepository.persist(user);
-        userInfoService.createUserInfo(createUserDTO, user);
+        userInfoService.createUserInfo(userCreationDTO, user);
         userPrincipal = UserPrincipalImpl.fromUser(user);
 
         userService.deleteUser(userPrincipal);
@@ -233,7 +233,7 @@ class UserServiceIntegrationTests {
     @Transactional
     @DisplayName("updatePassword(): " + THROWS_BAD_CREDENTIALS_WHEN_CURRENT_PASSWORD_INCORRECT)
     void updatePassword_IncorrectOldPassword_ThrowsBadCredentialsException() {
-        UserPrincipal newUserPrincipal = userService.createUser(createUserDTO);
+        UserPrincipal newUserPrincipal = userService.createUser(userCreationDTO);
         String notCurrentPassword = "notCurrentPassword";
         assertThrows(BadCredentialsException.class, () -> userService.updatePassword(newUserPrincipal,
             notCurrentPassword,
@@ -244,7 +244,7 @@ class UserServiceIntegrationTests {
     @Transactional
     @DisplayName("updatePassword(): " + UPDATES_PASSWORD_WHEN_CURRENT_PASSWORD_CORRECT)
     void updatePassword_UserExistsAndCorrectOldPassword_UpdatesPassword() {
-        UserPrincipal newUserPrincipal = userService.createUser(createUserDTO);
+        UserPrincipal newUserPrincipal = userService.createUser(userCreationDTO);
 
         UserPrincipal updatedUserPrincipal = userService.updatePassword(newUserPrincipal, PASSWORD_1, NEW_PASSWORD);
         assertTrue(passwordEncoder.matches(NEW_PASSWORD, updatedUserPrincipal.getPassword()));

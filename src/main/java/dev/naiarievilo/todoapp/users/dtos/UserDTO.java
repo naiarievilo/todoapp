@@ -1,6 +1,6 @@
 package dev.naiarievilo.todoapp.users.dtos;
 
-import dev.naiarievilo.todoapp.users.dtos.groups.AuthenticateUser;
+import dev.naiarievilo.todoapp.users.dtos.groups.UserAuthentication;
 import dev.naiarievilo.todoapp.validation.Email;
 import dev.naiarievilo.todoapp.validation.Password;
 import jakarta.validation.constraints.Positive;
@@ -8,12 +8,12 @@ import jakarta.validation.constraints.Positive;
 public record UserDTO(
 
     @Positive
-    Integer id,
+    Long id,
 
-    @Email(groups = AuthenticateUser.class)
+    @Email(groups = UserAuthentication.class)
     String email,
 
-    @Password(groups = AuthenticateUser.class)
+    @Password(groups = UserAuthentication.class)
     String password
 ) {
 

@@ -1,21 +1,18 @@
 package dev.naiarievilo.todoapp.users;
 
-import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
-import dev.naiarievilo.todoapp.security.JwtService;
-import dev.naiarievilo.todoapp.security.UserPrincipal;
-import dev.naiarievilo.todoapp.security.UserPrincipalAuthenticationToken;
-import dev.naiarievilo.todoapp.users.dtos.CreateUserDTO;
-import dev.naiarievilo.todoapp.users.dtos.UpdateCredentialsDTO;
+import dev.naiarievilo.todoapp.security.*;
+import dev.naiarievilo.todoapp.users.dtos.CredentialsUpdateDTO;
+import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserDTO;
-import dev.naiarievilo.todoapp.users.dtos.groups.AuthenticateUser;
-import dev.naiarievilo.todoapp.users.dtos.groups.UpdateEmail;
-import dev.naiarievilo.todoapp.users.dtos.groups.UpdatePassword;
+import dev.naiarievilo.todoapp.users.dtos.groups.CredentialsUpdate;
+import dev.naiarievilo.todoapp.users.dtos.groups.EmailUpdate;
+import dev.naiarievilo.todoapp.users.dtos.groups.PasswordUpdate;
+import dev.naiarievilo.todoapp.users.dtos.groups.UserAuthentication;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,8 +37,8 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createUser(@RequestBody @Valid CreateUserDTO createUserDTO) {
-        UserPrincipal userPrincipal = userService.createUser(createUserDTO);
+    public ResponseEntity<Void> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
+        UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
 
         return ResponseEntity
@@ -52,7 +49,7 @@ public class UserController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<Void> authenticateUser(@RequestBody @Validated(AuthenticateUser.class) UserDTO userDTO) {
+    public ResponseEntity<Void> authenticateUser(@RequestBody @Validated(UserAuthentication.class) UserDTO userDTO) {
         var authentication = (UserPrincipalAuthenticationToken) authenticationManager.authenticate(
             EmailPasswordAuthenticationToken.unauthenticated(userDTO.email(), userDTO.password())
         );
@@ -65,7 +62,7 @@ public class UserController {
             .build();
     }
 
-    @PutMapping("/reauthenticate")
+    @PostMapping("/reauthenticate")
     public ResponseEntity<Void> getNewAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String refreshToken) {
         String newAccessToken = jwtService.createAccessToken(refreshToken);
         return ResponseEntity
@@ -75,23 +72,37 @@ public class UserController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@Principal UserPrincipal userPrincipal) {
         userService.deleteUser(userPrincipal);
-        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/update-email")
-    public ResponseEntity<Void> updateEmail(@AuthenticationPrincipal UserPrincipal userPrincipal,
-        @RequestBody @Validated(UpdateEmail.class) UpdateCredentialsDTO updateCredentialsDTO) {
-        userService.updateEmail(userPrincipal, updateCredentialsDTO.newEmail());
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PatchMapping("/update-email")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateEmail(
+        @Principal UserPrincipal userPrincipal,
+        @RequestBody @Validated(EmailUpdate.class) CredentialsUpdateDTO newCredentials
+    ) {
+        userService.updateEmail(userPrincipal, newCredentials.newEmail());
     }
 
-    @PutMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal UserPrincipal userPrincipal,
-        @RequestBody @Validated(UpdatePassword.class) UpdateCredentialsDTO updateCredentialsDTO) {
-        userService.updatePassword(userPrincipal, updateCredentialsDTO.currentPassword(),
-            updateCredentialsDTO.newPassword());
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PatchMapping("/update-password")
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePassword(
+        @Principal UserPrincipal userPrincipal,
+        @RequestBody @Validated(PasswordUpdate.class) CredentialsUpdateDTO newCredentials
+    ) {
+        userService.updatePassword(userPrincipal, newCredentials.currentPassword(), newCredentials.newPassword());
     }
+
+    @PatchMapping("/update-credentials")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateCredentials(
+        @Principal UserPrincipal userPrincipal,
+        @RequestBody @Validated(CredentialsUpdate.class) CredentialsUpdateDTO newCredentials
+    ) {
+        userService.updateEmail(userPrincipal, newCredentials.newEmail());
+        userService.updatePassword(userPrincipal, newCredentials.currentPassword(), newCredentials.newPassword());
+    }
+
 }
