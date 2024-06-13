@@ -1,19 +1,21 @@
 package dev.naiarievilo.todoapp.security;
 
+import dev.naiarievilo.todoapp.users.User;
+import dev.naiarievilo.todoapp.users.UserServiceImpl;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
-public class UserPrincipalAuthenticationToken extends AbstractAuthenticationToken {
+public class UserAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final transient UserPrincipal principal;
+    private final transient User user;
     private final transient String credentials;
 
-    public UserPrincipalAuthenticationToken(UserPrincipal principal) {
-        super(principal.getAuthorities());
+    public UserAuthenticationToken(User user) {
+        super(UserServiceImpl.getRolesFromUser(user));
         super.setAuthenticated(true);
-        this.credentials = principal.getPassword();
-        this.principal = principal;
+        this.credentials = user.getPassword();
+        this.user = user;
     }
 
     @Override
@@ -22,31 +24,31 @@ public class UserPrincipalAuthenticationToken extends AbstractAuthenticationToke
     }
 
     @Override
-    public UserPrincipal getPrincipal() {
-        return principal;
+    public User getPrincipal() {
+        return user;
     }
 
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
         throw new IllegalArgumentException(
-            "Authentication status for `UserPrincipalAuthenticationToken` instances cannot be modified" +
+            "Authentication status for `UserAuthenticationToken` instances cannot be modified" +
                 "and should only represent authenticated users.");
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserPrincipalAuthenticationToken token)) return false;
+        if (!(o instanceof UserAuthenticationToken token)) return false;
 
         EqualsBuilder eb = new EqualsBuilder();
-        eb.append(principal, token.principal);
+        eb.append(user, token.user);
         return eb.isEquals();
     }
 
     @Override
     public int hashCode() {
         HashCodeBuilder hb = new HashCodeBuilder();
-        hb.append(principal);
+        hb.append(user);
         return hb.toHashCode();
     }
 }

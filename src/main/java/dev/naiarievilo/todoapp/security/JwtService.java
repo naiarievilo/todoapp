@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import dev.naiarievilo.todoapp.users.User;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -56,17 +57,17 @@ public class JwtService {
         return jwtVerifier.verify(token);
     }
 
-    public Map<String, String> createAccessAndRefreshTokens(UserPrincipal userPrincipal) {
+    public Map<String, String> createAccessAndRefreshTokens(User user) {
         Map<String, String> tokens = new HashMap<>();
-        tokens.put(ACCESS_TOKEN, createToken(userPrincipal, TokenTypes.ACCESS_TOKEN));
-        tokens.put(REFRESH_TOKEN, createToken(userPrincipal, TokenTypes.REFRESH_TOKEN));
+        tokens.put(ACCESS_TOKEN, createToken(user, TokenTypes.ACCESS_TOKEN));
+        tokens.put(REFRESH_TOKEN, createToken(user, TokenTypes.REFRESH_TOKEN));
         return tokens;
     }
 
-    private String createToken(UserPrincipal userPrincipal, TokenTypes tokenType) {
+    private String createToken(User user, TokenTypes tokenType) {
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(userPrincipal.getId().toString())
+            .withSubject(user.getId().toString())
             .withIssuer(issuer)
             .withIssuedAt(now);
 

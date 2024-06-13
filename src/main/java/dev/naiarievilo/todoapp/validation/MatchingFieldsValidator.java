@@ -19,8 +19,8 @@ public class MatchingFieldsValidator implements ConstraintValidator<MatchingFiel
     }
 
     @Override
-    public boolean isValid(Object obj, ConstraintValidatorContext constraintValidatorContext) {
-        BeanWrapper beanWrapper = new BeanWrapperImpl(obj);
+    public boolean isValid(Object object, ConstraintValidatorContext constraintValidatorContext) {
+        BeanWrapper beanWrapper = new BeanWrapperImpl(object);
 
         Object targetFieldValue = beanWrapper.getPropertyValue(targetField);
         Object matchingFieldValue = beanWrapper.getPropertyValue(matchingField);

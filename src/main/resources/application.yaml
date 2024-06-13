@@ -13,6 +13,12 @@ jwt:
   expires-in: ${JWT_EXPIRATION}
   refresh-expires-in: ${JWT_REFRESH_EXPIRATION}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 spring:
   application:
     name: "todoapp"

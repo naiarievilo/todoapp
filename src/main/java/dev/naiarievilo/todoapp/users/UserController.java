@@ -1,6 +1,9 @@
 package dev.naiarievilo.todoapp.users;
 
-import dev.naiarievilo.todoapp.security.*;
+import dev.naiarievilo.todoapp.security.AuthenticatedUser;
+import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
+import dev.naiarievilo.todoapp.security.JwtService;
+import dev.naiarievilo.todoapp.security.UserAuthenticationToken;
 import dev.naiarievilo.todoapp.users.dtos.CredentialsUpdateDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserDTO;
@@ -38,8 +41,8 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<Void> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
-        UserPrincipal userPrincipal = userService.createUser(userCreationDTO);
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        User user = userService.createUser(userCreationDTO);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -50,7 +53,7 @@ public class UserController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<Void> authenticateUser(@RequestBody @Validated(UserAuthentication.class) UserDTO userDTO) {
-        var authentication = (UserPrincipalAuthenticationToken) authenticationManager.authenticate(
+        var authentication = (UserAuthenticationToken) authenticationManager.authenticate(
             EmailPasswordAuthenticationToken.unauthenticated(userDTO.email(), userDTO.password())
         );
 
@@ -73,36 +76,36 @@ public class UserController {
 
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@Principal UserPrincipal userPrincipal) {
-        userService.deleteUser(userPrincipal);
+    public void deleteUser(@AuthenticatedUser User user) {
+        userService.deleteUser(user);
     }
 
     @PatchMapping("/update-email")
     @ResponseStatus(HttpStatus.OK)
     public void updateEmail(
-        @Principal UserPrincipal userPrincipal,
+        @AuthenticatedUser User user,
         @RequestBody @Validated(EmailUpdate.class) CredentialsUpdateDTO newCredentials
     ) {
-        userService.updateEmail(userPrincipal, newCredentials.newEmail());
+        userService.updateEmail(user, newCredentials.newEmail());
     }
 
     @PatchMapping("/update-password")
     @ResponseStatus(HttpStatus.OK)
     public void updatePassword(
-        @Principal UserPrincipal userPrincipal,
+        @AuthenticatedUser User user,
         @RequestBody @Validated(PasswordUpdate.class) CredentialsUpdateDTO newCredentials
     ) {
-        userService.updatePassword(userPrincipal, newCredentials.currentPassword(), newCredentials.newPassword());
+        userService.updatePassword(user, newCredentials.currentPassword(), newCredentials.newPassword());
     }
 
     @PatchMapping("/update-credentials")
     @ResponseStatus(HttpStatus.OK)
     public void updateCredentials(
-        @Principal UserPrincipal userPrincipal,
+        @AuthenticatedUser User user,
         @RequestBody @Validated(CredentialsUpdate.class) CredentialsUpdateDTO newCredentials
     ) {
-        userService.updateEmail(userPrincipal, newCredentials.newEmail());
-        userService.updatePassword(userPrincipal, newCredentials.currentPassword(), newCredentials.newPassword());
+        userService.updateEmail(user, newCredentials.newEmail());
+        userService.updatePassword(user, newCredentials.currentPassword(), newCredentials.newPassword());
     }
 
 }

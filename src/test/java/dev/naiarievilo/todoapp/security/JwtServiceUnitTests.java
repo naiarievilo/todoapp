@@ -31,7 +31,7 @@ class JwtServiceUnitTests {
     private final JwtService jwtService;
     private final JWTVerifier jwtVerifier;
 
-    private UserPrincipal userPrincipal;
+    private User user;
 
     JwtServiceUnitTests() {
         jwtService = new JwtService(JWT_SECRET, JWT_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ISSUER);
@@ -52,22 +52,20 @@ class JwtServiceUnitTests {
         Role userRole = new Role();
         userRole.setName(ROLE_USER.name());
 
-        User user = new User();
+        user = new User();
         user.setId(ID_1);
         user.setEmail(EMAIL_1);
         user.setPassword(PASSWORD_1);
         user.addRole(userRole);
         user.setIsEnabled(true);
         user.setIsLocked(false);
-
-        userPrincipal = UserPrincipalImpl.fromUser(user);
     }
 
     @Test
     @DisplayName("createAccessAndRefreshTokens(): Returns access and refresh tokens when authentication is not null")
     void createAccessAndRefreshTokens_UserPrincipalIsNotNull_CreatesAccessAndRefreshTokens() {
-        String userId = userPrincipal.getId().toString();
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        String userId = user.getId().toString();
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
 
         assertNotNull(tokens);
         assertEquals(2, tokens.size());
@@ -104,7 +102,7 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("createAccessToken(): Creates access token when refresh token is valid")
     void createAccessToken_RefreshTokenIsValid_CreatesAccessToken() {
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
         String refreshToken = tokens.get(REFRESH_TOKEN);
 
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
@@ -132,7 +130,7 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("verifyToken(): Returns `DecodedJWT` when token is valid")
     void verifyToken_TokenIsValid_ReturnsDecodedJWT() {
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(userPrincipal);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
         String accessToken = tokens.get(ACCESS_TOKEN);
 
         DecodedJWT decodedJwt = jwtService.verifyToken(accessToken);

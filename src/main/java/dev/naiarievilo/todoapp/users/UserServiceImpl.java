@@ -4,8 +4,6 @@ import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
-import dev.naiarievilo.todoapp.security.UserPrincipal;
-import dev.naiarievilo.todoapp.security.UserPrincipalImpl;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
@@ -60,12 +58,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserPrincipal loadUserPrincipalById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        return UserPrincipalImpl.fromUser(user);
-    }
-
-    @Override
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
@@ -77,7 +69,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserPrincipal createUser(UserCreationDTO userCreationDTO) {
+    public User createUser(UserCreationDTO userCreationDTO) {
         String email = userCreationDTO.email();
         if (userExists(email)) {
             throw new UserAlreadyExistsException(email);
@@ -92,127 +84,131 @@ public class UserServiceImpl implements UserService {
         userRepository.persist(newUser);
         userInfoService.createUserInfo(userCreationDTO, newUser);
 
-        return UserPrincipalImpl.fromUser(newUser);
+        return newUser;
     }
 
     @Override
     @Transactional
-    public void deleteUser(UserPrincipal userPrincipal) {
-        User user = getUserById(userPrincipal.getId());
+    public void deleteUser(User user) {
         user.removeAllRoles();
-
         userInfoService.deleteUserInfo(user.getId());
         userRepository.delete(user);
     }
 
     @Override
     @Transactional
-    public UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail) {
-        if (newEmail.equals(userPrincipal.getEmail())) {
-            return userPrincipal;
+    public User updateEmail(User user, String newEmail) {
+        if (newEmail.equals(user.getEmail())) {
+            return user;
         } else if (userExists(newEmail)) {
             throw new EmailAlreadyRegisteredException(newEmail);
         }
 
-        User user = getUserById(userPrincipal.getId());
         user.setEmail(newEmail);
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public UserPrincipal updatePassword(UserPrincipal userPrincipal, String currentPassword, String newPassword) {
-        if (!passwordEncoder.matches(currentPassword, userPrincipal.getPassword())) {
-            throw new BadCredentialsException("Incorrect current targetField");
+    public User updatePassword(User user, String currentPassword, String newPassword) {
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new BadCredentialsException("Current password is incorrect");
         } else if (newPassword.equals(currentPassword)) {
-            return userPrincipal;
+            return user;
         }
 
-        User user = getUserById(userPrincipal.getId());
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role) {
-        if (userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
-            return userPrincipal;
+    public User addRoleToUser(User user, Roles role) {
+        Set<Role> userAssignedRoles = user.getRoles();
+        for (Role currentRole : userAssignedRoles) {
+            if (currentRole.getName().equals(role.name())) {
+                return user;
+            }
         }
 
-        User user = getUserById(userPrincipal.getId());
         Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role) {
+    public User removeRoleFromUser(User user, Roles role) {
         if (role.name().equals(ROLE_USER.name())) {
             throw new UserRoleRemovalProhibitedException();
-        } else if (!userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(role.name()))) {
-            return userPrincipal;
         }
 
-        User user = getUserById(userPrincipal.getId());
+        Set<Role> userAssignedRoles = user.getRoles();
+        boolean roleIsAssigned = false;
+        for (Role currentRole : userAssignedRoles) {
+            if (currentRole.getName().equals(role.name())) {
+                roleIsAssigned = true;
+                break;
+            }
+        }
+
+        if (!roleIsAssigned) {
+            return user;
+        }
+
         Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public UserPrincipal lockUser(UserPrincipal userPrincipal) {
-        if (userPrincipal.isLocked()) {
-            return userPrincipal;
+    public User lockUser(User user) {
+        if (user.getIsLocked()) {
+            return user;
         }
 
-        User user = getUserById(userPrincipal.getId());
         user.setIsLocked(true);
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public UserPrincipal unlockUser(UserPrincipal userPrincipal) {
-        if (!userPrincipal.isLocked()) {
-            return userPrincipal;
+    public User unlockUser(User user) {
+        if (!user.getIsLocked()) {
+            return user;
         }
-        User user = getUserById(userPrincipal.getId());
 
         user.setIsLocked(false);
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public UserPrincipal disableUser(UserPrincipal userPrincipal) {
-        if (!userPrincipal.isEnabled()) {
-            return userPrincipal;
+    public User disableUser(User user) {
+        if (!user.getIsEnabled()) {
+            return user;
         }
-        User user = getUserById(userPrincipal.getId());
         user.setIsEnabled(false);
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public UserPrincipal enableUser(UserPrincipal userPrincipal) {
-        if (userPrincipal.isEnabled()) {
-            return userPrincipal;
+    public User enableUser(User user) {
+        if (user.getIsEnabled()) {
+            return user;
         }
-        User user = getUserById(userPrincipal.getId());
         user.setIsEnabled(true);
         userRepository.update(user);
-        return UserPrincipalImpl.fromUser(user);
+        return user;
     }
 
     @Override

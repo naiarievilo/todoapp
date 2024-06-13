@@ -51,5 +51,4 @@ public enum Roles {
     public String description() {
         return description;
     }
-
 }

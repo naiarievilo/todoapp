@@ -1,7 +1,6 @@
 package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Roles;
-import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 
 public interface UserService {
@@ -10,31 +9,29 @@ public interface UserService {
 
     boolean userExists(String email);
 
-    UserPrincipal loadUserPrincipalById(Long id);
-
     User getUserByEmail(String email);
 
     User getUserById(Long id);
 
-    UserPrincipal createUser(UserCreationDTO userCreationDTO);
+    User createUser(UserCreationDTO userCreationDTO);
 
-    void deleteUser(UserPrincipal userPrincipal);
+    void deleteUser(User user);
 
-    UserPrincipal updateEmail(UserPrincipal userPrincipal, String newEmail);
+    User updateEmail(User user, String newEmail);
 
-    UserPrincipal updatePassword(UserPrincipal userPrincipal, String currentPassword, String newPassword);
+    User updatePassword(User user, String currentPassword, String newPassword);
 
-    UserPrincipal addRoleToUser(UserPrincipal userPrincipal, Roles role);
+    User addRoleToUser(User user, Roles roleToAdd);
 
-    UserPrincipal removeRoleFromUser(UserPrincipal userPrincipal, Roles role);
+    User removeRoleFromUser(User user, Roles role);
 
-    UserPrincipal lockUser(UserPrincipal userPrincipal);
+    User lockUser(User user);
 
-    UserPrincipal unlockUser(UserPrincipal userPrincipal);
+    User unlockUser(User user);
 
-    UserPrincipal disableUser(UserPrincipal userPrincipal);
+    User disableUser(User user);
 
-    UserPrincipal enableUser(UserPrincipal userPrincipal);
+    User enableUser(User user);
 
     void addLoginAttempt(User user);
 

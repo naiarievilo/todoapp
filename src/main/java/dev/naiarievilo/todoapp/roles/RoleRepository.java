@@ -13,7 +13,7 @@ public interface RoleRepository extends BaseJpaRepository<Role, Long> {
 
     Optional<Role> findByName(String role);
 
-    @Query("SELECT r FROM Role AS r")
+    @Query("SELECT r FROM Role r")
     List<Role> findAll();
 
     @Transactional
@@ -21,6 +21,6 @@ public interface RoleRepository extends BaseJpaRepository<Role, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM roles", nativeQuery = true)
+    @Query("DELETE FROM Role")
     void deleteAll();
 }

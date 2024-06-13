@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class EmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
     public static final String BAD_CREDENTIALS = "Incorrect email and/or password";
+    private static final int MAX_ATTEMPTS = 10;
+
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
@@ -22,8 +24,8 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String email = (String) authentication.getPrincipal();
-        String password = (String) authentication.getCredentials();
+        var email = (String) authentication.getPrincipal();
+        var password = (String) authentication.getCredentials();
 
         User user;
         try {
@@ -32,13 +34,22 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
             throw new BadCredentialsException(BAD_CREDENTIALS);
         }
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            userService.addLoginAttempt(user);
+        if (user.getIsLocked() || !user.getIsEnabled()) {
             throw new BadCredentialsException(BAD_CREDENTIALS);
         }
 
-        userService.resetLoginAttempts(user);
-        return new UserPrincipalAuthenticationToken(UserPrincipalImpl.fromUser(user));
+        if (user.getFailedLoginAttempts() == MAX_ATTEMPTS) {
+            user.setIsLocked(true);
+            throw new BadCredentialsException(BAD_CREDENTIALS);
+        }
+
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            userService.resetLoginAttempts(user);
+            return new UserAuthenticationToken(user);
+        }
+
+        userService.addLoginAttempt(user);
+        throw new BadCredentialsException(BAD_CREDENTIALS);
     }
 
     @Override

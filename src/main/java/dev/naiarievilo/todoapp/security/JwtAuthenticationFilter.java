@@ -3,6 +3,7 @@ package dev.naiarievilo.todoapp.security;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserService;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
 import jakarta.servlet.FilterChain;
@@ -48,11 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authorization.replaceFirst(BEARER_PREFIX, "");
         DecodedJWT verifiedJWT;
-        UserPrincipal userPrincipal;
+        User authenticatedUser;
         try {
             verifiedJWT = jwtService.verifyToken(token);
             Long userId = Long.valueOf(verifiedJWT.getSubject());
-            userPrincipal = userService.loadUserPrincipalById(userId);
+            authenticatedUser = userService.getUserById(userId);
 
         } catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -67,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        var authentication = new UserPrincipalAuthenticationToken(userPrincipal);
+        var authentication = new UserAuthenticationToken(authenticatedUser);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);

@@ -3,7 +3,6 @@ package dev.naiarievilo.todoapp.users;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.naiarievilo.todoapp.security.ErrorDetails;
 import dev.naiarievilo.todoapp.security.JwtService;
-import dev.naiarievilo.todoapp.security.UserPrincipal;
 import dev.naiarievilo.todoapp.users.dtos.CredentialsUpdateDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserDTO;
@@ -56,8 +55,8 @@ class UserControllerIntegrationTests {
     private UserCreationDTO userCreationDTO;
     private UserCreationDTO otherUserCreationDTO;
     private UserDTO userDTO;
-    private UserPrincipal userPrincipal;
     private Exception exception;
+    private User user;
 
     @BeforeEach
     void setUp() {
@@ -116,7 +115,7 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("createUser(): " + STATUS_409_RETURNS_ERROR_MESSAGE_WHEN_USER_ALREADY_EXISTS)
     void createUser_UserAlreadyExists_ReturnsErrorDetails() throws Exception {
-        userService.createUser(userCreationDTO);
+        user = userService.createUser(userCreationDTO);
         exception = new UserAlreadyExistsException(userCreationDTO.email());
 
         String responseBody = mockMvc.perform(post("/users/create")
@@ -213,8 +212,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("getNewAccessToken(): " + STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_REFRESH_TOKEN_VALID)
     void getNewAccessToken_RefreshTokenValid_ReturnsNewAccessToken() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String refreshToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(REFRESH_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String refreshToken = jwtService.createAccessAndRefreshTokens(user).get(REFRESH_TOKEN);
 
         String accessToken = mockMvc.perform(post("/users/reauthenticate")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + refreshToken)
@@ -234,8 +233,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("deleteUser(): " + STATUS_204_DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
 
         mockMvc
             .perform(delete("/users/delete")
@@ -248,9 +247,9 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("deleteUser(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_NOT_FOUND)
     void deleteUser_UserDoesNotExist_ReturnsErrorDetails() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
-        exception = new UserNotFoundException(userPrincipal.getId());
+        user = userService.createUser(userCreationDTO);
+        String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        exception = new UserNotFoundException(user.getId());
 
         mockMvc
             .perform(delete("/users/delete")
@@ -276,8 +275,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updateEmail(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updateEmail_NewEmailNotValid_ReturnsErrorDetails() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
         var updateCredentialsDTO = new CredentialsUpdateDTO("invalidEmail", null, null, null);
 
         String responseBody = mockMvc.perform(patch("/users/update-email")
@@ -301,8 +300,8 @@ class UserControllerIntegrationTests {
     @DisplayName("updateEmail(): " + STATUS_409_RETURNS_ERROR_MESSAGE_WHEN_NEW_EMAIL_ALREADY_REGISTERED)
     void updateEmail_NewEmailAlreadyRegistered_ReturnsErrorDetails() throws Exception {
         userService.createUser(otherUserCreationDTO);
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
 
         exception = new EmailAlreadyRegisteredException(otherUserCreationDTO.email());
         var updateCredentialsDTO = new CredentialsUpdateDTO(otherUserCreationDTO.email(), null, null, null);
@@ -329,8 +328,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updateEmail(): " + STATUS_200_UPDATES_EMAIL_WHEN_NEW_EMAIL_VALID_AND_NOT_REGISTERED)
     void updateEmail_NewEmailValidAndNotRegistered_ReturnsNewAccessAndRefreshTokens() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
         var updateCredentialsDTO = new CredentialsUpdateDTO(NEW_EMAIL, null, null, null);
 
         mockMvc
@@ -346,8 +345,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updatePassword(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updatePassword_NewPasswordNotValid_ReturnsErrorDetails() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
         var updateCredentialsDTO = new CredentialsUpdateDTO(
             userCreationDTO.email(), "", NEW_PASSWORD, "confirmNewPasswordDoesNotMatch123!"
         );
@@ -379,8 +378,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updatePassword(): " + STATUS_200_UPDATES_PASSWORD_WHEN_NEW_PASSWORD_VALID)
     void updatePassword_NewPasswordValid_UpdatesPassword() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
         var updateCredentialsDTO = new CredentialsUpdateDTO(
             "", userCreationDTO.password(), NEW_PASSWORD, NEW_PASSWORD
         );
@@ -397,8 +396,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updateCredentials(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updateCredentials_NewCredentialsNotValid_ReturnsErrorDetails() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
         var updateCredentialsDTO = new CredentialsUpdateDTO("", "", "", "confirmPasswordDoesNotMatch");
 
         List<String> validationErrorMessages = List.of(
@@ -430,8 +429,8 @@ class UserControllerIntegrationTests {
     @Transactional
     @DisplayName("updateCredentials(): " + STATUS_200_UPDATES_CREDENTIALS_WHEN_NEW_CREDENTIALS_VALID)
     void updateCredentials_NewCredentialsValid_UpdatesCredentials() throws Exception {
-        userPrincipal = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(userPrincipal).get(ACCESS_TOKEN);
+        user = userService.createUser(userCreationDTO);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
         var updateCredentialsDTO =
             new CredentialsUpdateDTO(NEW_EMAIL, userCreationDTO.password(), NEW_PASSWORD, NEW_PASSWORD);
 
