@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.security;
+package dev.naiarievilo.todoapp.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -10,28 +10,22 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.naiarievilo.todoapp.security.JwtConstants.*;
+import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.*;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_BLANK;
 
 @Service
 public class JwtService {
 
-    private final Duration accessTokenExpiration;
     private final Algorithm algorithm;
     private final String issuer;
-    private final Duration refreshTokenExpiration;
     private final JWTVerifier jwtVerifier;
 
-    public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.expires-in}") Integer accessTokenExpiration,
-        @Value("${jwt.refresh-expires-in}") Integer refreshTokenExpiration, @Value("${jwt.issuer}") String issuer) {
+    public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.issuer}") String issuer) {
         this.algorithm = Algorithm.HMAC256(secret);
-        this.accessTokenExpiration = Duration.ofMinutes(accessTokenExpiration);
-        this.refreshTokenExpiration = Duration.ofDays(refreshTokenExpiration);
         this.jwtVerifier = JWT.require(this.algorithm).build();
         this.issuer = issuer;
     }
@@ -47,7 +41,7 @@ public class JwtService {
             .withSubject(userId)
             .withIssuer(issuer)
             .withIssuedAt(now)
-            .withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
+            .withExpiresAt(now.plusMillis(ACCESS_TOKEN.expirationInMillis()));
 
         return jwtBuilder.sign(algorithm);
     }
@@ -59,22 +53,22 @@ public class JwtService {
 
     public Map<String, String> createAccessAndRefreshTokens(User user) {
         Map<String, String> tokens = new HashMap<>();
-        tokens.put(ACCESS_TOKEN, createToken(user, TokenTypes.ACCESS_TOKEN));
-        tokens.put(REFRESH_TOKEN, createToken(user, TokenTypes.REFRESH_TOKEN));
+        tokens.put(ACCESS_TOKEN.key(), createToken(user, ACCESS_TOKEN));
+        tokens.put(REFRESH_TOKEN.key(), createToken(user, REFRESH_TOKEN));
         return tokens;
     }
 
-    private String createToken(User user, TokenTypes tokenType) {
+    private String createToken(User user, JwtTokens tokenType) {
         Instant now = Instant.now();
         JWTCreator.Builder jwtBuilder = JWT.create()
             .withSubject(user.getId().toString())
             .withIssuer(issuer)
             .withIssuedAt(now);
 
-        if (tokenType.equals(TokenTypes.ACCESS_TOKEN)) {
-            jwtBuilder.withExpiresAt(now.plusMillis(accessTokenExpiration.toMillis()));
-        } else if (tokenType.equals(TokenTypes.REFRESH_TOKEN)) {
-            jwtBuilder.withExpiresAt(now.plusMillis(refreshTokenExpiration.toMillis()));
+        if (tokenType.equals(ACCESS_TOKEN)) {
+            jwtBuilder.withExpiresAt(now.plusMillis(ACCESS_TOKEN.expirationInMillis()));
+        } else if (tokenType.equals(REFRESH_TOKEN)) {
+            jwtBuilder.withExpiresAt(now.plusMillis(REFRESH_TOKEN.expirationInMillis()));
         }
 
         return jwtBuilder.sign(algorithm);

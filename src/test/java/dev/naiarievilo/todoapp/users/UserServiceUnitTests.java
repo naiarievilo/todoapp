@@ -17,13 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
+import static dev.naiarievilo.todoapp.users.UserServiceImpl.EMAIL_CONFIRMATION_PERIOD;
 import static dev.naiarievilo.todoapp.users.UserServiceTestCaseMessages.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,6 +70,33 @@ class UserServiceUnitTests {
         user.setEmail(EMAIL_1);
         user.setPassword(PASSWORD_1);
         user.addRole(userRole);
+    }
+
+    @Test
+    @DisplayName("isUserExpired(): returns `false` when user is not expired")
+    void isUserExpired_UserNotExpired_ReturnsFalse() {
+        assertFalse(userService.isUserExpired(user));
+    }
+
+    @Test
+    @DisplayName("isUserExpired(): returns `true` when user is expired")
+    void isUserExpired_UserExpired_ReturnsTrue() {
+        user.setCreationDate(LocalDateTime.now().minusDays(EMAIL_CONFIRMATION_PERIOD));
+        assertTrue(userService.isUserExpired(user));
+    }
+
+    @Test
+    @DisplayName("isUserInactive(): returns `false` when user is active")
+    void isUserInactive_UserActive_ReturnsFalse() {
+        assertFalse(userService.isUserInactive(user));
+    }
+
+    @Test
+    @DisplayName("isUserInactive(): returns `true` when user is inactive")
+    void isUserInactive_UserInactive_ReturnsTrue() {
+        user.setLocked(true);
+        user.setEnabled(false);
+        assertTrue(userService.isUserInactive(user));
     }
 
     @Test
@@ -196,18 +223,20 @@ class UserServiceUnitTests {
 
         User userCaptured = userCaptor.getValue();
         assertEquals(encodedPassword, userCaptured.getPassword());
-        assertTrue(userCaptured.getIsEnabled());
-        assertFalse(userCaptured.getIsLocked());
-        assertEquals(LocalDate.now(), userCaptured.getCreatedOn());
+        assertTrue(userCaptured.isEnabled());
+        assertFalse(userCaptured.isLocked());
     }
 
     @Test
     @DisplayName("deleteUser(): " + DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() {
+        Long id = user.getId();
+        given(userRepository.findById(id)).willReturn(Optional.of(user));
         userService.deleteUser(user);
 
         InOrder invokeInOrder = inOrder(userRepository, userInfoService);
-        invokeInOrder.verify(userInfoService).deleteUserInfo(user.getId());
+        invokeInOrder.verify(userRepository).findById(id);
+        invokeInOrder.verify(userInfoService).deleteUserInfo(id);
         invokeInOrder.verify(userRepository).delete(userCaptor.capture());
         assertTrue(userCaptor.getValue().getRoles().isEmpty());
     }
@@ -240,7 +269,7 @@ class UserServiceUnitTests {
         User updatedUser = userService.updateEmail(user, NEW_EMAIL);
         assertEquals(NEW_EMAIL, updatedUser.getEmail());
         verify(userRepository).findByEmail(NEW_EMAIL);
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).merge(userCaptor.capture());
         assertEquals(NEW_EMAIL, userCaptor.getValue().getEmail());
 
     }
@@ -282,7 +311,7 @@ class UserServiceUnitTests {
         assertEquals(newEncodedPassword, updatedUser.getPassword());
         verify(passwordEncoder).matches(PASSWORD_1, currentPassword);
         verify(passwordEncoder).encode(NEW_PASSWORD);
-        verify(userRepository).update(user);
+        verify(userRepository).merge(user);
     }
 
     @Test
@@ -301,7 +330,7 @@ class UserServiceUnitTests {
         User updatedUser = userService.addRoleToUser(user, ROLE_ADMIN);
         assertTrue(updatedUser.getRoles().contains(adminRole));
         verify(roleService).getRole(ROLE_ADMIN);
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).merge(userCaptor.capture());
         assertTrue(userCaptor.getValue().getRoles().contains(adminRole));
     }
 
@@ -330,14 +359,14 @@ class UserServiceUnitTests {
         User updatedUser = userService.removeRoleFromUser(user, ROLE_ADMIN);
         assertFalse(updatedUser.getRoles().contains(adminRole));
         verify(roleService).getRole(ROLE_ADMIN);
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).merge(userCaptor.capture());
         assertFalse(userCaptor.getValue().getRoles().contains(adminRole));
     }
 
     @Test
     @DisplayName("lockUser(): " + DOES_NOT_LOCK_USER_WHEN_USER_ALREADY_LOCKED)
     void lockUser_UserAlreadyLocked_DoesNotLockUser() {
-        user.setIsLocked(true);
+        user.setLocked(true);
         userService.lockUser(user);
         verifyNoInteractions(userRepository);
     }
@@ -346,9 +375,9 @@ class UserServiceUnitTests {
     @DisplayName("lockUser(): " + LOCKS_USER_WHEN_USER_NOT_LOCKED)
     void lockUser_UserNotLocked_LocksUser() {
         User updatedUser = userService.lockUser(user);
-        assertTrue(updatedUser.getIsLocked());
-        verify(userRepository).update(userCaptor.capture());
-        assertTrue(userCaptor.getValue().getIsLocked());
+        assertTrue(updatedUser.isLocked());
+        verify(userRepository).merge(userCaptor.capture());
+        assertTrue(userCaptor.getValue().isLocked());
     }
 
     @Test
@@ -361,18 +390,18 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("unlockUser(): " + UNLOCKS_USER_WHEN_USER_LOCKED)
     void unlockUser_UserIsLocked_UnlocksUser() {
-        user.setIsLocked(true);
+        user.setLocked(true);
 
         User updatedUser = userService.unlockUser(user);
-        assertFalse(updatedUser.getIsLocked());
-        verify(userRepository).update(userCaptor.capture());
-        assertFalse(userCaptor.getValue().getIsLocked());
+        assertFalse(updatedUser.isLocked());
+        verify(userRepository).merge(userCaptor.capture());
+        assertFalse(userCaptor.getValue().isLocked());
     }
 
     @Test
     @DisplayName("disableUser(): " + DOES_NOT_DISABLE_USER_WHEN_USER_ALREADY_DISABLED)
     void disableUser_UserAlreadyDisabled_DoesNotDisableUser() {
-        user.setIsEnabled(false);
+        user.setEnabled(false);
         userService.disableUser(user);
         verifyNoInteractions(userRepository);
     }
@@ -381,9 +410,9 @@ class UserServiceUnitTests {
     @DisplayName("disableUser(): " + DISABLES_USER_WHEN_USER_ENABLED)
     void disableUser_UserEnabled_DisablesUser() {
         User updatedUser = userService.disableUser(user);
-        assertFalse(updatedUser.getIsEnabled());
-        verify(userRepository).update(userCaptor.capture());
-        assertFalse(userCaptor.getValue().getIsEnabled());
+        assertFalse(updatedUser.isEnabled());
+        verify(userRepository).merge(userCaptor.capture());
+        assertFalse(userCaptor.getValue().isEnabled());
     }
 
     @Test
@@ -396,36 +425,36 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("enableUser(): " + ENABLES_USER_WHEN_USER_DISABLED)
     void enableUser_UserDisabled_EnablesUser() {
-        user.setIsEnabled(false);
+        user.setEnabled(false);
 
         User updatedUser = userService.enableUser(user);
-        assertTrue(updatedUser.getIsEnabled());
-        verify(userRepository).update(userCaptor.capture());
-        assertTrue(userCaptor.getValue().getIsEnabled());
+        assertTrue(updatedUser.isEnabled());
+        verify(userRepository).merge(userCaptor.capture());
+        assertTrue(userCaptor.getValue().isEnabled());
     }
 
     @Test
     @DisplayName("addLoginAttempt(): " + ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void addLoginAttempt_UserIsNotNull_AddsLoginAttempt() {
-        int oldLoginAttempts = user.getFailedLoginAttempts();
+        int oldLoginAttempts = user.getLoginAttempts();
         LocalDateTime oldLocalTime = LocalDateTime.now();
-        user.setFailedLoginTime(oldLocalTime);
+        user.setLastLoginAttempt(oldLocalTime);
 
         userService.addLoginAttempt(user);
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).merge(userCaptor.capture());
         User userCaptured = userCaptor.getValue();
-        assertNotEquals(oldLoginAttempts, userCaptured.getFailedLoginAttempts());
-        assertNotEquals(oldLocalTime, userCaptured.getFailedLoginTime());
+        assertNotEquals(oldLoginAttempts, userCaptured.getLoginAttempts());
+        assertNotEquals(oldLocalTime, userCaptured.getLastLoginAttempt());
     }
 
     @Test
     @DisplayName("resetLoginAttempts(): " + RESETS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void resetLoginAttempts_UserIsNotNull_ResetsLoginAttempts() {
-        user.setFailedLoginAttempts(2);
+        user.setLoginAttempts((byte) 2);
 
         userService.resetLoginAttempts(user);
-        verify(userRepository).update(userCaptor.capture());
-        assertEquals(0, userCaptor.getValue().getFailedLoginAttempts());
+        verify(userRepository).merge(userCaptor.capture());
+        assertEquals(0, userCaptor.getValue().getLoginAttempts());
     }
 
 }

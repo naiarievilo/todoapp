@@ -50,7 +50,7 @@ class UserInfoIntegrationTests {
         User newUser = new User();
         newUser.setEmail(userCreationDTO.email());
         newUser.setPassword(userCreationDTO.password());
-        newUser.setFailedLoginAttempts(0);
+        newUser.setLoginAttempts((byte) 0);
         return userRepository.persist(newUser);
     }
 

@@ -5,7 +5,7 @@ import dev.naiarievilo.todoapp.roles.Roles;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
+import java.util.List;
 
 @Component
 public class ApplicationDataLoader {
@@ -22,7 +22,7 @@ public class ApplicationDataLoader {
     }
 
     private void loadRoles() {
-        Set<Roles> roles = Roles.roles();
+        List<Roles> roles = Roles.roles();
 
         for (Roles role : roles) {
             if (!roleService.roleExists(role)) {

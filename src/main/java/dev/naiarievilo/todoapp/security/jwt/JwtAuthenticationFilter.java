@@ -1,8 +1,10 @@
-package dev.naiarievilo.todoapp.security;
+package dev.naiarievilo.todoapp.security.jwt;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.naiarievilo.todoapp.security.ErrorDetails;
+import dev.naiarievilo.todoapp.security.UserAuthenticationToken;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserService;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -21,8 +23,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static dev.naiarievilo.todoapp.security.JwtConstants.BEARER_PREFIX;
-import static dev.naiarievilo.todoapp.security.JwtConstants.JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED;
+import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.BEARER_PREFIX;
+import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -48,17 +50,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authorization.replaceFirst(BEARER_PREFIX, "");
-        DecodedJWT verifiedJWT;
-        User authenticatedUser;
+        User user;
         try {
-            verifiedJWT = jwtService.verifyToken(token);
+            DecodedJWT verifiedJWT = jwtService.verifyToken(token);
             Long userId = Long.valueOf(verifiedJWT.getSubject());
-            authenticatedUser = userService.getUserById(userId);
+            user = userService.getUserById(userId);
 
         } catch (JWTVerificationException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            var errorDetails = new ErrorDetails(HttpStatus.UNAUTHORIZED, JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED);
-            response.getWriter().print(objectMapper.writeValueAsString(errorDetails));
+            buildJwtErrorDetailsResponse(response);
             return;
 
         } catch (UserNotFoundException e) {
@@ -68,12 +67,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        var authentication = new UserAuthenticationToken(authenticatedUser);
+        if (userService.isUserExpired(user)) {
+            userService.deleteUser(user);
+            this.buildJwtErrorDetailsResponse(response);
+            return;
+
+        } else if (userService.isUserInactive(user)) {
+            this.buildJwtErrorDetailsResponse(response);
+            return;
+        }
+
+        var authentication = new UserAuthenticationToken(user);
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
 
         filterChain.doFilter(request, response);
+    }
+
+    private void buildJwtErrorDetailsResponse(HttpServletResponse response) throws IOException {
+        var errorDetails = new ErrorDetails(HttpStatus.UNAUTHORIZED, JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().print(objectMapper.writeValueAsString(errorDetails));
     }
 }

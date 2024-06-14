@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.validation.ValidationLengths.EMAIL_MAX_LENGTH;
 
 @Entity(name = "User")
 @Table(name = "users")
@@ -24,29 +23,35 @@ public class User {
     private Long id;
 
     @NaturalId(mutable = true)
-    @Column(name = "email", unique = true, nullable = false, length = EMAIL_MAX_LENGTH)
+    @Column(name = "email", unique = true, nullable = false, length = 320)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", length = 80, nullable = false)
     private String password;
 
-    @Column(name = "is_enabled", nullable = false)
-    private boolean isEnabled = true;
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true;
 
-    @Column(name = "is_locked", nullable = false)
-    private boolean isLocked = false;
+    @Column(name = "locked", nullable = false)
+    private boolean locked = false;
 
-    @Column(name = "created_on", nullable = false, updatable = false)
-    private LocalDate createdOn = LocalDate.now();
+    @Column(name = "authenticated", nullable = false)
+    private boolean authenticated = false;
 
-    @Column(name = "failed_login_attempts", nullable = false)
-    private int failedLoginAttempts = 0;
+    @Column(name = "creation_date", nullable = false, updatable = false)
+    private LocalDateTime creationDate = LocalDateTime.now();
+
+    @Column(name = "login_attempts", nullable = false)
+    private byte loginAttempts = 0;
 
     @Nullable
-    @Column(name = "failed_login_time")
-    private LocalDateTime failedLoginTime;
+    @Column(name = "last_login_attempt")
+    private LocalDateTime lastLoginAttempt;
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @Column(name = "last_login", nullable = false)
+    private LocalDate lastLogin = LocalDate.now();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -76,48 +81,65 @@ public class User {
         this.password = password;
     }
 
-    public boolean getIsLocked() {
-        return isLocked;
+    public boolean isLocked() {
+        return locked;
     }
 
-    public void setIsLocked(boolean isLocked) {
-        this.isLocked = isLocked;
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
-    public boolean getIsEnabled() {
-        return isEnabled;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setIsEnabled(boolean isEnabled) {
-        this.isEnabled = isEnabled;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
-    public LocalDate getCreatedOn() {
-        return createdOn;
+    public boolean isAuthenticated() {
+        return authenticated;
     }
 
-    public void setCreatedOn(LocalDate createdOn) {
-        this.createdOn = createdOn;
+    public void setAuthenticated(boolean authenticated) {
+        this.authenticated = authenticated;
     }
 
-    public int getFailedLoginAttempts() {
-        return failedLoginAttempts;
+    public LocalDateTime getCreationDate() {
+        return creationDate;
     }
 
-    public void setFailedLoginAttempts(int failedLoginAttempts) {
-        this.failedLoginAttempts = failedLoginAttempts;
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
     }
 
-    public void incrementFailedLoginAttempts() {
-        failedLoginAttempts++;
+    public byte getLoginAttempts() {
+        return loginAttempts;
     }
 
-    public LocalDateTime getFailedLoginTime() {
-        return failedLoginTime;
+    public void setLoginAttempts(byte loginAttempts) {
+        this.loginAttempts = loginAttempts;
     }
 
-    public void setFailedLoginTime(@Nullable LocalDateTime failedLoginTime) {
-        this.failedLoginTime = failedLoginTime;
+    public void addLoginAttempt() {
+        loginAttempts++;
+    }
+
+    @Nullable
+    public LocalDateTime getLastLoginAttempt() {
+        return lastLoginAttempt;
+    }
+
+    public void setLastLoginAttempt(LocalDateTime lastLoginAttempt) {
+        this.lastLoginAttempt = lastLoginAttempt;
+    }
+
+    public LocalDate getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDate lastLogin) {
+        this.lastLogin = lastLogin;
     }
 
     public Set<Role> getRoles() {

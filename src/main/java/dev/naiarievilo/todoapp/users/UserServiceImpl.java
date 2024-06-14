@@ -27,6 +27,8 @@ import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
+    public static final byte EMAIL_CONFIRMATION_PERIOD = 7;
+
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
     private final UserInfoService userInfoService;
@@ -45,6 +47,17 @@ public class UserServiceImpl implements UserService {
             .map(Role::getName)
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public boolean isUserInactive(User user) {
+        return user.isLocked() || !user.isEnabled();
+    }
+
+    @Override
+    public boolean isUserExpired(User user) {
+        var emailAuthenticationPeriod = user.getCreationDate().plusDays(EMAIL_CONFIRMATION_PERIOD);
+        return !user.isAuthenticated() && LocalDateTime.now().isAfter(emailAuthenticationPeriod);
     }
 
     @Override
@@ -90,6 +103,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(User user) {
+        // Entity must be managed to disassociate a user from their assigned roles.
+        user = getUserById(user.getId());
         user.removeAllRoles();
         userInfoService.deleteUserInfo(user.getId());
         userRepository.delete(user);
@@ -105,7 +120,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setEmail(newEmail);
-        userRepository.update(user);
+        userRepository.merge(user);
         return user;
     }
 
@@ -119,7 +134,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.update(user);
+        userRepository.merge(user);
         return user;
     }
 
@@ -135,7 +150,7 @@ public class UserServiceImpl implements UserService {
 
         Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
-        userRepository.update(user);
+        userRepository.merge(user);
         return user;
     }
 
@@ -161,69 +176,69 @@ public class UserServiceImpl implements UserService {
 
         Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
-        userRepository.update(user);
+        userRepository.merge(user);
         return user;
     }
 
     @Override
     @Transactional
     public User lockUser(User user) {
-        if (user.getIsLocked()) {
+        if (user.isLocked()) {
             return user;
         }
 
-        user.setIsLocked(true);
-        userRepository.update(user);
+        user.setLocked(true);
+        userRepository.merge(user);
         return user;
     }
 
     @Override
     @Transactional
     public User unlockUser(User user) {
-        if (!user.getIsLocked()) {
+        if (!user.isLocked()) {
             return user;
         }
 
-        user.setIsLocked(false);
-        userRepository.update(user);
+        user.setLocked(false);
+        userRepository.merge(user);
         return user;
     }
 
     @Override
     @Transactional
     public User disableUser(User user) {
-        if (!user.getIsEnabled()) {
+        if (!user.isEnabled()) {
             return user;
         }
-        user.setIsEnabled(false);
-        userRepository.update(user);
+        user.setEnabled(false);
+        userRepository.merge(user);
         return user;
     }
 
     @Override
     @Transactional
     public User enableUser(User user) {
-        if (user.getIsEnabled()) {
+        if (user.isEnabled()) {
             return user;
         }
-        user.setIsEnabled(true);
-        userRepository.update(user);
+        user.setEnabled(true);
+        userRepository.merge(user);
         return user;
     }
 
     @Override
     @Transactional
     public void addLoginAttempt(User user) {
-        user.incrementFailedLoginAttempts();
-        user.setFailedLoginTime(LocalDateTime.now());
-        userRepository.update(user);
+        user.addLoginAttempt();
+        user.setLastLoginAttempt(LocalDateTime.now());
+        userRepository.merge(user);
     }
 
     @Override
     @Transactional
     public void resetLoginAttempts(User user) {
-        user.setFailedLoginAttempts(0);
-        userRepository.update(user);
+        user.setLoginAttempts((byte) 0);
+        userRepository.merge(user);
 
     }
 

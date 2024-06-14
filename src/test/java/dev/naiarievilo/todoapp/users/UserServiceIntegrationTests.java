@@ -238,22 +238,22 @@ class UserServiceIntegrationTests {
         userRepository.persist(user);
 
         User updatedUser = userService.lockUser(user);
-        assertTrue(updatedUser.getIsLocked());
+        assertTrue(updatedUser.isLocked());
         User retrievedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
-        assertTrue(retrievedUser.getIsLocked());
+        assertTrue(retrievedUser.isLocked());
     }
 
     @Test
     @Transactional
     @DisplayName("unlockUser(): " + UNLOCKS_USER_WHEN_USER_LOCKED)
     void unlockUser_UserLocked_UnlocksUser() {
-        user.setIsLocked(true);
+        user.setLocked(true);
         userRepository.persist(user);
 
         User updatedUser = userService.unlockUser(user);
-        assertFalse(updatedUser.getIsLocked());
+        assertFalse(updatedUser.isLocked());
         User retrievedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
-        assertFalse(retrievedUser.getIsLocked());
+        assertFalse(retrievedUser.isLocked());
     }
 
     @Test
@@ -263,50 +263,50 @@ class UserServiceIntegrationTests {
         userRepository.persist(user);
 
         User updatedUser = userService.disableUser(user);
-        assertFalse(updatedUser.getIsEnabled());
+        assertFalse(updatedUser.isEnabled());
 
         User retrievedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
-        assertFalse(retrievedUser.getIsEnabled());
+        assertFalse(retrievedUser.isEnabled());
     }
 
     @Test
     @Transactional
     @DisplayName("enableUser(): " + ENABLES_USER_WHEN_USER_DISABLED)
     void enableUser_UserDisabled_EnablesUser() {
-        user.setIsEnabled(false);
+        user.setEnabled(false);
         userRepository.persist(user);
 
         User updatedUser = userService.enableUser(user);
-        assertTrue(updatedUser.getIsEnabled());
+        assertTrue(updatedUser.isEnabled());
         User retrievedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
-        assertTrue(retrievedUser.getIsEnabled());
+        assertTrue(retrievedUser.isEnabled());
     }
 
     @Test
     @Transactional
     @DisplayName("addLoginAttempt(): " + ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void addLoginAttempt_UserNotNull_AddsLoginAttempt() {
-        user.setFailedLoginTime(LocalDateTime.now());
+        user.setLastLoginAttempt(LocalDateTime.now());
         userRepository.persist(user);
-        LocalDateTime oldFailedLoginTime = user.getFailedLoginTime();
-        int oldLoginAttempts = user.getFailedLoginAttempts();
+        LocalDateTime oldFailedLoginTime = user.getLastLoginAttempt();
+        int oldLoginAttempts = user.getLoginAttempts();
 
         userService.addLoginAttempt(user);
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
-        assertEquals(updatedUser.getFailedLoginAttempts(), oldLoginAttempts + 1);
-        assertTrue(oldFailedLoginTime.isBefore(updatedUser.getFailedLoginTime()));
+        assertEquals(updatedUser.getLoginAttempts(), oldLoginAttempts + 1);
+        assertTrue(oldFailedLoginTime.isBefore(updatedUser.getLastLoginAttempt()));
     }
 
     @Test
     @Transactional
     @DisplayName("resetLoginAttempts(): " + RESETS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void resetLoginAttempts_UserNotNull_ResetsLoginAttempts() {
-        user.setFailedLoginAttempts(7);
+        user.setLoginAttempts((byte) 7);
         userRepository.persist(user);
 
         userService.resetLoginAttempts(user);
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
-        assertEquals(0, updatedUser.getFailedLoginAttempts());
+        assertEquals(0, updatedUser.getLoginAttempts());
     }
 
 }

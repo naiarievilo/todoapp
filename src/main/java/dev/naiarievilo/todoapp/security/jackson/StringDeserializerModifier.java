@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.security;
+package dev.naiarievilo.todoapp.security.jackson;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;

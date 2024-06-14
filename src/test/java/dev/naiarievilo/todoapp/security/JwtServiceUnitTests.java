@@ -4,6 +4,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import dev.naiarievilo.todoapp.roles.Role;
+import dev.naiarievilo.todoapp.security.jwt.JwtService;
 import dev.naiarievilo.todoapp.users.User;
 import org.apache.commons.lang3.Validate;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,16 +17,14 @@ import java.time.Instant;
 import java.util.Map;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
-import static dev.naiarievilo.todoapp.security.JwtConstants.ACCESS_TOKEN;
-import static dev.naiarievilo.todoapp.security.JwtConstants.REFRESH_TOKEN;
+import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.ACCESS_TOKEN;
+import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.REFRESH_TOKEN;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JwtServiceUnitTests {
 
-    private static final Integer JWT_EXPIRATION = 30;
     private static final String JWT_ISSUER = "testApp";
-    private static final Integer JWT_REFRESH_EXPIRATION = 7;
     private static final String JWT_SECRET = "jwtSecret";
 
     private final JwtService jwtService;
@@ -34,7 +33,7 @@ class JwtServiceUnitTests {
     private User user;
 
     JwtServiceUnitTests() {
-        jwtService = new JwtService(JWT_SECRET, JWT_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ISSUER);
+        jwtService = new JwtService(JWT_SECRET, JWT_ISSUER);
 
         try {
             Field jwtVerifierField = JwtService.class.getDeclaredField("jwtVerifier");
@@ -57,8 +56,8 @@ class JwtServiceUnitTests {
         user.setEmail(EMAIL_1);
         user.setPassword(PASSWORD_1);
         user.addRole(userRole);
-        user.setIsEnabled(true);
-        user.setIsLocked(false);
+        user.setEnabled(true);
+        user.setLocked(false);
     }
 
     @Test
@@ -69,11 +68,11 @@ class JwtServiceUnitTests {
 
         assertNotNull(tokens);
         assertEquals(2, tokens.size());
-        assertTrue(tokens.containsKey(ACCESS_TOKEN) && tokens.containsKey(REFRESH_TOKEN));
+        assertTrue(tokens.containsKey(ACCESS_TOKEN.key()) && tokens.containsKey(REFRESH_TOKEN.key()));
 
-        String accessToken = tokens.get(ACCESS_TOKEN);
+        String accessToken = tokens.get(ACCESS_TOKEN.key());
         assertDoesNotThrow(() -> Validate.notBlank(accessToken));
-        String refreshToken = tokens.get(REFRESH_TOKEN);
+        String refreshToken = tokens.get(REFRESH_TOKEN.key());
         assertDoesNotThrow(() -> Validate.notBlank(refreshToken));
 
         assertDoesNotThrow(() -> jwtVerifier.verify(accessToken));
@@ -94,8 +93,9 @@ class JwtServiceUnitTests {
         Instant refreshTokenExpiresAt = decodedRefreshToken.getExpiresAtAsInstant();
 
         assertTrue(accessTokenExpiresAt.isBefore(refreshTokenExpiresAt));
-        assertEquals(Duration.ofMinutes(JWT_EXPIRATION), Duration.between(accessTokenIssuedAt, accessTokenExpiresAt));
-        assertEquals(Duration.ofDays(JWT_REFRESH_EXPIRATION),
+        assertEquals(Duration.ofMinutes(ACCESS_TOKEN.expirationInMinutes()),
+            Duration.between(accessTokenIssuedAt, accessTokenExpiresAt));
+        assertEquals(Duration.ofDays(REFRESH_TOKEN.expirationInDays()),
             Duration.between(refreshTokenIssuedAt, refreshTokenExpiresAt));
     }
 
@@ -103,7 +103,7 @@ class JwtServiceUnitTests {
     @DisplayName("createAccessToken(): Creates access token when refresh token is valid")
     void createAccessToken_RefreshTokenIsValid_CreatesAccessToken() {
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
-        String refreshToken = tokens.get(REFRESH_TOKEN);
+        String refreshToken = tokens.get(REFRESH_TOKEN.key());
 
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
         String userId = decodedRefreshToken.getSubject();
@@ -118,7 +118,8 @@ class JwtServiceUnitTests {
 
         Instant accessTokenIssuedAt = decodedAccessToken.getIssuedAtAsInstant();
         Instant accessTokenExpiresAt = decodedAccessToken.getExpiresAtAsInstant();
-        assertEquals(Duration.ofMinutes(JWT_EXPIRATION), Duration.between(accessTokenIssuedAt, accessTokenExpiresAt));
+        assertEquals(Duration.ofMinutes(ACCESS_TOKEN.expirationInMinutes()),
+            Duration.between(accessTokenIssuedAt, accessTokenExpiresAt));
     }
 
     @Test
@@ -131,7 +132,7 @@ class JwtServiceUnitTests {
     @DisplayName("verifyToken(): Returns `DecodedJWT` when token is valid")
     void verifyToken_TokenIsValid_ReturnsDecodedJWT() {
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
-        String accessToken = tokens.get(ACCESS_TOKEN);
+        String accessToken = tokens.get(ACCESS_TOKEN.key());
 
         DecodedJWT decodedJwt = jwtService.verifyToken(accessToken);
         assertNotNull(decodedJwt);

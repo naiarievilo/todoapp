@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.security;
 
+import dev.naiarievilo.todoapp.security.jwt.JwtAuthenticationFilter;
 import dev.naiarievilo.todoapp.users.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

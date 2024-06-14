@@ -2,8 +2,8 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.security.AuthenticatedUser;
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
-import dev.naiarievilo.todoapp.security.JwtService;
 import dev.naiarievilo.todoapp.security.UserAuthenticationToken;
+import dev.naiarievilo.todoapp.security.jwt.JwtService;
 import dev.naiarievilo.todoapp.users.dtos.CredentialsUpdateDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserDTO;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-import static dev.naiarievilo.todoapp.security.JwtConstants.*;
+import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.*;
 
 @RestController
 @RequestMapping("/users")
@@ -46,8 +46,8 @@ public class UserController {
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
-            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN))
+            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN.key()))
+            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN.key()))
             .build();
     }
 
@@ -60,8 +60,8 @@ public class UserController {
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication.getPrincipal());
         return ResponseEntity
             .status(HttpStatus.OK)
-            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN))
-            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN))
+            .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN.key()))
+            .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN.key()))
             .build();
     }
 
@@ -107,5 +107,4 @@ public class UserController {
         userService.updateEmail(user, newCredentials.newEmail());
         userService.updatePassword(user, newCredentials.currentPassword(), newCredentials.newPassword());
     }
-
 }

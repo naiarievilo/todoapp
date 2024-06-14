@@ -12,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class EmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
     public static final String BAD_CREDENTIALS = "Incorrect email and/or password";
-    private static final int MAX_ATTEMPTS = 10;
+    private static final BadCredentialsException BAD_CREDENTIALS_EXCEPTION =
+        new BadCredentialsException(BAD_CREDENTIALS);
+    private static final int MAX_LOGIN_ATTEMPTS_ALLOWED = 10;
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -31,25 +33,27 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
         try {
             user = userService.getUserByEmail(email);
         } catch (UserNotFoundException ex) {
-            throw new BadCredentialsException(BAD_CREDENTIALS);
+            throw BAD_CREDENTIALS_EXCEPTION;
         }
 
-        if (user.getIsLocked() || !user.getIsEnabled()) {
-            throw new BadCredentialsException(BAD_CREDENTIALS);
+        if (userService.isUserExpired(user)) {
+            userService.deleteUser(user);
+            throw BAD_CREDENTIALS_EXCEPTION;
+
+        } else if (userService.isUserInactive(user)) {
+            throw BAD_CREDENTIALS_EXCEPTION;
+
+        } else if (user.getLoginAttempts() >= MAX_LOGIN_ATTEMPTS_ALLOWED) {
+            userService.lockUser(user);
+            throw BAD_CREDENTIALS_EXCEPTION;
+
+        } else if (!passwordEncoder.matches(password, user.getPassword())) {
+            userService.addLoginAttempt(user);
+            throw BAD_CREDENTIALS_EXCEPTION;
         }
 
-        if (user.getFailedLoginAttempts() == MAX_ATTEMPTS) {
-            user.setIsLocked(true);
-            throw new BadCredentialsException(BAD_CREDENTIALS);
-        }
-
-        if (passwordEncoder.matches(password, user.getPassword())) {
-            userService.resetLoginAttempts(user);
-            return new UserAuthenticationToken(user);
-        }
-
-        userService.addLoginAttempt(user);
-        throw new BadCredentialsException(BAD_CREDENTIALS);
+        userService.resetLoginAttempts(user);
+        return new UserAuthenticationToken(user);
     }
 
     @Override

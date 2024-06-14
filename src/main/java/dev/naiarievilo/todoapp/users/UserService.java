@@ -5,6 +5,10 @@ import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 
 public interface UserService {
 
+    boolean isUserInactive(User user);
+
+    boolean isUserExpired(User user);
+
     boolean userExists(Long id);
 
     boolean userExists(String email);

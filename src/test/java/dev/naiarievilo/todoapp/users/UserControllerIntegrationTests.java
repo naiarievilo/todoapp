@@ -2,7 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.naiarievilo.todoapp.security.ErrorDetails;
-import dev.naiarievilo.todoapp.security.JwtService;
+import dev.naiarievilo.todoapp.security.jwt.JwtService;
 import dev.naiarievilo.todoapp.users.dtos.CredentialsUpdateDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserDTO;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationProvider.BAD_CREDENTIALS;
-import static dev.naiarievilo.todoapp.security.JwtConstants.*;
+import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.*;
 import static dev.naiarievilo.todoapp.users.UserController.REFRESH_TOKEN_HEADER;
 import static dev.naiarievilo.todoapp.users.UserControllerTestCaseMessages.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
@@ -39,8 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional(readOnly = true)
 class UserControllerIntegrationTests {
-
-    private static final String JWT_REGEX = "^([\\w-]+\\.){2}[\\w-]+$";
 
     @Autowired
     ObjectMapper objectMapper;
@@ -213,7 +211,7 @@ class UserControllerIntegrationTests {
     @DisplayName("getNewAccessToken(): " + STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_REFRESH_TOKEN_VALID)
     void getNewAccessToken_RefreshTokenValid_ReturnsNewAccessToken() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String refreshToken = jwtService.createAccessAndRefreshTokens(user).get(REFRESH_TOKEN);
+        String refreshToken = jwtService.createAccessAndRefreshTokens(user).get(REFRESH_TOKEN.key());
 
         String accessToken = mockMvc.perform(post("/users/reauthenticate")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + refreshToken)
@@ -234,7 +232,7 @@ class UserControllerIntegrationTests {
     @DisplayName("deleteUser(): " + STATUS_204_DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
 
         mockMvc
             .perform(delete("/users/delete")
@@ -248,7 +246,7 @@ class UserControllerIntegrationTests {
     @DisplayName("deleteUser(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_NOT_FOUND)
     void deleteUser_UserDoesNotExist_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = BEARER_PREFIX + jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
         exception = new UserNotFoundException(user.getId());
 
         mockMvc
@@ -276,7 +274,7 @@ class UserControllerIntegrationTests {
     @DisplayName("updateEmail(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updateEmail_NewEmailNotValid_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
         var updateCredentialsDTO = new CredentialsUpdateDTO("invalidEmail", null, null, null);
 
         String responseBody = mockMvc.perform(patch("/users/update-email")
@@ -301,7 +299,7 @@ class UserControllerIntegrationTests {
     void updateEmail_NewEmailAlreadyRegistered_ReturnsErrorDetails() throws Exception {
         userService.createUser(otherUserCreationDTO);
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
 
         exception = new EmailAlreadyRegisteredException(otherUserCreationDTO.email());
         var updateCredentialsDTO = new CredentialsUpdateDTO(otherUserCreationDTO.email(), null, null, null);
@@ -329,7 +327,7 @@ class UserControllerIntegrationTests {
     @DisplayName("updateEmail(): " + STATUS_200_UPDATES_EMAIL_WHEN_NEW_EMAIL_VALID_AND_NOT_REGISTERED)
     void updateEmail_NewEmailValidAndNotRegistered_ReturnsNewAccessAndRefreshTokens() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
         var updateCredentialsDTO = new CredentialsUpdateDTO(NEW_EMAIL, null, null, null);
 
         mockMvc
@@ -346,7 +344,7 @@ class UserControllerIntegrationTests {
     @DisplayName("updatePassword(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updatePassword_NewPasswordNotValid_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
         var updateCredentialsDTO = new CredentialsUpdateDTO(
             userCreationDTO.email(), "", NEW_PASSWORD, "confirmNewPasswordDoesNotMatch123!"
         );
@@ -379,7 +377,7 @@ class UserControllerIntegrationTests {
     @DisplayName("updatePassword(): " + STATUS_200_UPDATES_PASSWORD_WHEN_NEW_PASSWORD_VALID)
     void updatePassword_NewPasswordValid_UpdatesPassword() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
         var updateCredentialsDTO = new CredentialsUpdateDTO(
             "", userCreationDTO.password(), NEW_PASSWORD, NEW_PASSWORD
         );
@@ -397,7 +395,7 @@ class UserControllerIntegrationTests {
     @DisplayName("updateCredentials(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updateCredentials_NewCredentialsNotValid_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
         var updateCredentialsDTO = new CredentialsUpdateDTO("", "", "", "confirmPasswordDoesNotMatch");
 
         List<String> validationErrorMessages = List.of(
@@ -430,7 +428,7 @@ class UserControllerIntegrationTests {
     @DisplayName("updateCredentials(): " + STATUS_200_UPDATES_CREDENTIALS_WHEN_NEW_CREDENTIALS_VALID)
     void updateCredentials_NewCredentialsValid_UpdatesCredentials() throws Exception {
         user = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN);
+        String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
         var updateCredentialsDTO =
             new CredentialsUpdateDTO(NEW_EMAIL, userCreationDTO.password(), NEW_PASSWORD, NEW_PASSWORD);
 

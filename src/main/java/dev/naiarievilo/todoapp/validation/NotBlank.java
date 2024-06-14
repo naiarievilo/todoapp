@@ -8,8 +8,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static dev.naiarievilo.todoapp.validation.ValidationLengths.DEFAULT_MAX_LENGTH;
-import static dev.naiarievilo.todoapp.validation.ValidationLengths.DEFAULT_MIN_LENGTH;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 
 @Target({ElementType.PARAMETER, ElementType.FIELD})
@@ -19,9 +17,9 @@ public @interface NotBlank {
 
     String message() default MUST_BE_PROVIDED;
 
-    int min() default DEFAULT_MIN_LENGTH;
+    int min() default 1;
 
-    int max() default DEFAULT_MAX_LENGTH;
+    int max() default 255;
 
     Class<?>[] groups() default {};
 
