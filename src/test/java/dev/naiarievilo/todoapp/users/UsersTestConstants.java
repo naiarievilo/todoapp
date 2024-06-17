@@ -7,6 +7,7 @@ public class UsersTestConstants {
     public static final String FIRST_NAME_1 = "John";
     public static final String FIRST_NAME_2 = "David";
     public static final Long ID_1 = 1L;
+    public static final Long ID_2 = 2L;
     public static final String LAST_NAME_1 = "Doe";
     public static final String LAST_NAME_2 = "Smith";
     public static final String NEW_AVATAR_URL = "path/to/new/avatar/url";

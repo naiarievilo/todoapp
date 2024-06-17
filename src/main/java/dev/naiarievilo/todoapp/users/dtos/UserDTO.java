@@ -2,12 +2,12 @@ package dev.naiarievilo.todoapp.users.dtos;
 
 import dev.naiarievilo.todoapp.users.dtos.groups.UserAuthentication;
 import dev.naiarievilo.todoapp.validation.Email;
+import dev.naiarievilo.todoapp.validation.Id;
 import dev.naiarievilo.todoapp.validation.Password;
-import jakarta.validation.constraints.Positive;
 
 public record UserDTO(
 
-    @Positive
+    @Id
     Long id,
 
     @Email(groups = UserAuthentication.class)

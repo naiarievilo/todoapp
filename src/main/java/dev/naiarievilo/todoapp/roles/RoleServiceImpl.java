@@ -26,7 +26,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role getRole(Roles role) {
-        return roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
+        return roleRepository.findByName(role.name()).orElseThrow(() -> new RoleNotFoundException(role.name()));
     }
 
     @Override
@@ -62,10 +62,9 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void deleteRole(Roles role) {
-        if (!roleExists(role)) {
-            throw new RoleNotFoundException(role.name());
-        }
-        roleRepository.deleteByName(role.name());
+        Role roleToDelete = getRole(role);
+        roleToDelete.unassignUsers();
+        roleRepository.delete(roleToDelete);
     }
 
 }

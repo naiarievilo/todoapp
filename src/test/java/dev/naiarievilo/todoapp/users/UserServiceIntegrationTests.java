@@ -60,7 +60,17 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("userExists(Long id): " + RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST)
     void userExistsById_UserDoesNotExist_ReturnsFalse() {
-        assertFalse(userService.userExists(ID_1));
+        assertFalse(userService.userExists(ID_2));
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("authenticateUser(): " + AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED)
+    void authenticateUser_UserNotAuthenticated_AuthenticatesUser() {
+        userRepository.persist(user);
+        userService.authenticateUser(user);
+        User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
+        assertTrue(updatedUser.isAuthenticated());
     }
 
     @Test
@@ -104,7 +114,7 @@ class UserServiceIntegrationTests {
     @Test
     @DisplayName("getUserById(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void getUserById_UserDoesNotExist_ThrowsUserNotFoundException() {
-        assertThrows(UserNotFoundException.class, () -> userService.getUserById(ID_1));
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(ID_2));
     }
 
     @Test

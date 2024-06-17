@@ -13,6 +13,8 @@ public interface UserService {
 
     boolean userExists(String email);
 
+    void authenticateUser(User user);
+
     User getUserByEmail(String email);
 
     User getUserById(Long id);

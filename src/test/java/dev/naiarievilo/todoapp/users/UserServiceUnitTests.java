@@ -100,6 +100,22 @@ class UserServiceUnitTests {
     }
 
     @Test
+    @DisplayName("authenticateUser(): " + DOES_NOT_AUTHENTICATE_USER_WHEN_USER_ALREADY_AUTHENTICATED)
+    void authenticateUser_UserAlreadyAuthenticated_DoesNotAuthenticateUser() {
+        user.setAuthenticated(true);
+        userService.authenticateUser(user);
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    @DisplayName("authenticateUser(): " + AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED)
+    void authenticateUser_UserNotAuthenticated_AuthenticatesUser() {
+        userService.authenticateUser(user);
+        verify(userRepository).update(userCaptor.capture());
+        assertTrue(userCaptor.getValue().isAuthenticated());
+    }
+
+    @Test
     @DisplayName("userExists(Long id): " + RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST)
     void userExistsById_UserDoesNotExist_ReturnsFalse() {
         Long id = user.getId();
@@ -269,7 +285,7 @@ class UserServiceUnitTests {
         User updatedUser = userService.updateEmail(user, NEW_EMAIL);
         assertEquals(NEW_EMAIL, updatedUser.getEmail());
         verify(userRepository).findByEmail(NEW_EMAIL);
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertEquals(NEW_EMAIL, userCaptor.getValue().getEmail());
 
     }
@@ -311,7 +327,7 @@ class UserServiceUnitTests {
         assertEquals(newEncodedPassword, updatedUser.getPassword());
         verify(passwordEncoder).matches(PASSWORD_1, currentPassword);
         verify(passwordEncoder).encode(NEW_PASSWORD);
-        verify(userRepository).merge(user);
+        verify(userRepository).update(user);
     }
 
     @Test
@@ -330,7 +346,7 @@ class UserServiceUnitTests {
         User updatedUser = userService.addRoleToUser(user, ROLE_ADMIN);
         assertTrue(updatedUser.getRoles().contains(adminRole));
         verify(roleService).getRole(ROLE_ADMIN);
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertTrue(userCaptor.getValue().getRoles().contains(adminRole));
     }
 
@@ -359,7 +375,7 @@ class UserServiceUnitTests {
         User updatedUser = userService.removeRoleFromUser(user, ROLE_ADMIN);
         assertFalse(updatedUser.getRoles().contains(adminRole));
         verify(roleService).getRole(ROLE_ADMIN);
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertFalse(userCaptor.getValue().getRoles().contains(adminRole));
     }
 
@@ -376,7 +392,7 @@ class UserServiceUnitTests {
     void lockUser_UserNotLocked_LocksUser() {
         User updatedUser = userService.lockUser(user);
         assertTrue(updatedUser.isLocked());
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertTrue(userCaptor.getValue().isLocked());
     }
 
@@ -394,7 +410,7 @@ class UserServiceUnitTests {
 
         User updatedUser = userService.unlockUser(user);
         assertFalse(updatedUser.isLocked());
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertFalse(userCaptor.getValue().isLocked());
     }
 
@@ -411,7 +427,7 @@ class UserServiceUnitTests {
     void disableUser_UserEnabled_DisablesUser() {
         User updatedUser = userService.disableUser(user);
         assertFalse(updatedUser.isEnabled());
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertFalse(userCaptor.getValue().isEnabled());
     }
 
@@ -429,7 +445,7 @@ class UserServiceUnitTests {
 
         User updatedUser = userService.enableUser(user);
         assertTrue(updatedUser.isEnabled());
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertTrue(userCaptor.getValue().isEnabled());
     }
 
@@ -441,7 +457,7 @@ class UserServiceUnitTests {
         user.setLastLoginAttempt(oldLocalTime);
 
         userService.addLoginAttempt(user);
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         User userCaptured = userCaptor.getValue();
         assertNotEquals(oldLoginAttempts, userCaptured.getLoginAttempts());
         assertNotEquals(oldLocalTime, userCaptured.getLastLoginAttempt());
@@ -453,7 +469,7 @@ class UserServiceUnitTests {
         user.setLoginAttempts((byte) 2);
 
         userService.resetLoginAttempts(user);
-        verify(userRepository).merge(userCaptor.capture());
+        verify(userRepository).update(userCaptor.capture());
         assertEquals(0, userCaptor.getValue().getLoginAttempts());
     }
 

@@ -44,7 +44,9 @@ class RoleServiceIntegrationTests {
     @Transactional
     @DisplayName("roleExists(): " + RETURNS_FALSE_WHEN_ROLE_DOES_NOT_EXIST)
     void roleExists_roleDoesNotExist_ReturnsFalse() {
-        roleRepository.deleteByName(ROLE_USER.name());
+        Role targetRole = roleRepository.findByName(ROLE_USER.name()).orElseThrow(RoleNotFoundException::new);
+        targetRole.unassignUsers();
+        roleRepository.delete(targetRole);
         assertFalse(roleService.roleExists(ROLE_USER));
     }
 
@@ -58,7 +60,9 @@ class RoleServiceIntegrationTests {
     @Transactional
     @DisplayName("getRole(): " + THROWS_ROLE_NOT_FOUND_WHEN_ROLE_DOES_NOT_EXIST)
     void getRole_RoleDoesNotExist_ThrowsRoleNotFoundException() {
-        roleRepository.deleteByName(ROLE_USER.name());
+        Role targetRole = roleRepository.findByName(ROLE_USER.name()).orElseThrow(RoleNotFoundException::new);
+        targetRole.unassignUsers();
+        roleRepository.delete(targetRole);
         assertThrows(RoleNotFoundException.class, () -> roleService.getRole(ROLE_USER));
     }
 
@@ -74,8 +78,13 @@ class RoleServiceIntegrationTests {
     @Transactional
     @DisplayName("getRoles(): " + THROWS_ROLE_NOT_FOUND_WHEN_ONE_ROLE_DOES_NOT_EXIST)
     void getRoles_RolesDoesNotExist_ThrowsRoleNotFoundException() {
-        roleRepository.deleteByName(ROLE_USER.name());
-        Set<Roles> roles = new LinkedHashSet<>(List.of(ROLE_ADMIN, ROLE_USER));
+        for (Roles role : Roles.roles()) {
+            Role targetRole = roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
+            targetRole.unassignUsers();
+            roleRepository.delete(targetRole);
+        }
+
+        Set<Roles> roles = new LinkedHashSet<>(Roles.roles());
         assertThrows(RoleNotFoundException.class, () -> roleService.getRoles(roles));
     }
 
@@ -117,18 +126,21 @@ class RoleServiceIntegrationTests {
     @Transactional
     @DisplayName("createRole(): " + CREATES_ROLE_WHEN_ROLE_DOES_NOT_EXIST)
     void createRole_RoleDoesNotExist_CreatesRole() {
-        String roleName = ROLE_USER.name();
-        roleRepository.deleteByName(roleName);
+        String targetRoleName = ROLE_USER.name();
+
+        Role targetRole = roleRepository.findByName(targetRoleName).orElseThrow(RoleNotFoundException::new);
+        targetRole.unassignUsers();
+        roleRepository.delete(targetRole);
 
         roleService.createRole(ROLE_USER);
-        assertTrue(roleRepository.findByName(roleName).isPresent());
+        assertTrue(roleRepository.findByName(targetRoleName).isPresent());
     }
 
     @Test
     @Transactional
     @DisplayName("deleteRole(): " + THROWS_ROLE_NOT_FOUND_WHEN_ROLE_DOES_NOT_EXIST)
     void deleteRole_RoleDoesNotExist_ThrowsRoleNotFoundException() {
-        roleRepository.deleteByName(ROLE_USER.name());
+        roleService.deleteRole(ROLE_USER);
         assertThrows(RoleNotFoundException.class, () -> roleService.deleteRole(ROLE_USER));
     }
 

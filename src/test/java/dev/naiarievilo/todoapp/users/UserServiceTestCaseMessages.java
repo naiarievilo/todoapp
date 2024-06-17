@@ -6,6 +6,8 @@ class UserServiceTestCaseMessages {
         "adds login attempt when user is not null";
     static final String ADDS_ROLE_TO_USER_WHEN_ROLE_NOT_ASSIGNED =
         "adds role to user when role is not assigned";
+    static final String AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED =
+        "authenticates user when user is not authenticated";
     static final String CREATES_USER_WHEN_USER_DOES_NOT_EXIST =
         "creates `User` when user does not exist";
     static final String DELETES_USER_WHEN_USER_EXISTS =
@@ -14,6 +16,8 @@ class UserServiceTestCaseMessages {
         "disables user when user is enabled";
     static final String DOES_NOT_ADD_ROLE_WHEN_ROLE_ALREADY_ASSIGNED =
         "doesn't add role to user when role is already assigned";
+    static final String DOES_NOT_AUTHENTICATE_USER_WHEN_USER_ALREADY_AUTHENTICATED =
+        "does not authenticate user when user is already authenticated";
     static final String DOES_NOT_DISABLE_USER_WHEN_USER_ALREADY_DISABLED =
         "does not disable user when user already disabled";
     static final String DOES_NOT_ENABLE_USER_WHEN_USER_ALREADY_ENABLED =

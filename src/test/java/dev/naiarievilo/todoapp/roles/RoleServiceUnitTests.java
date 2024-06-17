@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.roles;
 
+import dev.naiarievilo.todoapp.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class RoleServiceUnitTests {
         adminRole = new Role();
         adminRole.setName(ROLE_ADMIN.name());
         adminRole.setDescription(ROLE_ADMIN.description());
+
+        User user = new User();
+        user.addRole(userRole);
     }
 
     @Test
@@ -168,7 +172,7 @@ class RoleServiceUnitTests {
 
         assertThrows(RoleNotFoundException.class, () -> roleService.deleteRole(ROLE_USER));
         verify(roleRepository).findByName(roleName);
-        verify(roleRepository, never()).deleteByName(roleName);
+        verify(roleRepository, never()).delete(any(Role.class));
     }
 
     @Test
@@ -179,6 +183,7 @@ class RoleServiceUnitTests {
 
         roleService.deleteRole(ROLE_USER);
         verify(roleRepository).findByName(roleName);
-        verify(roleRepository).deleteByName(roleName);
+        verify(roleRepository).delete(roleCaptor.capture());
+        assertTrue(roleCaptor.getValue().getUsers().isEmpty());
     }
 }

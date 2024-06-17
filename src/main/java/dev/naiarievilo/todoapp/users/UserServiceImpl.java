@@ -71,6 +71,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public void authenticateUser(User user) {
+        if (user.isAuthenticated()) {
+            return;
+        }
+
+        user.setAuthenticated(true);
+        userRepository.update(user);
+    }
+
+    @Override
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
@@ -120,7 +131,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setEmail(newEmail);
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -134,7 +145,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -150,7 +161,7 @@ public class UserServiceImpl implements UserService {
 
         Role roleToAdd = roleService.getRole(role);
         user.addRole(roleToAdd);
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -176,7 +187,7 @@ public class UserServiceImpl implements UserService {
 
         Role roleToRemove = roleService.getRole(role);
         user.removeRole(roleToRemove);
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -188,7 +199,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setLocked(true);
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -200,7 +211,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setLocked(false);
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -211,7 +222,7 @@ public class UserServiceImpl implements UserService {
             return user;
         }
         user.setEnabled(false);
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -222,7 +233,7 @@ public class UserServiceImpl implements UserService {
             return user;
         }
         user.setEnabled(true);
-        userRepository.merge(user);
+        userRepository.update(user);
         return user;
     }
 
@@ -231,14 +242,14 @@ public class UserServiceImpl implements UserService {
     public void addLoginAttempt(User user) {
         user.addLoginAttempt();
         user.setLastLoginAttempt(LocalDateTime.now());
-        userRepository.merge(user);
+        userRepository.update(user);
     }
 
     @Override
     @Transactional
     public void resetLoginAttempts(User user) {
         user.setLoginAttempts((byte) 0);
-        userRepository.merge(user);
+        userRepository.update(user);
 
     }
 

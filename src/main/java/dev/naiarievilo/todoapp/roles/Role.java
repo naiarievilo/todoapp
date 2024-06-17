@@ -36,6 +36,12 @@ public class Role {
         this.users = users;
     }
 
+    public void unassignUsers() {
+        for (User user : users) {
+            user.removeRole(this);
+        }
+    }
+
     public Long getId() {
         return id;
     }
