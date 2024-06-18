@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.roles;
 
+import dev.naiarievilo.todoapp.roles.exceptions.RoleNotFoundException;
 import org.apache.commons.lang3.Validate;
 import org.springframework.security.core.GrantedAuthority;
 

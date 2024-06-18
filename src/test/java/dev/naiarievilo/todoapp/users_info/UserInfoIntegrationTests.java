@@ -3,6 +3,9 @@ package dev.naiarievilo.todoapp.users_info;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserRepository;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users_info.dtos.UserInfoDTO;
+import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoAlreadyExistsException;
+import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +34,7 @@ class UserInfoIntegrationTests {
     private UserCreationDTO userCreationDTO;
     private UserInfo userInfo;
     private User user;
+    private UserInfoDTO userInfoDTO;
 
     @BeforeEach
     void setUp() {
@@ -44,6 +48,8 @@ class UserInfoIntegrationTests {
         userInfo.setUser(user);
         userInfo.setFirstName(userCreationDTO.firstName());
         userInfo.setLastName(userCreationDTO.lastName());
+
+        userInfoDTO = new UserInfoDTO(null, NEW_FIRST_NAME, NEW_LAST_NAME, NEW_AVATAR_URL);
     }
 
     private User loadUser(UserCreationDTO userCreationDTO) {
@@ -130,62 +136,28 @@ class UserInfoIntegrationTests {
     }
 
     @Test
-    @Transactional
-    @DisplayName("updateFirstName(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
-    void updateFirstName_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
-        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateFirstName(userInfo, NEW_FIRST_NAME));
+    @DisplayName("updateUserInfo(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
+    void updateUserInfo_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
+        Long id = user.getId();
+        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateUserInfo(id, userInfoDTO));
     }
 
     @Test
     @Transactional
-    @DisplayName("updateFirstName(): " + UPDATES_FIRST_NAME_WHEN_USER_INFO_EXISTS)
-    void updateFirstName_UserInfoExists_UpdatesFirstName() {
+    @DisplayName("updateUserInfo(): " + UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
+    void updateUserInfo_UserInfoExists_UpdatesUserInfo() {
+        Long id = user.getId();
         userInfoRepository.persist(userInfo);
 
-        UserInfo updatedUserInfo = userInfoService.updateFirstName(userInfo, NEW_FIRST_NAME);
-        assertEquals(NEW_FIRST_NAME, updatedUserInfo.getFirstName());
+        UserInfo updatedUserInfo = userInfoService.updateUserInfo(id, userInfoDTO);
+        assertEquals(updatedUserInfo.getFirstName(), userInfoDTO.firstName());
+        assertEquals(updatedUserInfo.getLastName(), userInfoDTO.lastName());
+        assertEquals(updatedUserInfo.getAvatarUrl(), userInfoDTO.avatarUrl());
 
-        UserInfo dbUserInfo = userInfoRepository.findById(userInfo.getId()).orElseThrow(UserInfoNotFoundException::new);
-        assertEquals(updatedUserInfo.getFirstName(), dbUserInfo.getFirstName());
+        UserInfo userInfoUpdated = userInfoRepository.findById(id).orElseThrow(UserInfoNotFoundException::new);
+        assertEquals(userInfoUpdated.getFirstName(), userInfoDTO.firstName());
+        assertEquals(userInfoUpdated.getLastName(), userInfoDTO.lastName());
+        assertEquals(userInfoUpdated.getAvatarUrl(), userInfoDTO.avatarUrl());
     }
 
-    @Test
-    @Transactional
-    @DisplayName("updateLastName(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
-    void updateLastName_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
-        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateLastName(userInfo, NEW_LAST_NAME));
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("updateLastName(): " + UPDATES_LAST_NAME_WHEN_USER_INFO_EXISTS)
-    void updateLastName_UserInfoExists_UpdatesFirstName() {
-        userInfoRepository.persist(userInfo);
-
-        UserInfo updatedUserInfo = userInfoService.updateLastName(userInfo, NEW_LAST_NAME);
-        assertEquals(NEW_LAST_NAME, updatedUserInfo.getLastName());
-
-        UserInfo dbUserInfo = userInfoRepository.findById(userInfo.getId()).orElseThrow(UserInfoNotFoundException::new);
-        assertEquals(updatedUserInfo.getLastName(), dbUserInfo.getLastName());
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("updateAvatarUrl(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
-    void updateAvatarUrl_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
-        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateAvatarUrl(userInfo, NEW_AVATAR_URL));
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("updateAvatarUrl(): " + UPDATES_AVATAR_URL_WHEN_USER_INFO_EXISTS)
-    void updateAvatarUrl_UserInfoExists_UpdatesFirstName() {
-        userInfoRepository.persist(userInfo);
-
-        UserInfo updatedUserInfo = userInfoService.updateAvatarUrl(userInfo, NEW_AVATAR_URL);
-        assertEquals(NEW_AVATAR_URL, updatedUserInfo.getAvatarUrl());
-
-        UserInfo dbUserInfo = userInfoRepository.findById(userInfo.getId()).orElseThrow(UserInfoNotFoundException::new);
-        assertEquals(updatedUserInfo.getAvatarUrl(), dbUserInfo.getAvatarUrl());
-    }
 }

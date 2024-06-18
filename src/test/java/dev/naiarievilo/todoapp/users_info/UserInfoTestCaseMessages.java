@@ -16,10 +16,6 @@ public class UserInfoTestCaseMessages {
         "throws `UserInfoAlreadyExistsException` when user info already exists";
     static final String THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST =
         "throws `UserInfoNotFoundException` when user info does not exist";
-    static final String UPDATES_AVATAR_URL_WHEN_USER_INFO_EXISTS =
-        "updates `avatarUrl` when user info exists";
-    static final String UPDATES_FIRST_NAME_WHEN_USER_INFO_EXISTS =
-        "updates `firstName` when user info exists";
-    static final String UPDATES_LAST_NAME_WHEN_USER_INFO_EXISTS =
-        "updates `lastName` when user info exists";
+    static final String UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS =
+        "Updates `UserInfo` when user info exists";
 }

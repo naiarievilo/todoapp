@@ -1,5 +1,7 @@
 package dev.naiarievilo.todoapp.roles;
 
+import dev.naiarievilo.todoapp.roles.exceptions.RoleAlreadyExistsException;
+import dev.naiarievilo.todoapp.roles.exceptions.RoleNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

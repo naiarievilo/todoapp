@@ -1,9 +1,11 @@
-package dev.naiarievilo.todoapp.users_info;
+package dev.naiarievilo.todoapp.users_info.dtos;
 
 import dev.naiarievilo.todoapp.validation.NotBlank;
 import jakarta.annotation.Nullable;
 
 public record UserInfoDTO(
+
+    String email,
 
     @NotBlank
     String firstName,
@@ -13,6 +15,4 @@ public record UserInfoDTO(
 
     @Nullable
     String avatarUrl
-) {
-
-}
+) { }

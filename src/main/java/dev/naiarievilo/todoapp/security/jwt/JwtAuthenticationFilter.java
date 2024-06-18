@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,6 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (UserNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             var errorDetails = new ErrorDetails(HttpStatus.NOT_FOUND, e.getMessage());
             response.getWriter().print(objectMapper.writeValueAsString(errorDetails));
             return;
@@ -90,6 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void buildJwtErrorDetailsResponse(HttpServletResponse response) throws IOException {
         var errorDetails = new ErrorDetails(HttpStatus.UNAUTHORIZED, JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().print(objectMapper.writeValueAsString(errorDetails));
     }
 }

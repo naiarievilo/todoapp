@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.roles;
+package dev.naiarievilo.todoapp.roles.exceptions;
 
 public class UserRoleRemovalProhibitedException extends RuntimeException {
 

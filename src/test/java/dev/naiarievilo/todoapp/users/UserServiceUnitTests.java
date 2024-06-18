@@ -2,7 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
-import dev.naiarievilo.todoapp.roles.UserRoleRemovalProhibitedException;
+import dev.naiarievilo.todoapp.roles.exceptions.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;

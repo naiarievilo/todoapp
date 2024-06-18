@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users_info.dtos.UserInfoDTO;
 
 public interface UserInfoService {
 
@@ -13,9 +14,5 @@ public interface UserInfoService {
 
     void deleteUserInfo(Long userId);
 
-    UserInfo updateFirstName(UserInfo userInfo, String newFirstName);
-
-    UserInfo updateLastName(UserInfo userInfo, String newLastName);
-
-    UserInfo updateAvatarUrl(UserInfo userInfo, String newAvatarUrl);
+    UserInfo updateUserInfo(Long userId, UserInfoDTO userInfoDTO);
 }

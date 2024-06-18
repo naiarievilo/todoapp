@@ -2,6 +2,9 @@ package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
+import dev.naiarievilo.todoapp.users_info.dtos.UserInfoDTO;
+import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoAlreadyExistsException;
+import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +39,7 @@ class UserInfoUnitTests {
     private UserInfo userInfo;
     private User user;
     private UserCreationDTO userCreationDTO;
+    private UserInfoDTO userInfoDTO;
 
     @BeforeEach
     void setUp() {
@@ -49,6 +53,8 @@ class UserInfoUnitTests {
         userInfo.setUser(user);
         userInfo.setFirstName(userCreationDTO.firstName());
         userInfo.setLastName(userCreationDTO.lastName());
+
+        userInfoDTO = new UserInfoDTO(null, NEW_FIRST_NAME, NEW_LAST_NAME, NEW_AVATAR_URL);
     }
 
     @Test
@@ -143,79 +149,32 @@ class UserInfoUnitTests {
     }
 
     @Test
-    @DisplayName("updateFirstName(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
-    void updateFirstName_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
-        Long id = userInfo.getId();
+    @DisplayName("updateUserInfo(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
+    void updateUserInfo_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
+        Long id = user.getId();
         given(userInfoRepository.findById(id)).willReturn(Optional.empty());
 
-        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateFirstName(userInfo, NEW_FIRST_NAME));
+        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateUserInfo(id, userInfoDTO));
         verify(userInfoRepository).findById(id);
         verify(userInfoRepository, never()).update(any(UserInfo.class));
     }
 
     @Test
-    @DisplayName("updateFirstName(): " + UPDATES_FIRST_NAME_WHEN_USER_INFO_EXISTS)
-    void updateFirstName_UserInfoExists_UpdatesFirstName() {
-        Long id = userInfo.getId();
+    @DisplayName("updateUserInfo(): " + UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
+    void updateUserInfo_UserInfoExists_UpdatesUserInfo() {
+        Long id = user.getId();
         given(userInfoRepository.findById(id)).willReturn(Optional.of(userInfo));
 
-        UserInfo updatedUserInfo = userInfoService.updateFirstName(userInfo, NEW_FIRST_NAME);
-        assertEquals(NEW_FIRST_NAME, updatedUserInfo.getFirstName());
+        UserInfo updatedUserInfo = userInfoService.updateUserInfo(id, userInfoDTO);
+        assertEquals(updatedUserInfo.getFirstName(), userInfoDTO.firstName());
+        assertEquals(updatedUserInfo.getLastName(), userInfoDTO.lastName());
+        assertEquals(updatedUserInfo.getAvatarUrl(), userInfoDTO.avatarUrl());
         verify(userInfoRepository).findById(id);
         verify(userInfoRepository).update(userInfoCaptor.capture());
-        UserInfo userInfoCaptured = userInfoCaptor.getValue();
-        assertEquals(NEW_FIRST_NAME, userInfoCaptured.getFirstName());
+        UserInfo userInfoUpdated = userInfoCaptor.getValue();
+        assertEquals(userInfoUpdated.getFirstName(), userInfoDTO.firstName());
+        assertEquals(userInfoUpdated.getLastName(), userInfoDTO.lastName());
+        assertEquals(userInfoUpdated.getAvatarUrl(), userInfoDTO.avatarUrl());
     }
 
-    @Test
-    @DisplayName("updateLastName(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
-    void updateLastName_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
-        Long id = userInfo.getId();
-        given(userInfoRepository.findById(id)).willReturn(Optional.empty());
-
-        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateLastName(userInfo, NEW_LAST_NAME));
-        verify(userInfoRepository).findById(id);
-        verify(userInfoRepository, never()).update(any(UserInfo.class));
-    }
-
-    @Test
-    @DisplayName("updateLastName(): " + UPDATES_LAST_NAME_WHEN_USER_INFO_EXISTS)
-    void updateLastName_UserInfoExists_UpdatesFirstName() {
-        Long id = userInfo.getId();
-        given(userInfoRepository.findById(id)).willReturn(Optional.of(userInfo));
-
-        UserInfo updatedUserInfo = userInfoService.updateLastName(userInfo, NEW_LAST_NAME);
-        assertEquals(NEW_LAST_NAME, updatedUserInfo.getLastName());
-
-        verify(userInfoRepository).findById(id);
-        verify(userInfoRepository).update(userInfoCaptor.capture());
-        UserInfo userInfoCaptured = userInfoCaptor.getValue();
-        assertEquals(NEW_LAST_NAME, userInfoCaptured.getLastName());
-    }
-
-    @Test
-    @DisplayName("updateAvatarUrl(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
-    void updateAvatarUrl_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
-        Long id = userInfo.getId();
-        given(userInfoRepository.findById(id)).willReturn(Optional.empty());
-
-        assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateAvatarUrl(userInfo, NEW_AVATAR_URL));
-        verify(userInfoRepository).findById(id);
-        verify(userInfoRepository, never()).update(any(UserInfo.class));
-    }
-
-    @Test
-    @DisplayName("updateAvatarUrl(): " + UPDATES_AVATAR_URL_WHEN_USER_INFO_EXISTS)
-    void updateAvatarUrl_UserInfoExists_UpdatesFirstName() {
-        Long id = userInfo.getId();
-        given(userInfoRepository.findById(id)).willReturn(Optional.of(userInfo));
-
-        UserInfo updatedUserInfo = userInfoService.updateAvatarUrl(userInfo, NEW_AVATAR_URL);
-        assertEquals(NEW_AVATAR_URL, updatedUserInfo.getAvatarUrl());
-
-        verify(userInfoRepository).findById(id);
-        verify(userInfoRepository).update(userInfoCaptor.capture());
-        UserInfo userInfoCaptured = userInfoCaptor.getValue();
-        assertEquals(NEW_AVATAR_URL, userInfoCaptured.getAvatarUrl());
-    }
 }
