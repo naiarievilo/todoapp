@@ -2,7 +2,6 @@ package dev.naiarievilo.todoapp.roles;
 
 import dev.naiarievilo.todoapp.roles.exceptions.RoleAlreadyExistsException;
 import dev.naiarievilo.todoapp.roles.exceptions.RoleNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.naiarievilo.todoapp.roles.RoleServiceTestCaseMessages.*;
-import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,20 +25,6 @@ class RoleServiceIntegrationTests {
     RoleRepository roleRepository;
     @Autowired
     RoleService roleService;
-
-    private Role userRole;
-    private Role adminRole;
-
-    @BeforeEach
-    void setUp() {
-        adminRole = new Role();
-        adminRole.setName(ROLE_ADMIN.name());
-        adminRole.setDescription(ROLE_ADMIN.description());
-
-        userRole = new Role();
-        userRole.setName(ROLE_USER.name());
-        userRole.setDescription(ROLE_USER.description());
-    }
 
     @Test
     @Transactional
@@ -77,31 +61,6 @@ class RoleServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
-    @DisplayName("getRoles(): " + THROWS_ROLE_NOT_FOUND_WHEN_ONE_ROLE_DOES_NOT_EXIST)
-    void getRoles_RolesDoesNotExist_ThrowsRoleNotFoundException() {
-        for (Roles role : Roles.roles()) {
-            Role targetRole = roleRepository.findByName(role.name()).orElseThrow(RoleNotFoundException::new);
-            targetRole.unassignUsers();
-            roleRepository.delete(targetRole);
-        }
-
-        Set<Roles> roles = new LinkedHashSet<>(Roles.roles());
-        assertThrows(RoleNotFoundException.class, () -> roleService.getRoles(roles));
-    }
-
-    @Test
-    @DisplayName("getRoles(): " + RETURNS_ROLES_WHEN_ROLES_EXIST)
-    void getRoles_RolesExist_ReturnRoles() {
-        Set<Roles> roles = new LinkedHashSet<>(List.of(ROLE_ADMIN, ROLE_USER));
-        Set<Role> entityRoles = new LinkedHashSet<>(List.of(adminRole, userRole));
-
-        Set<Role> returnedRoles = roleService.getRoles(roles);
-        assertEquals(roles.size(), returnedRoles.size());
-        assertTrue(returnedRoles.containsAll(entityRoles));
-    }
-
-    @Test
     @DisplayName("getAllRoles() : " + RETURNS_ALL_ROLES_IN_DATABASE)
     void getAllRoles_AllRolesInDatabase_ReturnsAllRoles() {
         Set<Role> roles = Roles.roles().stream()
@@ -113,7 +72,7 @@ class RoleServiceIntegrationTests {
             })
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        Set<Role> returnedRoles = roleService.getAllRoles();
+        List<Role> returnedRoles = roleService.getAllRoles();
         assertEquals(roles.size(), returnedRoles.size());
         assertTrue(roles.containsAll(returnedRoles));
     }

@@ -10,16 +10,12 @@ public class RoleServiceTestCaseMessages {
         "returns collection of `Role` stored in the database";
     static final String RETURNS_FALSE_WHEN_ROLE_DOES_NOT_EXIST =
         "returns `false` when role does not exist";
-    static final String RETURNS_ROLES_WHEN_ROLES_EXIST =
-        "returns collection of `Role` when roles exist";
     static final String RETURNS_ROLE_WHEN_ROLE_EXISTS =
         "returns `Role` when role exists";
     static final String RETURNS_TRUE_WHEN_ROLE_EXISTS =
         "returns `true` when role exists";
     static final String THROWS_ROLE_ALREADY_EXISTS_WHEN_ROLE_EXISTS =
         "throws `RoleAlreadyExistsException` when role already exists";
-    static final String THROWS_ROLE_NOT_FOUND_WHEN_ONE_ROLE_DOES_NOT_EXIST =
-        "throws `RoleNotFoundException` when one role does not exist";
     static final String THROWS_ROLE_NOT_FOUND_WHEN_ROLE_DOES_NOT_EXIST =
         "throws `RoleNotFoundException` when role does not exist";
 }

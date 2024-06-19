@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users_info;
 
 import dev.naiarievilo.todoapp.security.ErrorDetails;
+import dev.naiarievilo.todoapp.users.UserController;
 import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoAlreadyExistsException;
 import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackageClasses = UserInfoController.class)
+@RestControllerAdvice(basePackageClasses = {UserController.class, UserInfoController.class})
 public class UserInfoControllerAdvice {
 
     @ExceptionHandler(UserInfoNotFoundException.class)

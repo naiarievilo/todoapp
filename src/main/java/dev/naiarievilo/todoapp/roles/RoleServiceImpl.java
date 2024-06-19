@@ -2,14 +2,10 @@ package dev.naiarievilo.todoapp.roles;
 
 import dev.naiarievilo.todoapp.roles.exceptions.RoleAlreadyExistsException;
 import dev.naiarievilo.todoapp.roles.exceptions.RoleNotFoundException;
-import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,20 +28,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Set<Role> getRoles(Collection<Roles> roles) {
-        Validate.notEmpty(roles);
-
-        Set<Role> rolesSet = new LinkedHashSet<>();
-        for (Roles role : roles) {
-            rolesSet.add(getRole(role));
-        }
-        return rolesSet;
-    }
-
-    @Override
-    public Set<Role> getAllRoles() {
-        List<Role> roles = roleRepository.findAll();
-        return new LinkedHashSet<>(roles);
+    public List<Role> getAllRoles() {
+        return roleRepository.findAll();
     }
 
     @Override

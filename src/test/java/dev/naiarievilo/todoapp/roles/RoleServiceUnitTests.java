@@ -13,19 +13,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static dev.naiarievilo.todoapp.roles.RoleServiceTestCaseMessages.*;
-import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class RoleServiceUnitTests {
@@ -37,17 +34,12 @@ class RoleServiceUnitTests {
     @Captor
     private ArgumentCaptor<Role> roleCaptor;
     private Role userRole;
-    private Role adminRole;
 
     @BeforeEach
     void setUp() {
         userRole = new Role();
         userRole.setName(ROLE_USER.name());
         userRole.setDescription(ROLE_USER.description());
-
-        adminRole = new Role();
-        adminRole.setName(ROLE_ADMIN.name());
-        adminRole.setDescription(ROLE_ADMIN.description());
 
         User user = new User();
         user.addRole(userRole);
@@ -95,33 +87,6 @@ class RoleServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getRoles(): " + THROWS_ROLE_NOT_FOUND_WHEN_ONE_ROLE_DOES_NOT_EXIST)
-    void getRoles_RolesDoesNotExist_ThrowsRoleNotFoundException() {
-        Set<Roles> roles = new LinkedHashSet<>(List.of(ROLE_ADMIN, ROLE_USER));
-
-        given(roleRepository.findByName(ROLE_ADMIN.name())).willReturn(Optional.of(adminRole));
-        given(roleRepository.findByName(ROLE_USER.name())).willReturn(Optional.empty());
-
-        assertThrows(RoleNotFoundException.class, () -> roleService.getRoles(roles));
-        verify(roleRepository, times(2)).findByName(anyString());
-    }
-
-    @Test
-    @DisplayName("getRoles(): " + RETURNS_ROLES_WHEN_ROLES_EXIST)
-    void getRoles_RolesExist_ReturnRoles() {
-        Set<Roles> enumRoles = new LinkedHashSet<>(List.of(ROLE_ADMIN, ROLE_USER));
-        Set<Role> roles = new LinkedHashSet<>(List.of(userRole, adminRole));
-
-        given(roleRepository.findByName(adminRole.getName())).willReturn(Optional.of(adminRole));
-        given(roleRepository.findByName(userRole.getName())).willReturn(Optional.of(userRole));
-
-        Set<Role> returnedRoles = roleService.getRoles(enumRoles);
-        assertEquals(roles.size(), returnedRoles.size());
-        assertTrue(roles.containsAll(returnedRoles) && returnedRoles.containsAll(roles));
-        verify(roleRepository, times(2)).findByName(anyString());
-    }
-
-    @Test
     @DisplayName("getAllRoles() : " + RETURNS_ALL_ROLES_IN_DATABASE)
     void getAllRoles_AllRolesInDatabase_ReturnsAllRoles() {
         List<Role> roles = Roles.roles().stream()
@@ -135,7 +100,7 @@ class RoleServiceUnitTests {
 
         given(roleRepository.findAll()).willReturn(roles);
 
-        Set<Role> returnedRoles = roleService.getAllRoles();
+        List<Role> returnedRoles = roleService.getAllRoles();
         assertEquals(roles.size(), returnedRoles.size());
         assertTrue(roles.containsAll(returnedRoles) && returnedRoles.containsAll(roles));
         verify(roleRepository).findAll();

@@ -1,7 +1,6 @@
 package dev.naiarievilo.todoapp.roles;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
 public interface RoleService {
 
@@ -9,9 +8,7 @@ public interface RoleService {
 
     Role getRole(Roles role);
 
-    Set<Role> getRoles(Collection<Roles> roles);
-
-    Set<Role> getAllRoles();
+    List<Role> getAllRoles();
 
     void createRole(Roles roles);
 
