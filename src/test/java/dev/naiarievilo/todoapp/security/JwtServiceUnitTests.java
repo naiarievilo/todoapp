@@ -17,8 +17,10 @@ import java.time.Instant;
 import java.util.Map;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
+import static dev.naiarievilo.todoapp.security.jwt.JwtService.TYPE_CLAIM;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.ACCESS_TOKEN;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.REFRESH_TOKEN;
+import static dev.naiarievilo.todoapp.security.jwt.TokenTypes.USER_ACCESS;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,6 +82,10 @@ class JwtServiceUnitTests {
         assertDoesNotThrow(() -> jwtVerifier.verify(refreshToken));
         DecodedJWT decodedRefreshToken = jwtVerifier.verify(refreshToken);
 
+        int userAccessTokenType = USER_ACCESS.value();
+        assertEquals(userAccessTokenType, decodedAccessToken.getClaim(TYPE_CLAIM).asInt());
+        assertEquals(userAccessTokenType, decodedRefreshToken.getClaim(TYPE_CLAIM).asInt());
+
         assertEquals(JWT_ISSUER, decodedAccessToken.getIssuer());
         assertEquals(JWT_ISSUER, decodedRefreshToken.getIssuer());
 
@@ -113,6 +119,7 @@ class JwtServiceUnitTests {
         assertDoesNotThrow(() -> jwtVerifier.verify(newAccessToken));
 
         DecodedJWT decodedAccessToken = jwtVerifier.verify(newAccessToken);
+        assertEquals(USER_ACCESS.value(), decodedAccessToken.getClaim(TYPE_CLAIM).asInt());
         assertEquals(userId, decodedAccessToken.getSubject());
         assertEquals(decodedRefreshToken.getIssuer(), decodedAccessToken.getIssuer());
 
@@ -125,7 +132,7 @@ class JwtServiceUnitTests {
     @Test
     @DisplayName("verifyToken(): Throws `JWTVerificationException` when token is not valid")
     void verifyToken_TokenIsNotValid_ThrowsJWTVerificationException() {
-        assertThrows(JWTVerificationException.class, () -> jwtService.verifyToken("invalidToken"));
+        assertThrows(JWTVerificationException.class, () -> jwtService.verifyToken("invalidToken", USER_ACCESS));
     }
 
     @Test
@@ -134,7 +141,7 @@ class JwtServiceUnitTests {
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
         String accessToken = tokens.get(ACCESS_TOKEN.key());
 
-        DecodedJWT decodedJwt = jwtService.verifyToken(accessToken);
+        DecodedJWT decodedJwt = jwtService.verifyToken(accessToken, USER_ACCESS);
         assertNotNull(decodedJwt);
     }
 

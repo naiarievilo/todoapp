@@ -12,20 +12,22 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 
 import java.util.Objects;
 
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.DOES_NOT_RETURN_ERROR_MESSAGE_WHEN;
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.RETURNS_ERROR_MESSAGE_WHEN;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_VALID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {MethodValidationPostProcessor.class, LocalValidatorFactoryBean.class})
-class EmailIntegrationTests {
+class EmailAnnotationIntegrationTests {
 
     @Autowired
     LocalValidatorFactoryBean localValidatorFactoryBean;
 
     @Test
-    @DisplayName("@Email: returns constraint violation error when email is not provided")
+    @DisplayName("@Email: " + RETURNS_ERROR_MESSAGE_WHEN + " email is not provided")
     void email_EmailNotProvided_ReturnsConstraintViolationError() {
-        TestDTO testDTO = new TestDTO("");
+        var testDTO = new EmailTestDTO("");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
@@ -36,9 +38,9 @@ class EmailIntegrationTests {
     }
 
     @Test
-    @DisplayName("@Email: returns constraint violation error when email is not valid")
+    @DisplayName("@Email: " + RETURNS_ERROR_MESSAGE_WHEN + " email is not valid")
     void email_EmailNotValid_ReturnsConstraintViolationError() {
-        TestDTO testDTO = new TestDTO("notAValidEmail");
+        var testDTO = new EmailTestDTO("notAValidEmail");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
@@ -49,16 +51,16 @@ class EmailIntegrationTests {
     }
 
     @Test
-    @DisplayName("@Email: does not return errors when email is provided and valid")
+    @DisplayName("@Email: " + DOES_NOT_RETURN_ERROR_MESSAGE_WHEN + " email is provided and valid")
     void email_EmailProvidedAndValid_DoesNotReturnConstraintViolationError() {
-        TestDTO testDTO = new TestDTO("johnDoe@example.com");
+        var testDTO = new EmailTestDTO("johnDoe@example.com");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
         assertFalse(errors.hasErrors());
     }
 
-    record TestDTO(
+    record EmailTestDTO(
         @Email
         String email
     ) { }

@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -113,9 +114,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(User user) {
+    public void deleteUser(Long id) {
         // Entity must be managed to disassociate a user from their assigned roles.
-        user = getUserById(user.getId());
+        User user = getUserById(id);
         user.removeAllRoles();
         userInfoService.deleteUserInfo(user.getId());
         userRepository.delete(user);
@@ -249,6 +250,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void resetLoginAttempts(User user) {
         user.setLoginAttempts((byte) 0);
+        user.setLastLogin(LocalDate.now());
         userRepository.update(user);
 
     }

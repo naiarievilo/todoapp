@@ -13,12 +13,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.List;
 import java.util.Objects;
 
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.COULD_NOT_BE_VALIDATED;
+import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_VALID;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -38,6 +40,23 @@ public class GlobalControllerAdvice {
                 }
 
                 return error.getDefaultMessage();
+            })
+            .toList();
+
+        return new ErrorDetails(HttpStatus.BAD_REQUEST, validationErrorMessages);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDetails handleHandlerMethodValidationException(HandlerMethodValidationException e) {
+        List<String> validationErrorMessages = e.getAllValidationResults().stream()
+            .map(parameter -> {
+                String parameterName = parameter.getMethodParameter().getParameterName();
+                String message = parameter.getResolvableErrors().stream()
+                    .map(errorMessage -> Objects.requireNonNull(errorMessage.getDefaultMessage()))
+                    .findFirst().orElse(NOT_VALID);
+
+                return ValidationMessages.formatMessage(message, parameterName);
             })
             .toList();
 

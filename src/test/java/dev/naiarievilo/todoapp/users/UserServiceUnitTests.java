@@ -248,7 +248,7 @@ class UserServiceUnitTests {
     void deleteUser_UserExists_DeletesUser() {
         Long id = user.getId();
         given(userRepository.findById(id)).willReturn(Optional.of(user));
-        userService.deleteUser(user);
+        userService.deleteUser(id);
 
         InOrder invokeInOrder = inOrder(userRepository, userInfoService);
         invokeInOrder.verify(userRepository).findById(id);

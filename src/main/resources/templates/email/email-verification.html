@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+        <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    </head>
+    <div style="font-family:sans-serif; color:#0f172a">
+        <p>Hi, <span th:text="${userFirstName}"/>!</p>
+        <br/>
+        <p>
+            Thanks for signing up for <span th:text="${appName}"/>! We're excited to welcome you to the community.
+        </p>
+        <br/>
+        <p>
+            To complete your registration and access all the great features of <span th:text="${appName}"/>
+            permanently, please verify your email address. This helps us ensure the security of your account and
+            keep you informed about important updates.
+        </p>
+        <br/>
+        <p>
+            To verify your email address, please click in the following link:<br/>
+            <a style="word-wrap: break-word" th:href="${verificationUri}" th:text="${verificationUri}"/>
+        </p>
+        <br/>
+        <p>
+            If you're having trouble verifying your email, we're ready to help! Just reply to this email, and we'll
+            get you set up in no time.
+        </p>
+        <br/>
+        <p>Sincerely,</p>
+        <p>The <span th:text="${appName}"/> supporting team</p>
+    </div>
+</html>

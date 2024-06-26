@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.security;
 
+import dev.naiarievilo.todoapp.mailing.EmailService;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserService;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -16,10 +17,13 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
         new BadCredentialsException(BAD_CREDENTIALS);
     private static final int MAX_LOGIN_ATTEMPTS_ALLOWED = 10;
 
+    private final EmailService emailService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public EmailPasswordAuthenticationProvider(UserService userService, PasswordEncoder passwordEncoder) {
+    public EmailPasswordAuthenticationProvider(UserService userService, EmailService emailService,
+        PasswordEncoder passwordEncoder) {
+        this.emailService = emailService;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -37,7 +41,7 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
         }
 
         if (userService.isUserExpired(user)) {
-            userService.deleteUser(user);
+            userService.deleteUser(user.getId());
             throw BAD_CREDENTIALS_EXCEPTION;
 
         } else if (userService.isUserInactive(user)) {
@@ -45,6 +49,7 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
 
         } else if (user.getLoginAttempts() >= MAX_LOGIN_ATTEMPTS_ALLOWED) {
             userService.lockUser(user);
+            emailService.sendLockUserMessage(user);
             throw BAD_CREDENTIALS_EXCEPTION;
 
         } else if (!passwordEncoder.matches(password, user.getPassword())) {

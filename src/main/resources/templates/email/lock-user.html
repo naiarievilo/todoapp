@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+        <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    </head>
+    <div style="font-family:sans-serif; color:#0f172a">
+        <p>Hi, <span th:text="${userFirstName}"/>!</p>
+        <br/>
+        <p>
+            We are contacting you to inform you that your <span th:text="${appName}"/> account has been temporarily
+            locked for security reasons.
+        </p>
+        <br/>
+        <p>
+            Our system detected several failed login attempts on your <span th:text="${appName}"/> account recently.
+            This safety measure is in place to protect your account information in case of unauthorized, malicious
+            access attempts.
+        </p>
+        <br/>
+        <p>
+            To unlock your account, please click on the link below to initiate a user unlock:<br/>
+            <a style="word-wrap: break-word" th:href="${unlockUserPage}" th:text="${unlockUserPage}"/>
+        </p>
+        <br/>
+        <p>
+            If you're unable to unlock your <span th:text="${appName}"/> account or believe this is a mistake, please
+            contact our support team by replacing to this email.
+        </p>
+        <br/>
+        <p>
+            We apologize for any inconvenience this may cause.
+        </p>
+        <br/>
+        <p>Sincerely,</p>
+        <p>The <span th:text="${appName}"/> supporting team</p>
+    </div>
+</html>

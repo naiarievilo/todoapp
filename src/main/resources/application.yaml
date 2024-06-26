@@ -1,31 +1,31 @@
+admin:
+  email: ${ADMIN_EMAIL}
+  password: ${ADMIN_PASSWORD}
+jwt:
+  secret: ${JWT_SECRET}
+  issuer: ${JWT_ISSUER}
 logging:
   level:
     org:
       springframework:
+        boot: "DEBUG"
         web: "DEBUG"
         security:
           web:
             FilterChainProxy: "DEBUG"
-
-jwt:
-  secret: ${JWT_SECRET}
-  issuer: ${JWT_ISSUER}
-  expires-in: ${JWT_EXPIRATION}
-  refresh-expires-in: ${JWT_REFRESH_EXPIRATION}
-
 management:
   endpoints:
     web:
       exposure:
         include: "*"
-
-admin:
-  email: ${ADMIN_EMAIL}
-  password: ${ADMIN_PASSWORD}
-
+server:
+  address: "0.0.0.0"
+  port: 8080
+  ssl:
+    enabled: false
 spring:
   application:
-    name: "todoapp"
+    name: "Todoapp"
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -41,6 +41,23 @@ spring:
     show-sql: true
   liquibase:
     change-log: "classpath:/db/changelog/root-changelog.yaml"
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        transport:
+          protocol: "smtp"
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
   sql:
     init:
       mode: "never"
+client:
+  uri:
+    unlock-user: ${CLIENT_URI_UNLOCK_USER}

@@ -154,7 +154,7 @@ class UserServiceIntegrationTests {
         userInfoService.createUserInfo(userCreationDTO, user);
         Long id = user.getId();
 
-        userService.deleteUser(user);
+        userService.deleteUser(id);
         assertFalse(userRepository.findById(id).isPresent());
         assertFalse(userInfoService.userInfoExists(id));
     }
@@ -298,13 +298,13 @@ class UserServiceIntegrationTests {
     void addLoginAttempt_UserNotNull_AddsLoginAttempt() {
         user.setLastLoginAttempt(LocalDateTime.now());
         userRepository.persist(user);
-        LocalDateTime oldFailedLoginTime = user.getLastLoginAttempt();
+        LocalDateTime lastLoginAttempt = user.getLastLoginAttempt();
         int oldLoginAttempts = user.getLoginAttempts();
 
         userService.addLoginAttempt(user);
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
         assertEquals(updatedUser.getLoginAttempts(), oldLoginAttempts + 1);
-        assertTrue(oldFailedLoginTime.isBefore(updatedUser.getLastLoginAttempt()));
+        assertTrue(lastLoginAttempt.isBefore(updatedUser.getLastLoginAttempt()));
     }
 
     @Test

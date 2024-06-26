@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.security;
 
+import dev.naiarievilo.todoapp.mailing.EmailService;
 import dev.naiarievilo.todoapp.security.jwt.JwtAuthenticationFilter;
 import dev.naiarievilo.todoapp.users.UserService;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +38,8 @@ public class SecurityConfiguration {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/actuator/**").hasRole("ADMIN")
-                .requestMatchers("/users/create", "/users/authenticate").permitAll()
+                .requestMatchers("/users/creation", "/users/authentication", "/users/verify", "/users/unlock",
+                    "/users/enable").permitAll()
                 .anyRequest().authenticated()
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -67,10 +69,11 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthenticationManager authenticationManager(UserService userService, EmailService emailService,
+        PasswordEncoder passwordEncoder
+    ) {
         AuthenticationProvider authenticationProvider =
-            new EmailPasswordAuthenticationProvider(userService, passwordEncoder);
-
+            new EmailPasswordAuthenticationProvider(userService, emailService, passwordEncoder);
         return new ProviderManager(authenticationProvider);
     }
 

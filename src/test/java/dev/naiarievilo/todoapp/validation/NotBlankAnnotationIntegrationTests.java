@@ -12,19 +12,21 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 
 import java.util.Objects;
 
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.DOES_NOT_RETURN_ERROR_MESSAGE_WHEN;
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.RETURNS_ERROR_MESSAGE_WHEN;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {MethodValidationPostProcessor.class, LocalValidatorFactoryBean.class})
-class NotBlankIntegrationTests {
+class NotBlankAnnotationIntegrationTests {
 
     @Autowired
     LocalValidatorFactoryBean localValidatorFactoryBean;
 
     @Test
-    @DisplayName("@NotBlank: returns constraint violation error when field is blank")
+    @DisplayName("@NotBlank: " + RETURNS_ERROR_MESSAGE_WHEN + " field is blank")
     void notBlank_BlankField_ReturnsConstraintViolationError() {
-        TestDTO testDTO = new TestDTO("  ");
+        var testDTO = new NotBlankTestDTO("  ");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
@@ -35,16 +37,16 @@ class NotBlankIntegrationTests {
     }
 
     @Test
-    @DisplayName("@NotBlank: does not return constraint violation error when field is not blank")
+    @DisplayName("@NotBlank: " + DOES_NOT_RETURN_ERROR_MESSAGE_WHEN + " field is not blank")
     void notBlank_FieldNotBlank_DoesNotReturnConstraintViolationError() {
-        TestDTO testDTO = new TestDTO("notBlank");
+        var testDTO = new NotBlankTestDTO("notBlank");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
         assertFalse(errors.hasErrors());
     }
 
-    record TestDTO(
+    record NotBlankTestDTO(
         @NotBlank
         String field
     ) { }

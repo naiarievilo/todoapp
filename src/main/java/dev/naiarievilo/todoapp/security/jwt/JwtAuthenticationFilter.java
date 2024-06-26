@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.BEARER_PREFIX;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED;
+import static dev.naiarievilo.todoapp.security.jwt.TokenTypes.USER_ACCESS;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -53,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authorization.replaceFirst(BEARER_PREFIX, "");
         User user;
         try {
-            DecodedJWT verifiedJWT = jwtService.verifyToken(token);
+            DecodedJWT verifiedJWT = jwtService.verifyToken(token, USER_ACCESS);
             Long userId = Long.valueOf(verifiedJWT.getSubject());
             user = userService.getUserById(userId);
 
@@ -70,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (userService.isUserExpired(user)) {
-            userService.deleteUser(user);
+            userService.deleteUser(user.getId());
             this.buildJwtErrorDetailsResponse(response);
             return;
 

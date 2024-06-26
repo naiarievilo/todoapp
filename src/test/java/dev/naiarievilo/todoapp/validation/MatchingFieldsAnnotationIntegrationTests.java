@@ -12,11 +12,13 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 
 import java.util.Objects;
 
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.DOES_NOT_RETURN_ERROR_MESSAGE_WHEN;
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.RETURNS_ERROR_MESSAGE_WHEN;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.DOES_NOT_MATCH;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {MethodValidationPostProcessor.class, LocalValidatorFactoryBean.class})
-class MatchingFieldsIntegrationTests {
+class MatchingFieldsAnnotationIntegrationTests {
 
     private static final String FIELD_VALUE = "fieldValue";
     private static final String OTHER_FIELD_VALUE = "otherFieldValue";
@@ -25,9 +27,9 @@ class MatchingFieldsIntegrationTests {
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
     @Test
-    @DisplayName("@MatchingFields: returns constraint violation error when field values don't match")
+    @DisplayName("@MatchingFields: " + RETURNS_ERROR_MESSAGE_WHEN + " field values don't match")
     void matchingFields_PasswordsDoNotMatch_ReturnsConstraintViolationError() {
-        TestDTO testDTO = new TestDTO(FIELD_VALUE, OTHER_FIELD_VALUE);
+        var testDTO = new MatchingFieldsTestDTO(FIELD_VALUE, OTHER_FIELD_VALUE);
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
@@ -41,9 +43,9 @@ class MatchingFieldsIntegrationTests {
     }
 
     @Test
-    @DisplayName("@MatchingFields: does not return constraint violation error when field values match")
+    @DisplayName("@MatchingFields: " + DOES_NOT_RETURN_ERROR_MESSAGE_WHEN + " field values match")
     void matchingFields_PasswordsMatch_DoesNotReturnConstraintViolationError() {
-        TestDTO testDTO = new TestDTO(FIELD_VALUE, FIELD_VALUE);
+        var testDTO = new MatchingFieldsTestDTO(FIELD_VALUE, FIELD_VALUE);
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
@@ -51,7 +53,7 @@ class MatchingFieldsIntegrationTests {
     }
 
     @MatchingFields(targetField = "password", matchingField = "passwordConfirmation")
-    record TestDTO(
+    record MatchingFieldsTestDTO(
         String password,
         String passwordConfirmation
     ) { }
