@@ -88,8 +88,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByEmailEagerly(String email) {
+        return userRepository.findByEmailEagerly(email).orElseThrow(() -> new UserNotFoundException(email));
+    }
+
+    @Override
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @Override
+    public User getUserByIdEagerly(Long id) {
+        return userRepository.findByIdEagerly(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Override
@@ -116,7 +126,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long id) {
         // Entity must be managed to disassociate a user from their assigned roles.
-        User user = getUserById(id);
+        User user = getUserByIdEagerly(id);
         user.removeAllRoles();
         userInfoService.deleteUserInfo(user.getId());
         userRepository.delete(user);
@@ -243,7 +253,8 @@ public class UserServiceImpl implements UserService {
     public void addLoginAttempt(User user) {
         user.addLoginAttempt();
         user.setLastLoginAttempt(LocalDateTime.now());
-        userRepository.update(user);
+        // Invoking `update` instead of `merge` throws `PersistentObjectException`
+        userRepository.merge(user);
     }
 
     @Override
@@ -251,8 +262,8 @@ public class UserServiceImpl implements UserService {
     public void resetLoginAttempts(User user) {
         user.setLoginAttempts((byte) 0);
         user.setLastLogin(LocalDate.now());
-        userRepository.update(user);
-
+        // Invoking `update` instead of `merge` throws `PersistentObjectException`
+        userRepository.merge(user);
     }
 
 }

@@ -247,11 +247,11 @@ class UserServiceUnitTests {
     @DisplayName("deleteUser(): " + DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() {
         Long id = user.getId();
-        given(userRepository.findById(id)).willReturn(Optional.of(user));
+        given(userRepository.findByIdEagerly(id)).willReturn(Optional.of(user));
         userService.deleteUser(id);
 
         InOrder invokeInOrder = inOrder(userRepository, userInfoService);
-        invokeInOrder.verify(userRepository).findById(id);
+        invokeInOrder.verify(userRepository).findByIdEagerly(id);
         invokeInOrder.verify(userInfoService).deleteUserInfo(id);
         invokeInOrder.verify(userRepository).delete(userCaptor.capture());
         assertTrue(userCaptor.getValue().getRoles().isEmpty());
@@ -457,7 +457,7 @@ class UserServiceUnitTests {
         user.setLastLoginAttempt(oldLocalTime);
 
         userService.addLoginAttempt(user);
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).merge(userCaptor.capture());
         User userCaptured = userCaptor.getValue();
         assertNotEquals(oldLoginAttempts, userCaptured.getLoginAttempts());
         assertNotEquals(oldLocalTime, userCaptured.getLastLoginAttempt());
@@ -469,7 +469,7 @@ class UserServiceUnitTests {
         user.setLoginAttempts((byte) 2);
 
         userService.resetLoginAttempts(user);
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).merge(userCaptor.capture());
         assertEquals(0, userCaptor.getValue().getLoginAttempts());
     }
 

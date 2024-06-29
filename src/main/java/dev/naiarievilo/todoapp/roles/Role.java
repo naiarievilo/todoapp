@@ -15,14 +15,14 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
     @NaturalId
     @Column(name = "role", unique = true, nullable = false, updatable = false)
     private String name;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, updatable = false)
     private String description;
 
     @ManyToMany(mappedBy = "roles")

@@ -35,7 +35,7 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
 
         User user;
         try {
-            user = userService.getUserByEmail(email);
+            user = userService.getUserByEmailEagerly(email);
         } catch (UserNotFoundException ex) {
             throw BAD_CREDENTIALS_EXCEPTION;
         }

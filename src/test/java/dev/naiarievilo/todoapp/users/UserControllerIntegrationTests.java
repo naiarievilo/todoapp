@@ -143,7 +143,7 @@ class UserControllerIntegrationTests {
 
         String responseBody = mockMvc.perform(post("/users/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidUserDTO))
+                .content(invalidUserDTO.toString())
             )
             .andExpect(status().isBadRequest())
             .andReturn().getResponse().getContentAsString();
@@ -161,11 +161,11 @@ class UserControllerIntegrationTests {
     @DisplayName("authenticateUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_CREDENTIALS_INCORRECT)
     void authenticateUser_EmailOrPasswordIncorrect_ReturnsErrorDetails() throws Exception {
         userService.createUser(userCreationDTO);
-        UserDTO userDTOWithWrongPassword = new UserDTO(null, EMAIL_1, "wrongSecurePassword123!?");
+        UserDTO userDtoWithWrongPassword = new UserDTO(null, EMAIL_1, "wrongSecurePassword123!?");
 
         String content = mockMvc.perform(post("/users/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDTOWithWrongPassword))
+                .content(userDtoWithWrongPassword.toString())
             )
             .andExpectAll(status().isBadRequest())
             .andReturn().getResponse().getContentAsString();
@@ -186,7 +186,7 @@ class UserControllerIntegrationTests {
         mockMvc
             .perform(post("/users/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDTO))
+                .content(userDTO.toString())
             )
             .andExpectAll(
                 status().isOk(),

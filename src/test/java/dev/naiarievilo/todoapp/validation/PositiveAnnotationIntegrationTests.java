@@ -17,13 +17,13 @@ import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_VALID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {MethodValidationPostProcessor.class, LocalValidatorFactoryBean.class})
-class IdAnnotationIntegrationTests {
+class PositiveAnnotationIntegrationTests {
 
     @Autowired
     LocalValidatorFactoryBean localValidatorFactoryBean;
 
     @Test
-    @DisplayName("@Id: " + RETURNS_ERROR_MESSAGE_WHEN + " id is not valid")
+    @DisplayName("@Positive: " + RETURNS_ERROR_MESSAGE_WHEN + " id is not valid")
     void id_IdNotValid_ReturnsConstraintViolationError() {
         var testDTO = new IdTestDTO(null);
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
@@ -39,7 +39,7 @@ class IdAnnotationIntegrationTests {
     }
 
     @Test
-    @DisplayName("@Id: " + DOES_NOT_RETURN_ERROR_MESSAGE_WHEN + "id provided is valid")
+    @DisplayName("@Positive: " + DOES_NOT_RETURN_ERROR_MESSAGE_WHEN + "id provided is valid")
     void id_IdValid_DoesNotReturnConstraintViolationError() {
         var testDTO = new IdTestDTO(1L);
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
@@ -49,7 +49,7 @@ class IdAnnotationIntegrationTests {
     }
 
     record IdTestDTO(
-        @Id
+        @Positive
         Long id
     ) { }
 }

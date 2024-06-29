@@ -13,7 +13,7 @@ public interface RoleRepository extends BaseJpaRepository<Role, Long> {
 
     Optional<Role> findByName(String role);
 
-    @Query("SELECT r FROM Role r")
+    @Query("SELECT r FROM Role AS r")
     List<Role> findAll();
 
     @Transactional

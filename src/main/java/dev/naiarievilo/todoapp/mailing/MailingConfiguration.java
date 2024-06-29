@@ -38,7 +38,7 @@ public class MailingConfiguration {
         var templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix("templates/email");
         templateResolver.setSuffix(".html");
-        templateResolver.setTemplateMode("HTML5");
+        templateResolver.setTemplateMode("HTML");
         templateResolver.setCharacterEncoding(UTF_8);
         return templateResolver;
     }

@@ -197,8 +197,57 @@ databaseChangeLog:
                     deleteCascade: true
                     nullable: false
               - column:
+                  name: "type"
+                  type: "VARCHAR(64)"
+                  constraints:
+                    nullable: false
+              - column:
                   name: "date"
                   type: "DATE"
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: "create-todo_groups-table"
+      author: "Ian Oliveira"
+      preConditions:
+        - onFail: "MARK_RAN"
+        - not:
+            - tableExists:
+                tableName: "todo_groups"
+      changes:
+        - createTable:
+            tableName: "todo_groups"
+            columns:
+              - column:
+                  name: "id"
+                  type: "BIGINT"
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: "pk_todo_groups"
+                    nullable: false
+              - column:
+                  name: "todolist_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_todo_groups_todolists"
+                    references: "todolists(id)"
+                    deleteCascade: true
+                    nullable: false
+              - column:
+                  name: "name"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "completed"
+                  type: "BOOLEAN"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "position"
+                  type: "INT"
                   constraints:
                     nullable: false
 
@@ -231,13 +280,25 @@ databaseChangeLog:
                     deleteCascade: true
                     nullable: false
               - column:
+                  name: "todo_group_id"
+                  type: "BIGINT"
+                  constraints:
+                    foreignKeyName: "fk_todos_todo_groups"
+                    references: "todo_groups(id)"
+                    deleteCascade: true
+              - column:
                   name: "task"
                   type: "VARCHAR(255)"
                   constraints:
                     nullable: false
               - column:
-                  name: "is_done"
+                  name: "completed"
                   type: "BOOLEAN"
                   defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "position"
+                  type: "INT"
                   constraints:
                     nullable: false

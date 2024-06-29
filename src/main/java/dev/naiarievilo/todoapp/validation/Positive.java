@@ -12,8 +12,8 @@ import static dev.naiarievilo.todoapp.validation.ValidationMessages.NOT_VALID;
 
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = IdValidator.class)
-public @interface Id {
+@Constraint(validatedBy = PositiveValidator.class)
+public @interface Positive {
 
     String message() default NOT_VALID;
 

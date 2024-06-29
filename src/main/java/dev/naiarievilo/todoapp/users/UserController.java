@@ -60,17 +60,18 @@ public class UserController {
     }
 
     @PostMapping("/authentication")
-    public ResponseEntity<Void> authenticateUser(@RequestBody @Validated(UserAuthentication.class) UserDTO userDTO) {
+    public ResponseEntity<UserDTO> authenticateUser(@RequestBody @Validated(UserAuthentication.class) UserDTO userDTO) {
         var authentication = (UserAuthenticationToken) authenticationManager.authenticate(
             EmailPasswordAuthenticationToken.unauthenticated(userDTO.email(), userDTO.password())
         );
 
-        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(authentication.getPrincipal());
+        User user = authentication.getPrincipal();
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
         return ResponseEntity
             .status(HttpStatus.OK)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN.key()))
             .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN.key()))
-            .build();
+            .body(new UserDTO(user.getId(), user.getEmail(), user.getPassword()));
     }
 
     @GetMapping("/verify")

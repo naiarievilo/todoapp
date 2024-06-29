@@ -19,7 +19,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
     @NaturalId(mutable = true)
@@ -51,7 +51,7 @@ public class User {
     @Column(name = "last_login", nullable = false)
     private LocalDate lastLogin = LocalDate.now();
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -93,29 +93,17 @@ public class User {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public boolean isAuthenticated() {
-        return authenticated;
-    }
+    public boolean isAuthenticated() { return authenticated; }
 
-    public void setAuthenticated(boolean authenticated) {
-        this.authenticated = authenticated;
-    }
+    public void setAuthenticated(boolean authenticated) { this.authenticated = authenticated; }
 
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
+    public LocalDateTime getCreationDate() { return creationDate; }
 
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
+    public void setCreationDate(LocalDateTime creationDate) { this.creationDate = creationDate; }
 
-    public byte getLoginAttempts() {
-        return loginAttempts;
-    }
+    public byte getLoginAttempts() { return loginAttempts; }
 
     public void setLoginAttempts(byte loginAttempts) {
         this.loginAttempts = loginAttempts;
@@ -126,29 +114,19 @@ public class User {
     }
 
     @Nullable
-    public LocalDateTime getLastLoginAttempt() {
-        return lastLoginAttempt;
-    }
+    public LocalDateTime getLastLoginAttempt() { return lastLoginAttempt; }
 
-    public void setLastLoginAttempt(LocalDateTime lastLoginAttempt) {
-        this.lastLoginAttempt = lastLoginAttempt;
-    }
+    public void setLastLoginAttempt(LocalDateTime lastLoginAttempt) { this.lastLoginAttempt = lastLoginAttempt; }
 
-    public LocalDate getLastLogin() {
-        return lastLogin;
-    }
+    public LocalDate getLastLogin() { return lastLogin; }
 
-    public void setLastLogin(LocalDate lastLogin) {
-        this.lastLogin = lastLogin;
-    }
+    public void setLastLogin(LocalDate lastLogin) { this.lastLogin = lastLogin; }
 
     public Set<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
-        addRoles(roles);
-    }
+    public void setRoles(Set<Role> roles) { addRoles(roles); }
 
     public void addRoles(Set<Role> roles) {
         for (Role role : roles) {

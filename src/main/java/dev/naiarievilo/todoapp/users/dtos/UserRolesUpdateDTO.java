@@ -1,10 +1,10 @@
 package dev.naiarievilo.todoapp.users.dtos;
 
-import dev.naiarievilo.todoapp.validation.Id;
 import dev.naiarievilo.todoapp.validation.NotBlank;
+import dev.naiarievilo.todoapp.validation.Positive;
 
 public record UserRolesUpdateDTO(
-    @Id
+    @Positive
     Long id,
 
     @NotBlank

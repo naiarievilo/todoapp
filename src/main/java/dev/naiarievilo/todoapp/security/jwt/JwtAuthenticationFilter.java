@@ -56,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             DecodedJWT verifiedJWT = jwtService.verifyToken(token, USER_ACCESS);
             Long userId = Long.valueOf(verifiedJWT.getSubject());
-            user = userService.getUserById(userId);
+            user = userService.getUserByIdEagerly(userId);
 
         } catch (JWTVerificationException e) {
             buildJwtErrorDetailsResponse(response);

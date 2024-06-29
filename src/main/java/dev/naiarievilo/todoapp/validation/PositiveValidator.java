@@ -3,7 +3,7 @@ package dev.naiarievilo.todoapp.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class IdValidator implements ConstraintValidator<Id, Long> {
+public class PositiveValidator implements ConstraintValidator<Positive, Long> {
 
     @Override
     public boolean isValid(Long id, ConstraintValidatorContext constraintValidatorContext) {

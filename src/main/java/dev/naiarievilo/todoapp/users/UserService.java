@@ -17,7 +17,11 @@ public interface UserService {
 
     User getUserByEmail(String email);
 
+    User getUserByEmailEagerly(String email);
+
     User getUserById(Long id);
+
+    User getUserByIdEagerly(Long id);
 
     User createUser(UserCreationDTO userCreationDTO);
 
