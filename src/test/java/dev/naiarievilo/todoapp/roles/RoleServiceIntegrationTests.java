@@ -1,11 +1,11 @@
 package dev.naiarievilo.todoapp.roles;
 
+import dev.naiarievilo.todoapp.ServiceIntegrationTests;
 import dev.naiarievilo.todoapp.roles.exceptions.RoleAlreadyExistsException;
 import dev.naiarievilo.todoapp.roles.exceptions.RoleNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
@@ -13,13 +13,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.naiarievilo.todoapp.roles.RoleServiceTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.roles.RoleServiceTestCases.*;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Transactional(readOnly = true)
-class RoleServiceIntegrationTests {
+class RoleServiceIntegrationTests extends ServiceIntegrationTests {
 
     @Autowired
     RoleRepository roleRepository;

@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.roles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.naiarievilo.todoapp.ControllerIntegrationTests;
 import dev.naiarievilo.todoapp.roles.dtos.RoleDTO;
 import dev.naiarievilo.todoapp.roles.dtos.RolesDTO;
 import dev.naiarievilo.todoapp.security.jwt.JwtService;
@@ -12,16 +13,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static dev.naiarievilo.todoapp.roles.RoleControllerTestCaseMessages.STATUS_200_GETS_ALL_ROLES_WHEN_ROLES_PERSISTED_IN_DATABASE;
-import static dev.naiarievilo.todoapp.roles.RoleControllerTestCaseMessages.STATUS_403_RETURNS_FORBIDDEN_WHEN_AUTHENTICATED_USER_NOT_ADMIN;
+import static dev.naiarievilo.todoapp.roles.RoleControllerTestCases.STATUS_200_GETS_ALL_ROLES_WHEN_ROLES_PERSISTED_IN_DATABASE;
+import static dev.naiarievilo.todoapp.roles.RoleControllerTestCases.STATUS_403_RETURNS_FORBIDDEN_WHEN_AUTHENTICATED_USER_NOT_ADMIN;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.ACCESS_TOKEN;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.BEARER_PREFIX;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
@@ -29,9 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class RoleControllerIntegrationTests {
+class RoleControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Autowired
     MockMvc mockMvc;
@@ -46,8 +43,6 @@ class RoleControllerIntegrationTests {
 
     @Value("${admin.email}")
     private String adminEmail;
-    @Value("${admin.password}")
-    private String adminPassword;
     private UserCreationDTO userCreationDTO;
 
     @BeforeEach

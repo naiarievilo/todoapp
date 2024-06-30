@@ -3,7 +3,7 @@ package dev.naiarievilo.todoapp.roles;
 import static dev.naiarievilo.todoapp.ResponseConstants.FORBIDDEN;
 import static dev.naiarievilo.todoapp.ResponseConstants.OK;
 
-public class RoleControllerTestCaseMessages {
+public class RoleControllerTestCases {
 
     static final String STATUS_200_GETS_ALL_ROLES_WHEN_ROLES_PERSISTED_IN_DATABASE =
         OK + "Gets all roles when roles were persisted in database";

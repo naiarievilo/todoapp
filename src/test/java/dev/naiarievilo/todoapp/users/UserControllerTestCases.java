@@ -2,7 +2,7 @@ package dev.naiarievilo.todoapp.users;
 
 import static dev.naiarievilo.todoapp.ResponseConstants.*;
 
-class UserControllerTestCaseMessages {
+class UserControllerTestCases {
 
     static final String STATUS_200_ADDS_ROLE_TO_USER_WHEN_AUTHENTICATED_USER_ADMIN =
         OK + "Adds role to user when authenticated user has admin role";

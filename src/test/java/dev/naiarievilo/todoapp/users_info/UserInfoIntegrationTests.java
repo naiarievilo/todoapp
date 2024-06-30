@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.users_info;
 
+import dev.naiarievilo.todoapp.ServiceIntegrationTests;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserRepository;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
@@ -10,17 +11,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
-import static dev.naiarievilo.todoapp.users_info.UserInfoTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.users_info.UserInfoTestCases.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Transactional(readOnly = true)
-class UserInfoIntegrationTests {
+class UserInfoIntegrationTests extends ServiceIntegrationTests {
 
     @Autowired
     UserInfoRepository userInfoRepository;
@@ -29,7 +27,7 @@ class UserInfoIntegrationTests {
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
-    private UserInfoService userInfoService;
+    UserInfoService userInfoService;
 
     private UserCreationDTO userCreationDTO;
     private UserInfo userInfo;

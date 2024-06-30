@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static dev.naiarievilo.todoapp.roles.RoleServiceTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.roles.RoleServiceTestCases.*;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

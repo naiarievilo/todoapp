@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
-import static dev.naiarievilo.todoapp.users_info.UserInfoTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.users_info.UserInfoTestCases.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;

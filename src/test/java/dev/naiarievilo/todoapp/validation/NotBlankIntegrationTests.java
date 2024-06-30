@@ -3,22 +3,19 @@ package dev.naiarievilo.todoapp.validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import java.util.Objects;
 
-import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.DOES_NOT_RETURN_ERROR_MESSAGE_WHEN;
-import static dev.naiarievilo.todoapp.validation.AnnotationsTestCaseMessages.RETURNS_ERROR_MESSAGE_WHEN;
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCases.DOES_NOT_RETURN_ERROR_MESSAGE_WHEN;
+import static dev.naiarievilo.todoapp.validation.AnnotationsTestCases.RETURNS_ERROR_MESSAGE_WHEN;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {MethodValidationPostProcessor.class, LocalValidatorFactoryBean.class})
-class NotBlankAnnotationIntegrationTests {
+class NotBlankIntegrationTests extends ValidationIntegrationTests {
 
     @Autowired
     LocalValidatorFactoryBean localValidatorFactoryBean;

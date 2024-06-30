@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.users;
 
+import dev.naiarievilo.todoapp.ServiceIntegrationTests;
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.roles.exceptions.UserRoleRemovalProhibitedException;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +21,11 @@ import java.time.LocalDateTime;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
-import static dev.naiarievilo.todoapp.users.UserServiceTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.users.UserServiceTestCases.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Transactional(readOnly = true)
-class UserServiceIntegrationTests {
+class UserServiceIntegrationTests extends ServiceIntegrationTests {
 
     @Autowired
     private PasswordEncoder passwordEncoder;

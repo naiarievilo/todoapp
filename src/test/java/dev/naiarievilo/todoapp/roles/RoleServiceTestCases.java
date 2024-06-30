@@ -1,6 +1,6 @@
 package dev.naiarievilo.todoapp.roles;
 
-public class RoleServiceTestCaseMessages {
+public class RoleServiceTestCases {
 
     static final String CREATES_ROLE_WHEN_ROLE_DOES_NOT_EXIST =
         "creates role when role does not exist";

@@ -24,7 +24,7 @@ import java.util.Set;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static dev.naiarievilo.todoapp.users.UserServiceImpl.EMAIL_CONFIRMATION_PERIOD;
-import static dev.naiarievilo.todoapp.users.UserServiceTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.users.UserServiceTestCases.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;

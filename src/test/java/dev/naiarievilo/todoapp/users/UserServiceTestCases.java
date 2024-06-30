@@ -1,6 +1,6 @@
 package dev.naiarievilo.todoapp.users;
 
-class UserServiceTestCaseMessages {
+class UserServiceTestCases {
 
     static final String ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL =
         "adds login attempt when user is not null";

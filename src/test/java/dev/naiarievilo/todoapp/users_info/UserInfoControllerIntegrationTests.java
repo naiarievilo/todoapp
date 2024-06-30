@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users_info;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.naiarievilo.todoapp.ControllerIntegrationTests;
 import dev.naiarievilo.todoapp.security.ErrorDetails;
 import dev.naiarievilo.todoapp.security.jwt.JwtService;
 import dev.naiarievilo.todoapp.users.User;
@@ -12,8 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.ACCESS_TOKEN;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.BEARER_PREFIX;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
-import static dev.naiarievilo.todoapp.users_info.UserInfoControllerTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.users_info.UserInfoControllerTestCases.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,9 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class UserInfoControllerIntegrationTests {
+class UserInfoControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Autowired
     UserService userService;

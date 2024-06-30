@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.naiarievilo.todoapp.ControllerIntegrationTests;
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.security.ErrorDetails;
@@ -18,8 +19,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,16 +32,14 @@ import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationProvider.BAD_CREDENTIALS;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.*;
 import static dev.naiarievilo.todoapp.users.UserController.REFRESH_TOKEN_HEADER;
-import static dev.naiarievilo.todoapp.users.UserControllerTestCaseMessages.*;
+import static dev.naiarievilo.todoapp.users.UserControllerTestCases.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class UserControllerIntegrationTests {
+class UserControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Autowired
     ObjectMapper objectMapper;

@@ -1,6 +1,6 @@
 package dev.naiarievilo.todoapp.users_info;
 
-public class UserInfoTestCaseMessages {
+public class UserInfoTestCases {
 
     static final String CREATES_USER_INFO_WHEN_USER_INFO_DOES_NOT_EXIST =
         "creates `UserInfo` when user info does not exist";
