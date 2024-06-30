@@ -10,10 +10,10 @@ import java.lang.annotation.Target;
 
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = NotNullValidator.class)
-public @interface NotNull {
+@Constraint(validatedBy = NoNullElementsValidator.class)
+public @interface NoNullElements {
 
     String message() default MUST_BE_PROVIDED;
 

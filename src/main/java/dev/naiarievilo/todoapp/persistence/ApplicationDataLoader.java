@@ -55,6 +55,6 @@ public class ApplicationDataLoader {
         var adminDTO = new UserCreationDTO(adminEmail, adminPassword, null, "Server", "Administrator");
         User adminUser = userService.createUser(adminDTO);
         userService.addRoleToUser(adminUser, ROLE_ADMIN);
-        userService.authenticateUser(adminUser);
+        userService.verifyUser(adminUser);
     }
 }

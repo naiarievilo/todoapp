@@ -8,6 +8,9 @@ import dev.naiarievilo.todoapp.validation.NotBlank;
 import dev.naiarievilo.todoapp.validation.NotNull;
 import dev.naiarievilo.todoapp.validation.OneNotNull;
 import dev.naiarievilo.todoapp.validation.Positive;
+import org.springframework.lang.Nullable;
+
+import java.time.LocalDateTime;
 
 @OneNotNull(fields = {"listId", "groupId"}, groups = {Creation.class, Update.class})
 public record TodoDTO(
@@ -28,6 +31,11 @@ public record TodoDTO(
     Boolean completed,
 
     @Positive(groups = {Creation.class, Update.class})
-    Integer position
+    Integer position,
+
+    LocalDateTime createdAt,
+
+    @Nullable
+    LocalDateTime dueDate
 
 ) { }

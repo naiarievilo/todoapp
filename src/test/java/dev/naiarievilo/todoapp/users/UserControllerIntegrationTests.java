@@ -137,7 +137,7 @@ class UserControllerIntegrationTests {
     }
 
     @Test
-    @DisplayName("authenticateUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
+    @DisplayName("verifyUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void authenticateUser_UserAuthenticationDTONotValid_ReturnsErrorDetails() throws Exception {
         UserDTO invalidUserDTO = new UserDTO(null, EMAIL_1, " ");
 
@@ -158,7 +158,7 @@ class UserControllerIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("authenticateUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_CREDENTIALS_INCORRECT)
+    @DisplayName("verifyUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_CREDENTIALS_INCORRECT)
     void authenticateUser_EmailOrPasswordIncorrect_ReturnsErrorDetails() throws Exception {
         userService.createUser(userCreationDTO);
         UserDTO userDtoWithWrongPassword = new UserDTO(null, EMAIL_1, "wrongSecurePassword123!?");
@@ -179,7 +179,7 @@ class UserControllerIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("authenticateUser(): " + STATUS_200_AUTHENTICATES_USER_WHEN_CREDENTIALS_CORRECT)
+    @DisplayName("verifyUser(): " + STATUS_200_AUTHENTICATES_USER_WHEN_CREDENTIALS_CORRECT)
     void authenticateUser_CredentialsValid_AuthenticatesUser() throws Exception {
         userService.createUser(userCreationDTO);
 
@@ -638,7 +638,7 @@ class UserControllerIntegrationTests {
             .andExpect(status().isOk());
 
         user = userService.getUserById(user.getId());
-        assertTrue(user.isAuthenticated());
+        assertTrue(user.isVerified());
     }
 
     @Test

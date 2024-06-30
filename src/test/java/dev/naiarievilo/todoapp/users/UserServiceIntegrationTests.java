@@ -65,12 +65,12 @@ class UserServiceIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("authenticateUser(): " + AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED)
-    void authenticateUser_UserNotAuthenticated_AuthenticatesUser() {
+    @DisplayName("verifyUser(): " + AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED)
+    void verifyUser_UserNotAuthenticated_AuthenticatesUser() {
         userRepository.persist(user);
-        userService.authenticateUser(user);
+        userService.verifyUser(user);
         User updatedUser = userRepository.findById(user.getId()).orElseThrow(UserNotFoundException::new);
-        assertTrue(updatedUser.isAuthenticated());
+        assertTrue(updatedUser.isVerified());
     }
 
     @Test

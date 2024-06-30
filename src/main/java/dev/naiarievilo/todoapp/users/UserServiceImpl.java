@@ -57,8 +57,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isUserExpired(User user) {
-        var emailAuthenticationPeriod = user.getCreationDate().plusDays(EMAIL_CONFIRMATION_PERIOD);
-        return !user.isAuthenticated() && LocalDateTime.now().isAfter(emailAuthenticationPeriod);
+        var emailAuthenticationPeriod = user.getCreatedAt().plusDays(EMAIL_CONFIRMATION_PERIOD);
+        return !user.isVerified() && LocalDateTime.now().isAfter(emailAuthenticationPeriod);
     }
 
     @Override
@@ -73,12 +73,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void authenticateUser(User user) {
-        if (user.isAuthenticated()) {
+    public void verifyUser(User user) {
+        if (user.isVerified()) {
             return;
         }
 
-        user.setAuthenticated(true);
+        user.setVerified(true);
         userRepository.update(user);
     }
 

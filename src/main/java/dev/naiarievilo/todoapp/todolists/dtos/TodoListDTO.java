@@ -3,13 +3,14 @@ package dev.naiarievilo.todoapp.todolists.dtos;
 import dev.naiarievilo.todoapp.todolists.dtos.groups.Creation;
 import dev.naiarievilo.todoapp.todolists.dtos.groups.Deletion;
 import dev.naiarievilo.todoapp.todolists.dtos.groups.Update;
-import dev.naiarievilo.todoapp.todolists.todo_groups.TodoGroup;
-import dev.naiarievilo.todoapp.todolists.todos.Todo;
+import dev.naiarievilo.todoapp.todolists.todo_groups.dtos.TodoGroupDTO;
+import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
+import dev.naiarievilo.todoapp.validation.NoNullElements;
 import dev.naiarievilo.todoapp.validation.NotBlank;
-import dev.naiarievilo.todoapp.validation.NotNull;
 import dev.naiarievilo.todoapp.validation.Positive;
+import org.springframework.lang.Nullable;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 public record TodoListDTO(
@@ -17,16 +18,21 @@ public record TodoListDTO(
     @Positive(groups = {Update.class, Deletion.class})
     Long id,
 
+    @NotBlank(groups = {Creation.class, Update.class})
+    String title,
+
     @NotBlank(max = 64, groups = {Creation.class, Update.class})
     String type,
 
-    @NotNull(groups = Creation.class)
-    LocalDate date,
+    LocalDateTime createdAt,
 
-    @NotNull(groups = {Creation.class, Update.class})
-    Set<TodoGroup> groups,
+    @Nullable
+    LocalDateTime dueDate,
 
-    @NotNull(groups = {Creation.class, Update.class})
-    Set<Todo> todos
+    @NoNullElements(groups = {Update.class})
+    Set<TodoGroupDTO> groups,
+
+    @NoNullElements(groups = {Update.class})
+    Set<TodoDTO> todos
 
 ) { }

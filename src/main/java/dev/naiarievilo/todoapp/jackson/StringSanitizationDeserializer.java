@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.security.jackson;
+package dev.naiarievilo.todoapp.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

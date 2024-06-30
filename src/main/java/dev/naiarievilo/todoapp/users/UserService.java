@@ -13,7 +13,7 @@ public interface UserService {
 
     boolean userExists(String email);
 
-    void authenticateUser(User user);
+    void verifyUser(User user);
 
     User getUserByEmail(String email);
 

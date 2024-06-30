@@ -44,13 +44,13 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: "authenticated"
+                  name: "verified"
                   type: "BOOLEAN"
                   defaultValueBoolean: false
                   constraints:
                     nullable: false
               - column:
-                  name: "creation_date"
+                  name: "created_at"
                   type: "TIMESTAMP"
                   constraints:
                     nullable: false
@@ -197,15 +197,23 @@ databaseChangeLog:
                     deleteCascade: true
                     nullable: false
               - column:
+                  name: "title"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+              - column:
                   name: "type"
                   type: "VARCHAR(64)"
                   constraints:
                     nullable: false
               - column:
-                  name: "date"
-                  type: "DATE"
+                  name: "created_at"
+                  type: "TIMESTAMP"
                   constraints:
                     nullable: false
+              - column:
+                  name: "due_date"
+                  type: "TIMESTAMP"
 
   - changeSet:
       id: "create-todo_groups-table"
@@ -250,6 +258,14 @@ databaseChangeLog:
                   type: "INT"
                   constraints:
                     nullable: false
+              - column:
+                  name: "created_at"
+                  type: "TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "due_date"
+                  type: "TIMESTAMP"
 
   - changeSet:
       id: "create-todos-table"
@@ -302,3 +318,11 @@ databaseChangeLog:
                   type: "INT"
                   constraints:
                     nullable: false
+              - column:
+                  name: "created_at"
+                  type: "TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "due_date"
+                  type: "TIMESTAMP"

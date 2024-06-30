@@ -81,7 +81,7 @@ class UserServiceUnitTests {
     @Test
     @DisplayName("isUserExpired(): returns `true` when user is expired")
     void isUserExpired_UserExpired_ReturnsTrue() {
-        user.setCreationDate(LocalDateTime.now().minusDays(EMAIL_CONFIRMATION_PERIOD));
+        user.setCreatedAt(LocalDateTime.now().minusDays(EMAIL_CONFIRMATION_PERIOD));
         assertTrue(userService.isUserExpired(user));
     }
 
@@ -100,19 +100,19 @@ class UserServiceUnitTests {
     }
 
     @Test
-    @DisplayName("authenticateUser(): " + DOES_NOT_AUTHENTICATE_USER_WHEN_USER_ALREADY_AUTHENTICATED)
-    void authenticateUser_UserAlreadyAuthenticated_DoesNotAuthenticateUser() {
-        user.setAuthenticated(true);
-        userService.authenticateUser(user);
+    @DisplayName("verifyUser(): " + DOES_NOT_AUTHENTICATE_USER_WHEN_USER_ALREADY_AUTHENTICATED)
+    void authenticateUser_UserAlreadyAuthenticated_DoesNotVerifyUser() {
+        user.setVerified(true);
+        userService.verifyUser(user);
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("authenticateUser(): " + AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED)
-    void authenticateUser_UserNotAuthenticated_AuthenticatesUser() {
-        userService.authenticateUser(user);
+    @DisplayName("verifyUser(): " + AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED)
+    void verifyUser_UserNotAuthenticated_AuthenticatesUser() {
+        userService.verifyUser(user);
         verify(userRepository).update(userCaptor.capture());
-        assertTrue(userCaptor.getValue().isAuthenticated());
+        assertTrue(userCaptor.getValue().isVerified());
     }
 
     @Test

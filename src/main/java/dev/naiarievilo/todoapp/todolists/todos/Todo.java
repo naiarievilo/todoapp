@@ -5,6 +5,8 @@ import dev.naiarievilo.todoapp.todolists.todo_groups.TodoGroup;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "Todo")
 @Table(name = "todos")
 public class Todo {
@@ -22,6 +24,13 @@ public class Todo {
 
     @Column(name = "position", nullable = false)
     private int position;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Nullable
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
 
     @Nullable
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,6 +57,15 @@ public class Todo {
     public int getPosition() { return position; }
 
     public void setPosition(int position) { this.position = position; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    @Nullable
+    public LocalDateTime getDueDate() { return dueDate; }
+
+    public void setDueDate(@Nullable LocalDateTime dueDate) { this.dueDate = dueDate; }
 
     @Nullable
     public TodoList getList() { return list; }

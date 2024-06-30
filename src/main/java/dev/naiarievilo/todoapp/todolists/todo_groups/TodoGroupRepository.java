@@ -21,8 +21,8 @@ public interface TodoGroupRepository extends BaseJpaRepository<TodoGroup, Long> 
     @Query("""
             SELECT tg
               FROM TodoGroup AS tg
-        JOIN FETCH tg.todos
-        JOIN FETCH tg.list
+        JOIN FETCH tg.todos AS t
+        JOIN FETCH t.group.todos
              WHERE tg.id = :id
         """)
     Optional<TodoGroup> findByIdWithTodos(Long id);

@@ -4,11 +4,13 @@ import java.util.Arrays;
 
 public class ValidationMessages {
 
+    public static final String CONTAINS_NULL_ELEMENTS = "%s must not contain null elements";
     public static final String COULD_NOT_BE_VALIDATED = "%s could not be validated";
     public static final String DOES_NOT_MATCH = "%s does not match %s";
     public static final String IS_BLANK = "%s is null, length 0, or contains whitespace only";
     public static final String MUST_BE_PROVIDED = "%s must be provided";
     public static final String NOT_VALID = "%s is not valid";
+    public static final String ONE_NOT_NULL = "Only one of %s must not be null";
 
     private ValidationMessages() {
     }

@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.todolists.todos;
 
 import dev.naiarievilo.todoapp.todolists.TodoList;
 import dev.naiarievilo.todoapp.todolists.TodoListService;
+import dev.naiarievilo.todoapp.todolists.TodoParent;
 import dev.naiarievilo.todoapp.todolists.todo_groups.TodoGroup;
 import dev.naiarievilo.todoapp.todolists.todo_groups.TodoGroupService;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
@@ -50,17 +51,15 @@ public class TodoServiceImpl implements TodoService {
 
         Long listId = todoDTO.listId();
         Long groupId = todoDTO.groupId();
+        TodoParent parent;
         if (listId != null) {
-            TodoList list = listService.getListByIdWithTodos(listId);
-            list.addTodo(newTodo);
-            todoRepository.persist(newTodo);
-
+            parent = listService.getListByIdWithTodos(listId);
         } else {
-            TodoGroup group = groupService.getGroupByIdWithTodos(groupId);
-            group.addTodo(newTodo);
-            todoRepository.persist(newTodo);
+            parent = groupService.getGroupByIdWithTodos(groupId);
         }
 
+        parent.addTodo(newTodo);
+        todoRepository.persist(newTodo);
         return todoMapper.toDTO(newTodo);
     }
 

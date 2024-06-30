@@ -80,7 +80,7 @@ public class UserController {
         DecodedJWT verifiedJWT = jwtService.verifyToken(emailVerificationToken, USER_VERIFICATION);
         Long userId = Long.valueOf(verifiedJWT.getSubject());
         User user = userService.getUserById(userId);
-        userService.authenticateUser(user);
+        userService.verifyUser(user);
     }
 
     @GetMapping("/unlock")

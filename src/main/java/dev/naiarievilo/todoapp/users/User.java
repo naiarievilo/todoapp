@@ -35,11 +35,11 @@ public class User {
     @Column(name = "locked", nullable = false)
     private boolean locked = false;
 
-    @Column(name = "authenticated", nullable = false)
-    private boolean authenticated = false;
+    @Column(name = "verified", nullable = false)
+    private boolean verified = false;
 
-    @Column(name = "creation_date", nullable = false, updatable = false)
-    private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "login_attempts", nullable = false)
     private byte loginAttempts = 0;
@@ -95,13 +95,13 @@ public class User {
 
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
-    public boolean isAuthenticated() { return authenticated; }
+    public boolean isVerified() { return verified; }
 
-    public void setAuthenticated(boolean authenticated) { this.authenticated = authenticated; }
+    public void setVerified(boolean verified) { this.verified = verified; }
 
-    public LocalDateTime getCreationDate() { return creationDate; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-    public void setCreationDate(LocalDateTime creationDate) { this.creationDate = creationDate; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public byte getLoginAttempts() { return loginAttempts; }
 

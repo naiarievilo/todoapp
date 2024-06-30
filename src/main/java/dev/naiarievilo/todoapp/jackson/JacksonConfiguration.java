@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.security.jackson;
+package dev.naiarievilo.todoapp.jackson;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
