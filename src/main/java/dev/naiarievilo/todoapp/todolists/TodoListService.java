@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.todolists;
 
 import dev.naiarievilo.todoapp.todolists.dtos.TodoListDTO;
+import dev.naiarievilo.todoapp.users.User;
 
 public interface TodoListService {
 
@@ -12,7 +13,7 @@ public interface TodoListService {
 
     TodoList getListByIdWithTodos(Long id);
 
-    TodoListDTO createList(TodoListDTO listDTO);
+    TodoListDTO createList(TodoListDTO listDTO, User user);
 
     TodoListDTO updateList(TodoListDTO listDTO);
 

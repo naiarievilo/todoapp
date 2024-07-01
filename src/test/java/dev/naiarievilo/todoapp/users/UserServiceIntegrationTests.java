@@ -294,9 +294,9 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     @Transactional
     @DisplayName("addLoginAttempt(): " + ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void addLoginAttempt_UserNotNull_AddsLoginAttempt() {
-        user.setLastLoginAttempt(LocalDateTime.now());
+        LocalDateTime lastLoginAttempt = LocalDateTime.now();
+        user.setLastLoginAttempt(lastLoginAttempt);
         userRepository.persist(user);
-        LocalDateTime lastLoginAttempt = user.getLastLoginAttempt();
         int oldLoginAttempts = user.getLoginAttempts();
 
         userService.addLoginAttempt(user);
