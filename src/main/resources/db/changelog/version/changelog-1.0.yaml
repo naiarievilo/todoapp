@@ -169,16 +169,16 @@ databaseChangeLog:
                     nullable: false
 
   - changeSet:
-      id: "create-todolists-table"
+      id: "create-todo_lists-table"
       author: "Ian Oliveira"
       preConditions:
         - onFail: "MARK_RAN"
         - not:
             - tableExists:
-                tableName: "todolists"
+                tableName: "todo_lists"
       changes:
         - createTable:
-            tableName: "todolists"
+            tableName: "todo_lists"
             columns:
               - column:
                   name: "id"
@@ -186,21 +186,19 @@ databaseChangeLog:
                   autoIncrement: true
                   constraints:
                     primaryKey: true
-                    primaryKeyName: "pk_todolists"
+                    primaryKeyName: "pk_todo_lists"
                     nullable: false
               - column:
                   name: "user_id"
                   type: "BIGINT"
                   constraints:
-                    foreignKeyName: "fk_todolists_users"
+                    foreignKeyName: "fk_todo_lists_users"
                     references: "users(id)"
                     deleteCascade: true
                     nullable: false
               - column:
                   name: "title"
                   type: "VARCHAR(255)"
-                  constraints:
-                    nullable: false
               - column:
                   name: "type"
                   type: "VARCHAR(64)"
@@ -213,59 +211,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: "due_date"
-                  type: "TIMESTAMP"
-
-  - changeSet:
-      id: "create-todo_groups-table"
-      author: "Ian Oliveira"
-      preConditions:
-        - onFail: "MARK_RAN"
-        - not:
-            - tableExists:
-                tableName: "todo_groups"
-      changes:
-        - createTable:
-            tableName: "todo_groups"
-            columns:
-              - column:
-                  name: "id"
-                  type: "BIGINT"
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    primaryKeyName: "pk_todo_groups"
-                    nullable: false
-              - column:
-                  name: "todolist_id"
-                  type: "BIGINT"
-                  constraints:
-                    foreignKeyName: "fk_todo_groups_todolists"
-                    references: "todolists(id)"
-                    deleteCascade: true
-                    nullable: false
-              - column:
-                  name: "name"
-                  type: "VARCHAR(255)"
-                  constraints:
-                    nullable: false
-              - column:
-                  name: "completed"
-                  type: "BOOLEAN"
-                  constraints:
-                    nullable: false
-              - column:
-                  name: "position"
-                  type: "INT"
-                  constraints:
-                    nullable: false
-              - column:
-                  name: "created_at"
-                  type: "TIMESTAMP"
-                  constraints:
-                    nullable: false
-              - column:
-                  name: "due_date"
-                  type: "TIMESTAMP"
+                  type: "DATE"
 
   - changeSet:
       id: "create-todos-table"
@@ -288,20 +234,13 @@ databaseChangeLog:
                     primaryKeyName: "pk_todos"
                     nullable: false
               - column:
-                  name: "todolist_id"
+                  name: "todo_list_id"
                   type: "BIGINT"
                   constraints:
-                    foreignKeyName: "fk_todos_todolists"
-                    references: "todolists(id)"
+                    foreignKeyName: "fk_todos_todo_lists"
+                    references: "todo_lists(id)"
                     deleteCascade: true
                     nullable: false
-              - column:
-                  name: "todo_group_id"
-                  type: "BIGINT"
-                  constraints:
-                    foreignKeyName: "fk_todos_todo_groups"
-                    references: "todo_groups(id)"
-                    deleteCascade: true
               - column:
                   name: "task"
                   type: "VARCHAR(255)"
@@ -325,4 +264,4 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: "due_date"
-                  type: "TIMESTAMP"
+                  type: "DATE"

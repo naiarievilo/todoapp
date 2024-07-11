@@ -1,21 +1,31 @@
 package dev.naiarievilo.todoapp.todolists;
 
 import dev.naiarievilo.todoapp.todolists.dtos.TodoListDTO;
+import dev.naiarievilo.todoapp.todolists.todos.Todo;
+import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.users.User;
+
+import java.util.Set;
 
 public interface TodoListService {
 
-    TodoList getListById(Long id);
+    TodoList getInboxList(User user);
 
-    TodoList getListByIdEagerly(Long id);
+    TodoList getTodayList(User user);
 
-    TodoList getListByIdWithGroups(Long id);
+    Set<TodoList> getWeeklyLists(User user);
 
-    TodoList getListByIdWithTodos(Long id);
+    TodoList getListByIdEagerly(Long userId, Long listId);
 
-    TodoListDTO createList(TodoListDTO listDTO, User user);
+    TodoList createList(User user, TodoListDTO listDTO, ListTypes listType);
 
-    TodoListDTO updateList(TodoListDTO listDTO);
+    void updateList(Long userId, Long listId, TodoListDTO listDTO);
 
-    void deleteList(TodoListDTO listDTO);
+    void deleteList(Long userId, Long listId);
+
+    Todo addNewTodoToList(Long userId, Long listId, TodoDTO todoDTO);
+
+    void updateTodoFromList(Long userId, Long listId, Long todoId, TodoDTO todoDTO);
+
+    void removeTodoFromList(Long userId, Long listId, Long todoId);
 }

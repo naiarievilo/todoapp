@@ -1,19 +1,19 @@
 package dev.naiarievilo.todoapp.todolists.todos;
 
 import dev.naiarievilo.todoapp.todolists.TodoList;
-import dev.naiarievilo.todoapp.todolists.TodoParent;
-import dev.naiarievilo.todoapp.todolists.todo_groups.TodoGroup;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
-import dev.naiarievilo.todoapp.todolists.todos.exceptions.TodoNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional(propagation = Propagation.SUPPORTS)
 public class TodoServiceImpl implements TodoService {
 
     private final TodoRepository todoRepository;
@@ -24,40 +24,22 @@ public class TodoServiceImpl implements TodoService {
         this.todoMapper = todoMapper;
     }
 
-    private Todo getTodoByIdWithGroup(Long id) {
-        return todoRepository.findByIdWithGroup(id).orElseThrow(() -> new TodoNotFoundException(id));
-    }
-
-    private Todo getTodoByIdWithList(Long id) {
-        return todoRepository.findByIdWithList(id).orElseThrow(() -> new TodoNotFoundException(id));
-    }
-
     @Override
-    public Todo getTodoById(Long id) {
-        return todoRepository.findById(id).orElseThrow(() -> new TodoNotFoundException(id));
-    }
-
-    @Override
-    @Transactional
-    public TodoDTO createTodo(TodoDTO todoDTO, TodoParent parent) {
+    public Todo createTodo(TodoDTO todoDTO, TodoList parent) {
         Todo newTodo = todoMapper.toEntity(todoDTO);
         parent.addTodo(newTodo);
         todoRepository.persist(newTodo);
-        return todoMapper.toDTO(newTodo);
+        return newTodo;
     }
 
     @Override
-    @Transactional
-    public TodoDTO updateTodo(TodoDTO todoDTO) {
-        Todo todo = getTodoById(todoDTO.id());
+    public void updateTodo(Todo todo, TodoDTO todoDTO) {
         todoMapper.updateEntityFromDTO(todo, todoDTO);
         todoRepository.update(todo);
-        return todoMapper.toDTO(todo);
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public void updateTodos(Set<Todo> todos, Set<TodoDTO> todosDTO, TodoParent parent) {
+    public void updateTodos(Set<Todo> todos, Set<TodoDTO> todosDTO, TodoList parent) {
         Map<Long, Todo> todosMap = new HashMap<>();
         for (Todo todo : todos) {
             todosMap.put(todo.getId(), todo);
@@ -68,10 +50,9 @@ public class TodoServiceImpl implements TodoService {
             Todo todo = todosMap.get(todoDTO.id());
             if (todo != null) {
                 matchedTodoIds.add(todo.getId());
-                todoMapper.updateEntityFromDTO(todo, todoDTO);
+                updateTodo(todo, todoDTO);
             } else {
-                Todo newTodo = todoMapper.toEntity(todoDTO);
-                parent.addTodo(newTodo);
+                createTodo(todoDTO, parent);
             }
         }
 
@@ -83,28 +64,13 @@ public class TodoServiceImpl implements TodoService {
         unmatchedTodoIds.removeAll(matchedTodoIds);
         for (Long unmatchedTodoId : unmatchedTodoIds) {
             Todo todoToRemove = todosMap.get(unmatchedTodoId);
-            parent.removeTodo(todoToRemove);
+            deleteTodo(todoToRemove, parent);
         }
     }
 
     @Override
-    @Transactional
-    public void deleteTodo(TodoDTO todoDTO) {
-        Long todoId = todoDTO.id();
-        Long listId = todoDTO.listId();
-
-        Todo todo;
-        if (listId != null) {
-            todo = getTodoByIdWithList(todoId);
-            TodoList list = Objects.requireNonNull(todo.getList());
-            list.removeTodo(todo);
-
-        } else {
-            todo = getTodoByIdWithGroup(todoId);
-            TodoGroup group = Objects.requireNonNull(todo.getGroup());
-            group.removeTodo(todo);
-        }
-
+    public void deleteTodo(Todo todo, TodoList parent) {
+        parent.removeTodo(todo);
         todoRepository.delete(todo);
     }
 }

@@ -241,7 +241,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
             .perform(delete("/users/current")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -256,7 +256,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
             .perform(delete("/users/current")
                 .header(HttpHeaders.AUTHORIZATION, accessToken)
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         String responseBody = mockMvc.perform(delete("/users/current")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -339,7 +339,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -390,7 +390,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -440,7 +440,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -508,7 +508,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(userRolesUpdateDTO))
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         User updatedUser = userService.getUserById(newUser.getId());
         Role adminRole = roleService.getRole(ROLE_ADMIN);
@@ -577,7 +577,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRolesUpdateDTO))
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         User updatedAdmin = userService.getUserByEmail(adminEmail);
         Role adminRole = roleService.getRole(ROLE_ADMIN);

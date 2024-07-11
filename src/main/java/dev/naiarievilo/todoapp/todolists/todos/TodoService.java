@@ -1,19 +1,17 @@
 package dev.naiarievilo.todoapp.todolists.todos;
 
-import dev.naiarievilo.todoapp.todolists.TodoParent;
+import dev.naiarievilo.todoapp.todolists.TodoList;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 
 import java.util.Set;
 
 public interface TodoService {
 
-    Todo getTodoById(Long id);
+    Todo createTodo(TodoDTO todoDTO, TodoList parent);
 
-    TodoDTO createTodo(TodoDTO todoDTO, TodoParent parent);
+    void updateTodo(Todo todo, TodoDTO todoDTO);
 
-    TodoDTO updateTodo(TodoDTO todoDTO);
+    void updateTodos(Set<Todo> todos, Set<TodoDTO> todosDTO, TodoList parent);
 
-    void updateTodos(Set<Todo> todos, Set<TodoDTO> todosDTO, TodoParent parent);
-
-    void deleteTodo(TodoDTO todoDTO);
+    void deleteTodo(Todo todo, TodoList parent);
 }

@@ -1,36 +1,36 @@
 package dev.naiarievilo.todoapp.todolists;
 
-import dev.naiarievilo.todoapp.todolists.todo_groups.TodoGroup;
 import dev.naiarievilo.todoapp.todolists.todos.Todo;
 import dev.naiarievilo.todoapp.users.User;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity(name = "TodoList")
-@Table(name = "todolists")
-public class TodoList implements TodoParent {
+@Table(name = "todo_lists")
+public class TodoList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title")
     private String title;
 
-    @Column(name = "type", length = 64, nullable = false, updatable = false)
-    private String type;
+    @Column(name = "type", length = 64, nullable = false)
+    private ListTypes type;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Nullable
     @Column(name = "due_date")
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -40,10 +40,6 @@ public class TodoList implements TodoParent {
     @OrderBy("position")
     private Set<Todo> todos = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("position")
-    private Set<TodoGroup> groups = new LinkedHashSet<>();
-
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
@@ -52,60 +48,45 @@ public class TodoList implements TodoParent {
 
     public void setTitle(String title) { this.title = title; }
 
-    public String getType() { return type; }
+    public ListTypes getType() { return type; }
 
-    public void setType(String type) { this.type = type; }
+    public void setType(ListTypes type) { this.type = type; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     @Nullable
-    public LocalDateTime getDueDate() { return dueDate; }
+    public LocalDate getDueDate() { return dueDate; }
 
-    public void setDueDate(@Nullable LocalDateTime dueDate) { this.dueDate = dueDate; }
+    public void setDueDate(@Nullable LocalDate dueDate) { this.dueDate = dueDate; }
 
     public User getUser() { return user; }
 
     public void setUser(User user) { this.user = user; }
 
-    @Override
     public Set<Todo> getTodos() { return todos; }
 
-    @Override
-    public void setTodos(Set<Todo> todos) { this.todos = todos; }
+    public void setTodos(Set<Todo> todos) {
+        for (Todo todo : todos) {
+            addTodo(todo);
+        }
+    }
 
-    @Override
     public void addTodo(Todo todo) {
         todos.add(todo);
         todo.setList(this);
     }
 
-    @Override
-    public void removeTodo(Todo todo) {
-        todos.remove(todo);
-        todo.setList(this);
-    }
-
-    @Override
     public void removeTodos(Set<Todo> todos) {
         for (Todo todo : todos) {
             removeTodo(todo);
         }
     }
 
-    public Set<TodoGroup> getGroups() { return groups; }
-
-    public void setGroups(Set<TodoGroup> groups) { this.groups = groups; }
-
-    public void addGroup(TodoGroup group) {
-        groups.add(group);
-        group.setList(this);
-    }
-
-    public void removeGroup(TodoGroup group) {
-        groups.remove(group);
-        group.setList(null);
+    public void removeTodo(Todo todo) {
+        todos.remove(todo);
+        todo.setList(null);
     }
 
     @Override

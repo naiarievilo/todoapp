@@ -46,7 +46,7 @@ class UserInfoUnitTests {
         userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
         user = new User();
-        user.setId(ID_1);
+        user.setId(USER_ID_1);
 
         userInfo = new UserInfo();
         userInfo.setId(user.getId());

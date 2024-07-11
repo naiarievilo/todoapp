@@ -10,8 +10,6 @@ import java.util.Set;
 @Mapper(componentModel = "spring")
 public interface TodoMapper {
 
-    @Mapping(target = "listId", ignore = true)
-    @Mapping(target = "groupId", ignore = true)
     TodoDTO toDTO(Todo todo);
 
     Set<TodoDTO> toSetDTO(Set<Todo> todos);
@@ -19,11 +17,10 @@ public interface TodoMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "list", ignore = true)
-    @Mapping(target = "group", ignore = true)
     void updateEntityFromDTO(@MappingTarget Todo todo, TodoDTO todoDTO);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "list", ignore = true)
-    @Mapping(target = "group", ignore = true)
     Todo toEntity(TodoDTO todoDTO);
 }

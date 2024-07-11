@@ -58,7 +58,7 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     @Test
     @DisplayName("userExists(Long id): " + RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST)
     void userExistsById_UserDoesNotExist_ReturnsFalse() {
-        assertFalse(userService.userExists(ID_2));
+        assertFalse(userService.userExists(USER_ID_2));
     }
 
     @Test
@@ -112,7 +112,7 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     @Test
     @DisplayName("getUserById(): " + THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST)
     void getUserById_UserDoesNotExist_ThrowsUserNotFoundException() {
-        assertThrows(UserNotFoundException.class, () -> userService.getUserById(ID_2));
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(USER_ID_2));
     }
 
     @Test

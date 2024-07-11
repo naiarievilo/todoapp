@@ -16,15 +16,6 @@ public interface TodoRepository extends BaseJpaRepository<Todo, Long> {
         JOIN FETCH l.todos
              WHERE t.id = :id
         """)
-    Optional<Todo> findByIdWithList(Long id);
-
-    @Query("""
-            SELECT t
-              FROM Todo AS t
-        JOIN FETCH t.group AS g
-        JOIN FETCH g.todos
-             WHERE t.id = :id
-        """)
-    Optional<Todo> findByIdWithGroup(Long id);
+    Optional<Todo> findByIdEagerly(Long id);
 
 }

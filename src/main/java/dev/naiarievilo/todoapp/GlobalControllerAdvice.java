@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import dev.naiarievilo.todoapp.security.ErrorDetails;
+import dev.naiarievilo.todoapp.security.exceptions.UnauthorizedDataAccessException;
 import dev.naiarievilo.todoapp.validation.ValidationMessages;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -73,5 +74,11 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorDetails handleJWTVerificationException() {
         return new ErrorDetails(HttpStatus.UNAUTHORIZED, JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED);
+    }
+
+    @ExceptionHandler(UnauthorizedDataAccessException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorDetails handleUnauthorizedDataAccessException(UnauthorizedDataAccessException e) {
+        return new ErrorDetails(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 }

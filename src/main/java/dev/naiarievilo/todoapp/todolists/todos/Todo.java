@@ -1,10 +1,10 @@
 package dev.naiarievilo.todoapp.todolists.todos;
 
 import dev.naiarievilo.todoapp.todolists.TodoList;
-import dev.naiarievilo.todoapp.todolists.todo_groups.TodoGroup;
 import jakarta.persistence.*;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity(name = "Todo")
@@ -30,17 +30,12 @@ public class Todo {
 
     @Nullable
     @Column(name = "due_date")
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
 
     @Nullable
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "todolist_id")
+    @JoinColumn(name = "todo_list_id")
     private TodoList list;
-
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "todo_group_id")
-    private TodoGroup group;
 
     public Long getId() { return id; }
 
@@ -63,19 +58,14 @@ public class Todo {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     @Nullable
-    public LocalDateTime getDueDate() { return dueDate; }
+    public LocalDate getDueDate() { return dueDate; }
 
-    public void setDueDate(@Nullable LocalDateTime dueDate) { this.dueDate = dueDate; }
+    public void setDueDate(@Nullable LocalDate dueDate) { this.dueDate = dueDate; }
 
     @Nullable
     public TodoList getList() { return list; }
 
     public void setList(@Nullable TodoList list) { this.list = list; }
-
-    @Nullable
-    public TodoGroup getGroup() { return group; }
-
-    public void setGroup(@Nullable TodoGroup group) { this.group = group; }
 
     @Override
     public int hashCode() {

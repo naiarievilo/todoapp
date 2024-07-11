@@ -1,41 +1,35 @@
 package dev.naiarievilo.todoapp.todolists.todos.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.naiarievilo.todoapp.todolists.dtos.groups.Creation;
-import dev.naiarievilo.todoapp.todolists.dtos.groups.Deletion;
-import dev.naiarievilo.todoapp.todolists.dtos.groups.Update;
 import dev.naiarievilo.todoapp.validation.NotBlank;
 import dev.naiarievilo.todoapp.validation.NotNull;
-import dev.naiarievilo.todoapp.validation.OneNotNull;
 import dev.naiarievilo.todoapp.validation.Positive;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@OneNotNull(fields = {"listId", "groupId"}, groups = {Creation.class, Update.class})
 public record TodoDTO(
 
-    @Positive(groups = {Update.class, Deletion.class})
+    @Nullable
+    @Positive
     Long id,
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    Long listId,
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    Long groupId,
-
-    @NotBlank(groups = {Creation.class, Update.class})
+    @NotBlank
     String task,
 
-    @NotNull(groups = {Creation.class, Update.class})
+    @NotNull
     Boolean completed,
 
-    @Positive(groups = {Creation.class, Update.class})
+    @Positive
     Integer position,
 
+    @Nullable
+    @JsonProperty("created_at")
     LocalDateTime createdAt,
 
     @Nullable
-    LocalDateTime dueDate
+    @JsonProperty("due_date")
+    LocalDate dueDate
 
 ) { }

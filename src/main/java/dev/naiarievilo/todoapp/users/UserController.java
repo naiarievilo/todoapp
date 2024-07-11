@@ -129,13 +129,13 @@ public class UserController {
     }
 
     @DeleteMapping("/current")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@AuthenticatedUser User user) {
         userService.deleteUser(user.getId());
     }
 
     @PatchMapping("/current/email")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateEmail(
         @AuthenticatedUser User user,
         @RequestBody @Validated(EmailUpdate.class) CredentialsUpdateDTO newCredentials
@@ -150,7 +150,7 @@ public class UserController {
     }
 
     @PatchMapping("/current/password")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePassword(
         @AuthenticatedUser User user,
         @RequestBody @Validated(PasswordUpdate.class) CredentialsUpdateDTO newCredentials
@@ -159,7 +159,7 @@ public class UserController {
     }
 
     @PatchMapping("/current/credentials")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCredentials(
         @AuthenticatedUser User user,
         @RequestBody @Validated(CredentialsUpdate.class) CredentialsUpdateDTO newCredentials
@@ -170,7 +170,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/admin/role-assignment")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addRoleToUser(@RequestBody @Valid UserRolesUpdateDTO userRolesUpdateDTO) {
         User targetUser = userService.getUserById(userRolesUpdateDTO.id());
         userService.addRoleToUser(targetUser, Roles.getRole(userRolesUpdateDTO.role()));
@@ -178,7 +178,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/admin/role-unassignment")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeRoleFromUser(@RequestBody @Valid UserRolesUpdateDTO userRolesUpdateDTO) {
         User targetUser = userService.getUserById(userRolesUpdateDTO.id());
         userService.removeRoleFromUser(targetUser, Roles.getRole(userRolesUpdateDTO.role()));
@@ -186,7 +186,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/user-deletion")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@RequestBody @Validated(UserDeletion.class) UserDTO userDTO) {
         User targetUser = userService.getUserById(userDTO.id());
         userService.deleteUser(targetUser.getId());
