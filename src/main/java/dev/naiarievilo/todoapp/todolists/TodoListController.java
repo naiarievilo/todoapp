@@ -7,13 +7,15 @@ import dev.naiarievilo.todoapp.todolists.todos.Todo;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
 import dev.naiarievilo.todoapp.users.User;
-import jakarta.validation.Valid;
+import dev.naiarievilo.todoapp.validation.groups.Creation;
+import dev.naiarievilo.todoapp.validation.groups.Update;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.todolists.ListTypes.PERSONALIZED;
+import static dev.naiarievilo.todoapp.todolists.ListTypes.CUSTOM;
 
 @RestController
 @RequestMapping("/users/current/todolists")
@@ -45,22 +47,30 @@ public class TodoListController {
 
     @GetMapping("/week")
     @ResponseStatus(HttpStatus.OK)
-    public Set<TodoListDTO> getWeeklyLists(@AuthenticatedUser User user) {
+    public Set<TodoListDTO> getWeekLists(@AuthenticatedUser User user) {
         Set<TodoList> weeklyLists = listService.getWeeklyLists(user);
         return listMapper.toSetDTO(weeklyLists);
     }
 
+    @GetMapping("/custom")
+    @ResponseStatus(HttpStatus.OK)
+    public Set<TodoListDTO> getCustomLists(@AuthenticatedUser User user) {
+        Set<TodoList> customLists = listService.getAllCustomLists(user);
+        return listMapper.toSetDTO(customLists);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TodoListDTO createList(@AuthenticatedUser User user, @RequestBody @Valid TodoListDTO listDTO) {
-        TodoList newList = listService.createList(user, listDTO, PERSONALIZED);
+    public TodoListDTO createList(@AuthenticatedUser User user,
+        @RequestBody @Validated(Creation.class) TodoListDTO listDTO) {
+        TodoList newList = listService.createList(user, listDTO, CUSTOM);
         return listMapper.toDTO(newList);
     }
 
     @PutMapping("/{listId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateList(@AuthenticatedUser User user, @PathVariable Long listId,
-        @RequestBody @Valid TodoListDTO listDTO) {
+        @RequestBody @Validated(Update.class) TodoListDTO listDTO) {
         listService.updateList(user.getId(), listId, listDTO);
     }
 
@@ -73,7 +83,7 @@ public class TodoListController {
     @PostMapping("{listId}/todos")
     @ResponseStatus(HttpStatus.CREATED)
     public TodoDTO addTodoToList(@AuthenticatedUser User user, @PathVariable Long listId,
-        @RequestBody @Valid TodoDTO todoDTO) {
+        @RequestBody @Validated(Creation.class) TodoDTO todoDTO) {
         Todo newTodo = listService.addNewTodoToList(user.getId(), listId, todoDTO);
         return todoMapper.toDTO(newTodo);
     }
@@ -81,7 +91,7 @@ public class TodoListController {
     @PutMapping("{listId}/todos/{todoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTodoFromList(@AuthenticatedUser User user, @PathVariable Long listId, @PathVariable Long todoId,
-        @RequestBody @Valid TodoDTO todoDTO) {
+        @RequestBody @Validated(Update.class) TodoDTO todoDTO) {
         listService.updateTodoFromList(user.getId(), listId, todoId, todoDTO);
     }
 

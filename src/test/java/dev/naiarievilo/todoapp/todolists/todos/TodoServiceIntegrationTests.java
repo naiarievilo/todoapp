@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static dev.naiarievilo.todoapp.todolists.todos.TodoServiceTestCases.*;
@@ -36,21 +37,17 @@ class TodoServiceIntegrationTests extends ServiceIntegrationTests {
     private TodoDTO newTodoDTO_1;
     private Todo newTodo_1;
     private TodoList parentList;
-    private Set<Todo> newTodoSet;
     private Set<TodoDTO> todoDTOSet;
-    private TodoDTO newTodoDTO;
 
     @BeforeEach
     void setUp() {
         parentList = new TodoList();
-        parentList.setType(ListTypes.PERSONALIZED);
+        parentList.setType(ListTypes.CUSTOM);
 
-        newTodoSet = TodosTestHelper.newTodoSet();
         todoDTOSet = TodosTestHelper.todoDTOSet();
 
         newTodoDTO_1 = TodosTestHelper.newTodoDTO_1();
         newTodo_1 = TodosTestHelper.newTodo_1();
-        newTodoDTO = new TodoDTO(null, NEW_TODO_TASK, false, NEW_TODO_POSITION, null, NEW_TODO_DUE_DATE);
     }
 
     @Test
@@ -89,48 +86,28 @@ class TodoServiceIntegrationTests extends ServiceIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("updateTodos(): " + ADDS_NEW_TODO_TO_PARENT_WHEN_NEW_DTO_IN_DTO_SET)
-    void updateTodos_NewTodoInDTOSet_AddsNewTodoToParent() {
-        parentList.setTodos(newTodoSet);
-        listRepository.persist(parentList);
-
-        todoDTOSet.add(newTodoDTO);
-        todoService.updateTodos(parentList.getTodos(), todoDTOSet, parentList);
-        assertEquals(4, parentList.getTodos().size());
-
-        Todo addedTodo = parentList.getTodos().stream().reduce((a, b) -> b).orElse(null);
-        assertNotNull(addedTodo);
-        assertEquals(newTodoDTO.task(), addedTodo.getTask());
-        assertEquals(newTodoDTO.position(), addedTodo.getPosition());
-        assertEquals(newTodoDTO.dueDate(), addedTodo.getDueDate());
-    }
-
-    @Test
-    @Transactional
     @DisplayName("updateTodos(): " + REMOVES_TODO_FROM_PARENT_WHEN_TODO_NOT_IN_DTO_SET)
     void updateTodos_TodoNotInDTOSet_RemovesTodoFromParent() {
-        parentList.setTodos(newTodoSet);
+        parentList.setTodos(TodosTestHelper.newTodoSet());
         listRepository.persist(parentList);
 
-        todoDTOSet.remove(TodosTestHelper.todoDTO_1());
+        Set<TodoDTO> updatedTodoDTOSet = new LinkedHashSet<>();
+        Todo todoToRemove = null;
+        TodoDTO lastTodoDTO = null;
+        for (Todo todo : parentList.getTodos()) {
+            TodoDTO newTodoDTO = new TodoDTO(
+                todo.getId(), todo.getTask(), todo.isCompleted(), todo.getPosition(), null, todo.getDueDate()
+            );
+            updatedTodoDTOSet.add(newTodoDTO);
+            todoToRemove = todo;
+            lastTodoDTO = newTodoDTO;
+        }
 
-        todoService.updateTodos(parentList.getTodos(), todoDTOSet, parentList);
+        updatedTodoDTOSet.remove(lastTodoDTO);
+
+        todoService.updateTodos(parentList.getTodos(), updatedTodoDTOSet, parentList);
         assertEquals(2, parentList.getTodos().size());
-        assertFalse(parentList.getTodos().contains(TodosTestHelper.todo_1()));
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("updateTodos(): " + ADDS_AND_REMOVES_TODOS_FROM_PARENT_WHEN_DTO_SET_UPDATED)
-    void updateTodos_NewAndDeletedTodosInDTOSet_AddsAndRemovesTodosFromParent() {
-        parentList.setTodos(newTodoSet);
-        listRepository.persist(parentList);
-
-        todoDTOSet.remove(TodosTestHelper.todoDTO_1());
-        todoDTOSet.add(newTodoDTO);
-
-        todoService.updateTodos(parentList.getTodos(), todoDTOSet, parentList);
-        assertEquals(3, parentList.getTodos().size());
+        assertFalse(parentList.getTodos().contains(todoToRemove));
     }
 
     @Test

@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 
 import static dev.naiarievilo.todoapp.todolists.todos.TodoServiceTestCases.*;
-import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -82,34 +81,6 @@ class TodoServiceUnitTests {
     }
 
     @Test
-    @DisplayName("updateTodos(): " + ADDS_NEW_TODO_TO_PARENT_WHEN_NEW_DTO_IN_DTO_SET)
-    void updateTodos_NewTodoInDTOSet_AddsNewTodoToParent() {
-        parentList.setTodos(todoSet);
-        TodoDTO newTodoDTO = new TodoDTO(null, NEW_TODO_TASK, true, NEW_TODO_POSITION, null, NEW_TODO_DUE_DATE);
-        todoDTOSet.add(newTodoDTO);
-
-        Todo newTodo = new Todo();
-        newTodo.setId(NEW_TODO_ID);
-        newTodo.setTask(newTodoDTO.task());
-        newTodo.setCompleted(newTodoDTO.completed());
-        newTodo.setPosition(newTodoDTO.position());
-
-        given(todoMapper.toEntity(newTodoDTO)).willReturn(newTodo);
-
-        todoService.updateTodos(parentList.getTodos(), todoDTOSet, parentList);
-        assertEquals(4, parentList.getTodos().size());
-        assertTrue(parentList.getTodos().contains(newTodo));
-
-        verify(todoMapper, times(3)).updateEntityFromDTO(any(Todo.class), any(TodoDTO.class));
-        verify(todoRepository, times(3)).update(any(Todo.class));
-        verify(todoRepository).persist(todoCaptor.capture());
-        Todo capturedTodo = todoCaptor.getValue();
-        TodoList capturedParentList = capturedTodo.getList();
-        assertEquals(capturedParentList, parentList);
-        assertTrue(capturedParentList.getTodos().contains(capturedTodo));
-    }
-
-    @Test
     @DisplayName("updateTodos(): " + REMOVES_TODO_FROM_PARENT_WHEN_TODO_NOT_IN_DTO_SET)
     void updateTodos_TodoNotInDTOSet_RemovesTodoFromParent() {
         parentList.setTodos(todoSet);
@@ -124,36 +95,6 @@ class TodoServiceUnitTests {
         Todo deletedTodo = todoCaptor.getValue();
         assertNull(deletedTodo.getList());
         assertEquals(todo_1.getId(), deletedTodo.getId());
-    }
-
-    @Test
-    @DisplayName("updateTodos(): " + ADDS_AND_REMOVES_TODOS_FROM_PARENT_WHEN_DTO_SET_UPDATED)
-    void updateTodos_NewAndDeletedTodosInDTOSet_AddsAndRemovesTodosFromParent() {
-        parentList.setTodos(todoSet);
-        todoDTOSet.remove(todoDTO_1);
-
-        TodoDTO newTodoDTO = new TodoDTO(null, NEW_TODO_TASK, true, NEW_TODO_POSITION, null, NEW_TODO_DUE_DATE);
-        todoDTOSet.add(newTodoDTO);
-
-        Todo newTodo = new Todo();
-        newTodo.setId(NEW_TODO_ID);
-        newTodo.setTask(newTodoDTO.task());
-        newTodo.setCompleted(newTodoDTO.completed());
-        newTodo.setPosition(newTodoDTO.position());
-
-        given(todoMapper.toEntity(newTodoDTO)).willReturn(newTodo);
-
-        todoService.updateTodos(parentList.getTodos(), todoDTOSet, parentList);
-        assertEquals(3, parentList.getTodos().size());
-        assertTrue(parentList.getTodos().contains(newTodo));
-        assertFalse(parentList.getTodos().contains(todo_1));
-
-        verify(todoMapper, times(2)).updateEntityFromDTO(any(Todo.class), any(TodoDTO.class));
-        verify(todoRepository, times(2)).update(any(Todo.class));
-        verify(todoRepository).persist(todoCaptor.capture());
-        Todo capturedTodo = todoCaptor.getValue();
-        assertEquals(newTodo.getId(), capturedTodo.getId());
-        assertEquals(newTodo.getList(), parentList);
     }
 
     @Test

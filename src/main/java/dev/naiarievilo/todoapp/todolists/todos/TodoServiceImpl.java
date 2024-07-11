@@ -51,8 +51,6 @@ public class TodoServiceImpl implements TodoService {
             if (todo != null) {
                 matchedTodoIds.add(todo.getId());
                 updateTodo(todo, todoDTO);
-            } else {
-                createTodo(todoDTO, parent);
             }
         }
 

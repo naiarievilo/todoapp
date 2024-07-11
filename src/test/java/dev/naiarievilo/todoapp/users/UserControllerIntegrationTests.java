@@ -232,7 +232,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("deleteUser(): " + STATUS_200_DELETES_USER_WHEN_USER_EXISTS)
+    @DisplayName("deleteUser(): " + STATUS_204_DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() throws Exception {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
@@ -327,7 +327,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("updateEmail(): " + STATUS_200_UPDATES_EMAIL_WHEN_NEW_EMAIL_VALID_AND_NOT_REGISTERED)
+    @DisplayName("updateEmail(): " + STATUS_204_UPDATES_EMAIL_WHEN_NEW_EMAIL_VALID_AND_NOT_REGISTERED)
     void updateEmail_NewEmailValidAndNotRegistered_ReturnsNewAccessAndRefreshTokens() throws Exception {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
@@ -377,7 +377,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("updatePassword(): " + STATUS_200_UPDATES_PASSWORD_WHEN_NEW_PASSWORD_VALID)
+    @DisplayName("updatePassword(): " + STATUS_204_UPDATES_PASSWORD_WHEN_NEW_PASSWORD_VALID)
     void updatePassword_NewPasswordValid_UpdatesPassword() throws Exception {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
@@ -428,7 +428,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("updateCredentials(): " + STATUS_200_UPDATES_CREDENTIALS_WHEN_NEW_CREDENTIALS_VALID)
+    @DisplayName("updateCredentials(): " + STATUS_204_UPDATES_CREDENTIALS_WHEN_NEW_CREDENTIALS_VALID)
     void updateCredentials_NewCredentialsValid_UpdatesCredentials() throws Exception {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
@@ -566,7 +566,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("removeRoleFromUser(): " + STATUS_200_REMOVES_ROLE_FROM_USER_WHEN_AUTHENTICATED_USER_ADMIN)
+    @DisplayName("removeRoleFromUser(): " + STATUS_204_REMOVES_ROLE_FROM_USER_WHEN_AUTHENTICATED_USER_ADMIN)
     void removeRoleFromUser_AuthenticatedUserAdmin_RemovesRoleFromUser() throws Exception {
         User admin = userService.getUserByEmail(adminEmail);
         String accessToken = jwtService.createToken(admin, ACCESS_TOKEN);

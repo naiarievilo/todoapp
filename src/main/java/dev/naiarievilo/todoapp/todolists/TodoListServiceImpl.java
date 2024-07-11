@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.todolists.ListTypes.CALENDAR;
-import static dev.naiarievilo.todoapp.todolists.ListTypes.INBOX;
+import static dev.naiarievilo.todoapp.todolists.ListTypes.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -47,6 +47,7 @@ public class TodoListServiceImpl implements TodoListService {
         }
 
         TodoList newInboxList = new TodoList();
+        newInboxList.setTitle(INBOX.toString());
         newInboxList.setType(INBOX);
         newInboxList.setUser(user);
         listRepository.persist(newInboxList);
@@ -99,6 +100,12 @@ public class TodoListServiceImpl implements TodoListService {
         }
 
         return weeklyLists;
+    }
+
+    @Override
+    public Set<TodoList> getAllCustomLists(User user) {
+        List<TodoList> customLists = listRepository.findAllByType(CUSTOM, user);
+        return new LinkedHashSet<>(customLists);
     }
 
     @Override

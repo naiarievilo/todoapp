@@ -53,7 +53,7 @@ public class TodoListsTestHelper {
         TodoList list = new TodoList();
         list.setId(LIST_ID_1);
         list.setTitle(LIST_TITLE_1);
-        list.setType(PERSONALIZED);
+        list.setType(CUSTOM);
         return list;
     }
 

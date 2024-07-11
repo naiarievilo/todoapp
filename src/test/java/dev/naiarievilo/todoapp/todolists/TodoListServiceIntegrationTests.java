@@ -22,6 +22,8 @@ import java.util.Set;
 import static dev.naiarievilo.todoapp.todolists.ListTypes.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListServiceTestCases.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListsTestHelper.*;
+import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_POSITION_2;
+import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_TASK_2;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.EMAIL_1;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.PASSWORD_1;
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +54,7 @@ class TodoListServiceIntegrationTests extends ServiceIntegrationTests {
 
         list = new TodoList();
         list.setTitle(LIST_TITLE_1);
-        list.setType(PERSONALIZED);
+        list.setType(CUSTOM);
         list.setUser(user);
 
         listDTO = new TodoListDTO(null, list.getTitle(), null, null, null, null);
@@ -83,8 +85,8 @@ class TodoListServiceIntegrationTests extends ServiceIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("getWeeklyLists(): " + RETURNS_WEEKLY_LISTS_WHEN_LISTS_EXIST)
-    void getWeeklyLists_WeeklyListsExist_ReturnsWeeklyLists() {
+    @DisplayName("getWeekLists(): " + RETURNS_WEEKLY_LISTS_WHEN_LISTS_EXIST)
+    void getWeekLists_WeeklyListsExist_ReturnsWeeklyLists() {
         userRepository.persist(user);
 
         Set<TodoList> weeklyLists = listService.getWeeklyLists(user);
@@ -97,6 +99,22 @@ class TodoListServiceIntegrationTests extends ServiceIntegrationTests {
             assertEquals(CALENDAR, dayList.getType());
             dayOfWeek = dayOfWeek.plusDays(1);
         }
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("getAllCustomLists(): " + RETURNS_ALL_USER_CUSTOM_LISTS)
+    void getAllCustomLists_ReturnsAllPersonalizedLists() {
+        userRepository.persist(user);
+        TodoList otherList = new TodoList();
+        list.setType(CUSTOM);
+        otherList.setType(CUSTOM);
+        otherList.setUser(user);
+        listRepository.persistAll(Set.of(list, otherList));
+
+        Set<TodoList> customLists = listService.getAllCustomLists(user);
+        assertNotNull(customLists);
+        assertEquals(2, customLists.size());
     }
 
     @Test
@@ -132,10 +150,10 @@ class TodoListServiceIntegrationTests extends ServiceIntegrationTests {
     void createList_InputValid_CreatesList() {
         userRepository.persist(user);
 
-        TodoList createdList = listService.createList(user, listDTO, PERSONALIZED);
+        TodoList createdList = listService.createList(user, listDTO, CUSTOM);
         assertNotNull(createdList);
         assertEquals(listDTO.title(), createdList.getTitle());
-        assertEquals(PERSONALIZED, createdList.getType());
+        assertEquals(CUSTOM, createdList.getType());
         assertNotNull(createdList.getCreatedAt());
         assertTrue(listRepository.existsById(createdList.getId()));
     }
@@ -162,10 +180,12 @@ class TodoListServiceIntegrationTests extends ServiceIntegrationTests {
     @DisplayName("updateList(): " + UPDATES_LIST_AND_ITS_TODOS_WHEN_USER_HAS_ACCESS)
     void updateList_HasTodosToUpdate_UpdatesListAndTodos() {
         userRepository.persist(user);
+        Todo persistedTodo = TodosTestHelper.newTodo_1();
+        list.addTodo(persistedTodo);
         listRepository.persist(list);
-        TodoDTO newTodo = TodosTestHelper.newTodoDTO_1();
+        TodoDTO updatedTodoDTO = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_2, null, null);
         TodoListDTO updatedListDTO =
-            new TodoListDTO(list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), Set.of(newTodo));
+            new TodoListDTO(list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), Set.of(updatedTodoDTO));
 
         Long userId = user.getId();
         Long listId = list.getId();
@@ -177,10 +197,10 @@ class TodoListServiceIntegrationTests extends ServiceIntegrationTests {
         assertEquals(updatedListDTO.dueDate(), updatedList.getDueDate());
         assertEquals(1, updatedList.getTodos().size());
 
-        Todo createdTodo = updatedList.getTodos().iterator().next();
-        assertEquals(newTodo.task(), createdTodo.getTask());
-        assertEquals(newTodo.position(), createdTodo.getPosition());
-        assertEquals(newTodo.dueDate(), createdTodo.getDueDate());
+        Todo updatedTodo = updatedList.getTodos().iterator().next();
+        assertEquals(updatedTodoDTO.task(), updatedTodo.getTask());
+        assertEquals(updatedTodoDTO.position(), updatedTodo.getPosition());
+        assertEquals(updatedTodoDTO.dueDate(), updatedTodo.getDueDate());
     }
 
     @Test

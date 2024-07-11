@@ -4,31 +4,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.naiarievilo.todoapp.validation.NotBlank;
 import dev.naiarievilo.todoapp.validation.NotNull;
 import dev.naiarievilo.todoapp.validation.Positive;
-import org.springframework.lang.Nullable;
+import dev.naiarievilo.todoapp.validation.groups.Creation;
+import dev.naiarievilo.todoapp.validation.groups.Update;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record TodoDTO(
 
-    @Nullable
-    @Positive
+    @Positive(groups = Update.class)
     Long id,
 
-    @NotBlank
+    @NotBlank(groups = {Creation.class, Update.class})
     String task,
 
-    @NotNull
+    @NotNull(groups = {Creation.class, Update.class})
     Boolean completed,
 
-    @Positive
+    @Positive(groups = {Creation.class, Update.class})
     Integer position,
 
-    @Nullable
     @JsonProperty("created_at")
     LocalDateTime createdAt,
 
-    @Nullable
     @JsonProperty("due_date")
     LocalDate dueDate
 

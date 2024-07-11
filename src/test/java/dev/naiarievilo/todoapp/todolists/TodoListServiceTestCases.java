@@ -26,6 +26,8 @@ public class TodoListServiceTestCases {
         "Does not update list when user does not have access to the list";
     public static final String DOES_NOT_UPDATE_TODO_FROM_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS =
         "Does not update todo from list when user does not have access to the list";
+    public static final String RETURNS_ALL_USER_CUSTOM_LISTS =
+        "Returns all custom lists of user";
     public static final String RETURNS_INBOX_LIST_WHEN_LIST_EXISTS =
         "Returns inbox list when inbox list exists";
     public static final String RETURNS_LIST_WHEN_LIST_EXISTS =

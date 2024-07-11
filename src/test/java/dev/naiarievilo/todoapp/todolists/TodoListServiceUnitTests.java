@@ -128,7 +128,7 @@ class TodoListServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getWeeklyLists(): " + RETURNS_WEEKLY_LISTS_WHEN_LISTS_EXIST)
+    @DisplayName("getWeekLists(): " + RETURNS_WEEKLY_LISTS_WHEN_LISTS_EXIST)
     void getWeeklyLists_WeeklyListsExist_ReturnsWeeklyLists() {
         LocalDate dayOfWeek = START_OF_WEEK;
         for (TodoList listDay : weeklyLists) {
@@ -150,7 +150,7 @@ class TodoListServiceUnitTests {
     }
 
     @Test
-    @DisplayName("getWeeklyLists(): " + CREATES_AND_RETURNS_WEEKLY_LISTS_WHEN_LISTS_DO_NOT_EXIST)
+    @DisplayName("getWeekLists(): " + CREATES_AND_RETURNS_WEEKLY_LISTS_WHEN_LISTS_DO_NOT_EXIST)
     void getWeeklyLists_WeeklyListsDoNotExist_CreatesAndReturnsWeeklyLists() {
         LocalDate dayOfWeek = START_OF_WEEK;
         while (dayOfWeek.isBefore(NEXT_WEEK)) {
@@ -217,7 +217,7 @@ class TodoListServiceUnitTests {
 
         given(listMapper.toEntity(newListDTO)).willReturn(newList);
 
-        TodoList createdList = listService.createList(user, newListDTO, PERSONALIZED);
+        TodoList createdList = listService.createList(user, newListDTO, CUSTOM);
         assertEquals(newList.getTitle(), createdList.getTitle());
         assertEquals(newList.getDueDate(), createdList.getDueDate());
 

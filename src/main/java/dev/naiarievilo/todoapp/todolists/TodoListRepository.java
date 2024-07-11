@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
@@ -20,6 +21,16 @@ public interface TodoListRepository extends BaseJpaRepository<TodoList, Long> {
                     AND tl.type = :type
         """)
     Optional<TodoList> findByType(ListTypes type, User user);
+
+    @Query(value = """
+                 SELECT tl
+                   FROM TodoList AS tl
+             JOIN FETCH tl.user
+        LEFT JOIN FETCH tl.todos
+                  WHERE tl.user = :user
+                    AND tl.type = :type
+        """)
+    List<TodoList> findAllByType(ListTypes type, User user);
 
     @Query("""
                  SELECT tl

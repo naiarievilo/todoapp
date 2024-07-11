@@ -15,6 +15,8 @@ public interface TodoListService {
 
     Set<TodoList> getWeeklyLists(User user);
 
+    Set<TodoList> getAllCustomLists(User user);
+
     TodoList getListByIdEagerly(Long userId, Long listId);
 
     TodoList createList(User user, TodoListDTO listDTO, ListTypes listType);
