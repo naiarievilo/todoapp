@@ -1,9 +1,8 @@
 admin:
-  email: ${ADMIN_EMAIL}
-  password: ${ADMIN_PASSWORD}
+  email: "admin@example.com"
+  password: "secretPassword1234!?"
 jwt:
-  secret: ${JWT_SECRET}
-  issuer: ${JWT_ISSUER}
+  secret: "ultraSecret"
 logging:
   level:
     org:
@@ -26,10 +25,12 @@ server:
 spring:
   application:
     name: "Todoapp"
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+  docker:
+    compose:
+      skip:
+        in-tests: false
+      lifecycle-management: start_only
+      enabled: true
   jackson:
     time-zone: "UTC"
   jpa:
@@ -43,10 +44,9 @@ spring:
   liquibase:
     change-log: "classpath:/db/changelog/root-changelog.yaml"
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: "localhost"
+    port: 1025
+    username: "no-reply@example.com"
     properties:
       mail:
         transport:
@@ -61,4 +61,4 @@ spring:
       mode: "never"
 client:
   uri:
-    unlock-user: ${CLIENT_URI_UNLOCK_USER}
+    unlock-user: "http://localhost:3000/unlock-user"

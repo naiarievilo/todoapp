@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -62,7 +61,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("verifyUser(): " + AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED)
     void verifyUser_UserNotAuthenticated_AuthenticatesUser() {
         userRepository.persist(user);
@@ -72,7 +70,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("userExists(Long id): " + RETURNS_TRUE_WHEN_USER_EXISTS)
     void userExistsById_UserExists_ReturnsTrue() {
         userRepository.persist(user);
@@ -86,7 +83,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("userExists(String email): " + RETURNS_TRUE_WHEN_USER_EXISTS)
     void userExistsByEmail_UserExists_ReturnsTrue() {
         userRepository.persist(user);
@@ -101,7 +97,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getUserByEmail(): " + RETURNS_USER_WHEN_USER_EXISTS)
     void getUserByEmail_UserExists_ReturnsUser() {
         userRepository.persist(user);
@@ -116,7 +111,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getUserById(): " + RETURNS_USER_WHEN_USER_EXISTS)
     void getUserById_UserExists_ReturnsUser() {
         userRepository.persist(user);
@@ -125,7 +119,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("createUser(): " + THROWS_USER_ALREADY_EXISTS_WHEN_USER_ALREADY_EXISTS)
     void createUser_UserAlreadyExists_ThrowsUserAlreadyExistsException() {
         userRepository.persist(user);
@@ -133,7 +126,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("createUser(): " + CREATES_USER_WHEN_USER_DOES_NOT_EXIST)
     void createUser_UserDoesNotExist_CreatesUser() {
         User returnedUser = userService.createUser(userCreationDTO);
@@ -145,7 +137,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("deleteUser(): " + DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() {
         userRepository.persist(user);
@@ -171,7 +162,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateEmail(): " + UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED)
     void updateEmail_NewEmailNotRegistered_UpdatesEmail() {
         userRepository.persist(user);
@@ -182,7 +172,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updatePassword(): " + THROWS_BAD_CREDENTIALS_WHEN_CURRENT_PASSWORD_INCORRECT)
     void updatePassword_IncorrectOldPassword_ThrowsBadCredentialsException() {
         user = userService.createUser(userCreationDTO);
@@ -192,7 +181,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updatePassword(): " + UPDATES_PASSWORD_WHEN_CURRENT_PASSWORD_CORRECT)
     void updatePassword_UserExistsAndCorrectOldPassword_UpdatesPassword() {
         user = userService.createUser(userCreationDTO);
@@ -205,7 +193,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("addRoleToUser() : " + ADDS_ROLE_TO_USER_WHEN_ROLE_NOT_ASSIGNED)
     void addRoleToUser_UserDoesNotHaveRole_AddsRoleToUser() {
         userRepository.persist(user);
@@ -218,7 +205,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("removeRoleFromUser(): " + THROWS_USER_ROLE_REMOVAL_PROHIBITED_WHEN_REMOVING_USER_ROLE)
     void removeRoleFromUser_RoleToRemoveIsUserRole_ThrowsUserRoleRemovalProhibitedException() {
         userRepository.persist(user);
@@ -226,7 +212,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("removeRoleFromUser(): " + REMOVES_ROLE_WHEN_ROLE_ASSIGNED_AND_REMOVABLE)
     void removeRoleFromUser_RoleIsAssignedAndRemovable_RemoveRole() {
         user.addRole(adminRole);
@@ -240,7 +225,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("lockUser(): " + LOCKS_USER_WHEN_USER_NOT_LOCKED)
     void lockUser_UserNotLocked_LocksUser() {
         userRepository.persist(user);
@@ -252,7 +236,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("unlockUser(): " + UNLOCKS_USER_WHEN_USER_LOCKED)
     void unlockUser_UserLocked_UnlocksUser() {
         user.setLocked(true);
@@ -265,7 +248,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("disabledUser(): " + DISABLES_USER_WHEN_USER_ENABLED)
     void disabledUser_UserEnabled_DisabledUser() {
         userRepository.persist(user);
@@ -278,7 +260,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("enableUser(): " + ENABLES_USER_WHEN_USER_DISABLED)
     void enableUser_UserDisabled_EnablesUser() {
         user.setEnabled(false);
@@ -291,7 +272,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("addLoginAttempt(): " + ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void addLoginAttempt_UserNotNull_AddsLoginAttempt() {
         LocalDateTime lastLoginAttempt = LocalDateTime.now();
@@ -306,7 +286,6 @@ class UserServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("resetLoginAttempts(): " + RESETS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL)
     void resetLoginAttempts_UserNotNull_ResetsLoginAttempts() {
         user.setLoginAttempts((byte) 7);

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static dev.naiarievilo.todoapp.users_info.UserInfoTestCases.*;
@@ -65,7 +64,6 @@ class UserInfoIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("userInfoExists(): " + RETURNS_TRUE_WHEN_USER_INFO_EXISTS)
     void userInfoExists_UserInfoExists_ReturnsTrue() {
         userInfoRepository.persist(userInfo);
@@ -83,7 +81,6 @@ class UserInfoIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getUserInfoById(): " + RETURNS_USER_INFO_WHEN_INFO_EXISTS)
     void getUserInfoById_UserInfoExists_ReturnsUserInfo() {
         userInfoRepository.persist(userInfo);
@@ -96,7 +93,6 @@ class UserInfoIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("createUserInfo(): " + THROWS_USER_INFO_ALREADY_EXISTS_WHEN_INFO_ALREADY_EXISTS)
     void createUserInfo_UserInfoAlreadyExists_ThrowsUserInfoAlreadyExists() {
         userInfoRepository.persist(userInfo);
@@ -104,7 +100,6 @@ class UserInfoIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("createUserInfo(): " + CREATES_USER_INFO_WHEN_USER_INFO_DOES_NOT_EXIST)
     void createUserInfo_UserInfoDoesNotExist_CreatesUserInfo() {
         userInfoService.createUserInfo(userCreationDTO, user);
@@ -123,7 +118,6 @@ class UserInfoIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("deleteUserInfo(): " + DELETES_USER_INFO_WHEN_USER_INFO_EXISTS)
     void deleteUserInfo_UserInfoExists_DeletesUserInfo() {
         userInfoRepository.persist(userInfo);
@@ -141,7 +135,6 @@ class UserInfoIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateUserInfo(): " + UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
     void updateUserInfo_UserInfoExists_UpdatesUserInfo() {
         Long id = user.getId();

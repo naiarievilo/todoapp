@@ -6,6 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional(readOnly = true)
+@Transactional
 public abstract class ControllerIntegrationTests {
 }

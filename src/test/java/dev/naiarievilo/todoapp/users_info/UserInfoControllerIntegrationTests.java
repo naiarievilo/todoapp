@@ -17,7 +17,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.ACCESS_TOKEN;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.BEARER_PREFIX;
@@ -56,7 +55,6 @@ class UserInfoControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getUserInfo(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_INFO_NOT_FOUND)
     void getUserInfo_UserInfoDoesNotExist_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -81,7 +79,6 @@ class UserInfoControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getUserInfo(): " + STATUS_200_RETURNS_USER_INFO_DTO_WHEN_USER_INFO_EXISTS)
     void getUserInfo_UserInfoExists_ReturnsUserInfoDTO() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -105,7 +102,6 @@ class UserInfoControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateUserInfo(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_INFO_NOT_FOUND)
     void updateUserInfo_UserInfoDoesNotExist_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -132,7 +128,6 @@ class UserInfoControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateUserInfo(): " + STATUS_200_UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
     void updateUserInfo_UserInfoExists_UpdatesUserInfo() throws Exception {
         user = userService.createUser(userCreationDTO);

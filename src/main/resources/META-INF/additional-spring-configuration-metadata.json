@@ -2,13 +2,8 @@
   "properties": [
     {
       "name": "jwt.secret",
-      "type": "java.lang.Integer",
-      "description": "Secret key to sign JWT."
-    },
-    {
-      "name": "jwt.issuer",
       "type": "java.lang.String",
-      "description": "Issuer of the JWT."
+      "description": "Secret key to sign JWT."
     },
     {
       "name": "admin.email",

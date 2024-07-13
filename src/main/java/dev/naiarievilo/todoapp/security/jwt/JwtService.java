@@ -28,7 +28,7 @@ public class JwtService {
     private final String issuer;
     private final JWTVerifier jwtVerifier;
 
-    public JwtService(@Value("${jwt.secret}") String secret, @Value("${jwt.issuer}") String issuer) {
+    public JwtService(@Value("${jwt.secret}") String secret, @Value("${spring.application.name}") String issuer) {
         this.algorithm = Algorithm.HMAC256(secret);
         this.issuer = issuer;
         this.jwtVerifier = JWT.require(this.algorithm)

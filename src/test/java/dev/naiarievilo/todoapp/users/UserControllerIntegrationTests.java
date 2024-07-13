@@ -24,7 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -51,7 +50,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     JwtService jwtService;
     @Autowired
     MockMvc mockMvc;
-    @Value("${ADMIN_EMAIL}")
+    @Value("${admin.email}")
     private String adminEmail;
     private UserCreationDTO userCreationDTO;
     private UserCreationDTO otherUserCreationDTO;
@@ -63,7 +62,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     void setUp() {
         userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
         otherUserCreationDTO = new UserCreationDTO(EMAIL_2, PASSWORD_2, CONFIRM_PASSWORD_2, FIRST_NAME_2, LAST_NAME_2);
-        userDTO = new UserDTO(null, userCreationDTO.email(), userCreationDTO.password());
+        userDTO = new UserDTO(null, userCreationDTO.email(), userCreationDTO.password(), false);
     }
 
     @Test
@@ -88,7 +87,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("createUser(): " + STATUS_201_CREATES_USER_WHEN_USER_DOES_NOT_EXIST)
     void createUser_UserDoesNotExist_CreatesUser() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(post("/users/creation")
@@ -113,7 +111,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("createUser(): " + STATUS_409_RETURNS_ERROR_MESSAGE_WHEN_USER_ALREADY_EXISTS)
     void createUser_UserAlreadyExists_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -136,7 +133,7 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     @Test
     @DisplayName("verifyUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void authenticateUser_UserAuthenticationDTONotValid_ReturnsErrorDetails() throws Exception {
-        UserDTO invalidUserDTO = new UserDTO(null, EMAIL_1, " ");
+        UserDTO invalidUserDTO = new UserDTO(null, EMAIL_1, " ", false);
 
         String responseBody = mockMvc.perform(post("/users/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -154,11 +151,10 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("verifyUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_CREDENTIALS_INCORRECT)
     void authenticateUser_EmailOrPasswordIncorrect_ReturnsErrorDetails() throws Exception {
         userService.createUser(userCreationDTO);
-        UserDTO userDtoWithWrongPassword = new UserDTO(null, EMAIL_1, "wrongSecurePassword123!?");
+        UserDTO userDtoWithWrongPassword = new UserDTO(null, EMAIL_1, "wrongSecurePassword123!?", false);
 
         String content = mockMvc.perform(post("/users/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +171,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("verifyUser(): " + STATUS_200_AUTHENTICATES_USER_WHEN_CREDENTIALS_CORRECT)
     void authenticateUser_CredentialsValid_AuthenticatesUser() throws Exception {
         userService.createUser(userCreationDTO);
@@ -210,7 +205,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getNewAccessToken(): " + STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_REFRESH_TOKEN_VALID)
     void getNewAccessToken_RefreshTokenValid_ReturnsNewAccessToken() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -231,7 +225,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("deleteUser(): " + STATUS_204_DELETES_USER_WHEN_USER_EXISTS)
     void deleteUser_UserExists_DeletesUser() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -245,7 +238,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("deleteUser(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_NOT_FOUND)
     void deleteUser_UserDoesNotExist_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -273,7 +265,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateEmail(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updateEmail_NewEmailNotValid_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -297,7 +288,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateEmail(): " + STATUS_409_RETURNS_ERROR_MESSAGE_WHEN_NEW_EMAIL_ALREADY_REGISTERED)
     void updateEmail_NewEmailAlreadyRegistered_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -326,7 +316,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateEmail(): " + STATUS_204_UPDATES_EMAIL_WHEN_NEW_EMAIL_VALID_AND_NOT_REGISTERED)
     void updateEmail_NewEmailValidAndNotRegistered_ReturnsNewAccessAndRefreshTokens() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -343,7 +332,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updatePassword(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updatePassword_NewPasswordNotValid_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -376,7 +364,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updatePassword(): " + STATUS_204_UPDATES_PASSWORD_WHEN_NEW_PASSWORD_VALID)
     void updatePassword_NewPasswordValid_UpdatesPassword() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -394,7 +381,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateCredentials(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void updateCredentials_NewCredentialsNotValid_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -427,7 +413,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateCredentials(): " + STATUS_204_UPDATES_CREDENTIALS_WHEN_NEW_CREDENTIALS_VALID)
     void updateCredentials_NewCredentialsValid_UpdatesCredentials() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -444,7 +429,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("addRoleToUser(): " + STATUS_403_RETURNS_FORBIDDEN_WHEN_AUTHENTICATED_USER_NOT_ADMIN)
     void addRoleToUser_AuthenticatedUserNotAdmin_ReturnsForbidden() throws Exception {
         User newUser = userService.createUser(userCreationDTO);
@@ -463,7 +447,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("addRoleToUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void addRoleToUser_UserIdOrRoleNotValid_ReturnsErrorDetails() throws Exception {
         User admin = userService.getUserByEmail(adminEmail);
@@ -494,7 +477,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("addRoleToUser(): " + STATUS_200_ADDS_ROLE_TO_USER_WHEN_AUTHENTICATED_USER_ADMIN)
     void addRoleToUser_AuthenticatedUserAdmin_AddsRoleToUser() throws Exception {
         User admin = userService.getUserByEmail(adminEmail);
@@ -516,7 +498,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("removeRoleFromUser(): " + STATUS_403_RETURNS_FORBIDDEN_WHEN_AUTHENTICATED_USER_NOT_ADMIN)
     void removeRoleFromUser_PrincipalNotAdmin_ReturnsForbidden() throws Exception {
         User newUser = userService.createUser(userCreationDTO);
@@ -534,7 +515,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("removeRoleFromUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void removeRoleFromUser_UserIdOrRoleNotValid_ReturnsErrorDetails() throws Exception {
         User admin = userService.getUserByEmail(adminEmail);
@@ -565,7 +545,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("removeRoleFromUser(): " + STATUS_204_REMOVES_ROLE_FROM_USER_WHEN_AUTHENTICATED_USER_ADMIN)
     void removeRoleFromUser_AuthenticatedUserAdmin_RemovesRoleFromUser() throws Exception {
         User admin = userService.getUserByEmail(adminEmail);
@@ -585,7 +564,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("verifyEmailRequest() : " + STATUS_200_SENDS_EMAIL_VERIFICATION_MESSAGE_WHEN_EMAIL_VALID)
     void verifyEmailRequest_EmailValid_SendsEmailVerificationMessage() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -598,7 +576,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("verifyEmail(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_TOKEN_INVALID)
     void verifyEmail_TokenInvalid_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -623,7 +600,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("verifyEmail(): " + STATUS_200_VERIFIES_USER_EMAIL_WHEN_VERIFICATION_TOKEN_VALID)
     void verifyEmail_TokenValid_VerifiesUserEmail() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -639,12 +615,11 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("unlockUserRequest(): " + STATUS_200_SENDS_UNLOCK_USER_MESSAGE_WHEN_EMAIL_VALID)
     void unlockUserRequest_EmailValid_SendsUnlockUserMessage() throws Exception {
         user = userService.createUser(userCreationDTO);
         userService.lockUser(user);
-        userDTO = new UserDTO(null, user.getEmail(), null);
+        userDTO = new UserDTO(null, user.getEmail(), null, false);
 
         mockMvc.perform(post("/users/unlock")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -654,7 +629,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("unlockUser(): " + STATUS_200_UNLOCKS_USER_WHEN_TOKEN_VALID)
     void unlockUser_UnlockTokenValid_UnlocksUser() throws Exception {
         user = userService.createUser(userCreationDTO);
@@ -670,12 +644,11 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("enableUserRequest(): " + STATUS_200_SENDS_ENABLE_USER_MESSAGE_WHEN_EMAIL_VALID)
     void enableUserRequest_EmailValid_SendsEnableUserMessage() throws Exception {
         user = userService.createUser(userCreationDTO);
         userService.disableUser(user);
-        userDTO = new UserDTO(null, user.getEmail(), null);
+        userDTO = new UserDTO(null, user.getEmail(), null, false);
 
         mockMvc.perform(post("/users/enable")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -685,7 +658,6 @@ class UserControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("enableUser(): " + STATUS_200_ENABLES_USER_WHEN_ENABLE_TOKEN_VALID)
     void enableUser_EnableTokenValid_EnablesUser() throws Exception {
         user = userService.createUser(userCreationDTO);

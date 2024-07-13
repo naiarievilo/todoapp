@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @PostMapping("/creation")
-    public ResponseEntity<Void> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
         User user = userService.createUser(userCreationDTO);
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
 
@@ -56,7 +56,7 @@ public class UserController {
             .status(HttpStatus.CREATED)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN.key()))
             .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN.key()))
-            .build();
+            .body(new UserDTO(user.getId(), null, null, user.isVerified()));
     }
 
     @PostMapping("/authentication")
@@ -71,7 +71,7 @@ public class UserController {
             .status(HttpStatus.OK)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + tokens.get(ACCESS_TOKEN.key()))
             .header(REFRESH_TOKEN_HEADER, BEARER_PREFIX + tokens.get(REFRESH_TOKEN.key()))
-            .body(new UserDTO(user.getId(), user.getEmail(), user.getPassword()));
+            .body(new UserDTO(user.getId(), null, null, user.isVerified()));
     }
 
     @GetMapping("/verify")

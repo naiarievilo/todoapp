@@ -2,16 +2,16 @@ logging:
   level:
     org:
       springframework:
-        boot: "WARN"
-        web: "WARN"
+        boot: "INFO"
+        web: "INFO"
         security:
           web:
-            FilterChainProxy: "WARN"
+            FilterChainProxy: "INFO"
 
 spring:
   jpa:
     hibernate:
-      ddl-auto: "none"
+      ddl-auto: "update"
     show-sql: false
   mail:
     properties:

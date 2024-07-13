@@ -25,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
@@ -69,7 +68,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     private User user;
 
     @BeforeEach
-    @Transactional
     void setUp() {
         var userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
         user = userService.createUser(userCreationDTO);
@@ -80,7 +78,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getInboxList(): " + STATUS_200_RETURNS_INBOX_LIST_WHEN_USER_AUTHENTICATED)
     void getInboxList_UserAuthenticated_ReturnsUserInboxList() throws Exception {
         String responseBody = mockMvc.perform(get("/users/current/todolists/inbox")
@@ -98,7 +95,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getTodayList(): " + STATUS_200_RETURNS_TODAY_LIST_WHEN_USER_AUTHENTICATED)
     void getTodayList_UserAuthenticated_ReturnsUserTodayList() throws Exception {
         String responseBody = mockMvc.perform(get("/users/current/todolists/today")
@@ -118,7 +114,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getWeekLists(): " + STATUS_200_RETURNS_WEEK_LISTS_WHEN_USER_AUTHENTICATED)
     void getWeekLists_UserAuthenticated_ReturnsUserWeekLists() throws Exception {
         String responseBody = mockMvc.perform(get("/users/current/todolists/week")
@@ -142,7 +137,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getAllCustomLists(): " + STATUS_200_RETURNS_ALL_CUSTOM_LISTS_WHEN_USER_AUTHENTICATED)
     void getAllCustomLists_UserAuthenticated_ReturnsUserCustomLists() throws Exception {
         listService.createList(user, listDTO, CUSTOM);
@@ -166,7 +160,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("createList(): " + STATUS_200_CREATES_LIST_WHEN_USER_AUTHENTICATED)
     void createList_UserAuthenticated_CreatesList() throws Exception {
         String responseBody = mockMvc.perform(post("/users/current/todolists")
@@ -188,7 +181,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateList(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_LIST_NOT_FOUND)
     void updateList_ListDoesNotExist_ReturnsErrorDetails() throws Exception {
         Long fakeListId = 3423L;
@@ -214,7 +206,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateList(): " + STATUS_401_RETURNS_ERROR_MESSAGE_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void updateList_UserDoesNotHaveListAccess_ReturnsErrorDetails() throws Exception {
         var otherUserCreationDTO =
@@ -244,7 +235,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateList(): " + STATUS_204_UPDATES_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateList_UserHasListAccess_UpdatesList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
@@ -262,7 +252,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("deleteList(): " + STATUS_204_DELETES_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void deleteList_UserHasListAccess_DeleteList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
@@ -274,7 +263,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("addTodoToList(): " + STATUS_201_ADDS_TODO_TO_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void addTodoToList_UserHasListAccess_AddsTodoToList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
@@ -300,7 +288,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateTodoFromList(): " + STATUS_204_UPDATES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateTodoFromList_UserHasListAccess_UpdatesTodoFromList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
@@ -320,7 +307,6 @@ class TodoListControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("removeTodoFromList(): " + STATUS_204_DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateTodoFromList_UserHasListAccess_RemoveTodoFromList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);

@@ -17,6 +17,7 @@ import static dev.naiarievilo.todoapp.roles.RoleServiceTestCases.*;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Transactional(readOnly = true)
 class RoleServiceIntegrationTests extends ServiceIntegrationTests {
 
     @Autowired

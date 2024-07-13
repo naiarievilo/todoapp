@@ -7,23 +7,29 @@ import dev.naiarievilo.todoapp.todolists.TodoListRepository;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
 import dev.naiarievilo.todoapp.todolists.todos.exceptions.TodoNotFoundException;
+import dev.naiarievilo.todoapp.users.User;
+import dev.naiarievilo.todoapp.users.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static dev.naiarievilo.todoapp.todolists.todos.TodoServiceTestCases.*;
 import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.*;
+import static dev.naiarievilo.todoapp.users.UsersTestConstants.EMAIL_1;
+import static dev.naiarievilo.todoapp.users.UsersTestConstants.PASSWORD_2;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TodoServiceIntegrationTests extends ServiceIntegrationTests {
 
     @Autowired
     TodoRepository todoRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     TodoMapper todoMapper;
@@ -37,21 +43,23 @@ class TodoServiceIntegrationTests extends ServiceIntegrationTests {
     private TodoDTO newTodoDTO_1;
     private Todo newTodo_1;
     private TodoList parentList;
-    private Set<TodoDTO> todoDTOSet;
 
     @BeforeEach
     void setUp() {
-        parentList = new TodoList();
-        parentList.setType(ListTypes.CUSTOM);
+        User user = new User();
+        user.setEmail(EMAIL_1);
+        user.setPassword(PASSWORD_2);
+        userRepository.persist(user);
 
-        todoDTOSet = TodosTestHelper.todoDTOSet();
+        parentList = new TodoList();
+        parentList.setUser(user);
+        parentList.setType(ListTypes.CUSTOM);
 
         newTodoDTO_1 = TodosTestHelper.newTodoDTO_1();
         newTodo_1 = TodosTestHelper.newTodo_1();
     }
 
     @Test
-    @Transactional
     @DisplayName("createTodo(): " + CREATES_TODO_WHEN_INPUT_VALID)
     void createTodo_InputValidAndParentList_CreatesTodo() {
         listRepository.persist(parentList);
@@ -62,7 +70,6 @@ class TodoServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateTodo(): " + UPDATES_TODO_WHEN_INPUT_VALID)
     void updateTodo_InputValid_UpdatesTodo() {
         parentList.addTodo(newTodo_1);
@@ -85,7 +92,6 @@ class TodoServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("updateTodos(): " + REMOVES_TODO_FROM_PARENT_WHEN_TODO_NOT_IN_DTO_SET)
     void updateTodos_TodoNotInDTOSet_RemovesTodoFromParent() {
         parentList.setTodos(TodosTestHelper.newTodoSet());
@@ -111,7 +117,6 @@ class TodoServiceIntegrationTests extends ServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("deleteTodo(): " + DELETES_TODO_WHEN_TODO_EXISTS)
     void deleteTodo_TodoExists_DeletesTodo() {
         parentList.addTodo(newTodo_1);

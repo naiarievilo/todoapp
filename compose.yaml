@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: "postgres:14.2"
+    environment:
+      POSTGRES_DB: "todoapp"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+    ports:
+      - "15432:5432"
+  smtp:
+    image: "axllent/mailpit"
+    command: [ "--enable-spamassassin", "postmark" ]
+    ports:
+      - "8025:8025"
+      - "1025:1025"

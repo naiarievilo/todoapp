@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -51,7 +50,6 @@ class RoleControllerIntegrationTests extends ControllerIntegrationTests {
     }
 
     @Test
-    @Transactional
     @DisplayName("getAllRoles(): " + STATUS_403_RETURNS_FORBIDDEN_WHEN_AUTHENTICATED_USER_NOT_ADMIN)
     void getAllRoles_AuthenticatedUserNotAdmin_ReturnsForbidden() throws Exception {
         User newUser = userService.createUser(userCreationDTO);

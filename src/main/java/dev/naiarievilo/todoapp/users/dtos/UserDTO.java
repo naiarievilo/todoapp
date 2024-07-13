@@ -16,10 +16,12 @@ public record UserDTO(
     @Email(groups = {UserAuthentication.class, UserSecurity.class})
     String email,
 
-    @Password(groups = UserAuthentication.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    String password
+    @Password(groups = UserAuthentication.class)
+    String password,
 
+    @JsonProperty(value = "is_verified", access = JsonProperty.Access.READ_ONLY)
+    Boolean verified
 ) {
 
     @Override
