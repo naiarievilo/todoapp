@@ -17,7 +17,7 @@ import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static dev.naiarievilo.todoapp.users_info.UserInfoTestCases.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserInfoIntegrationTests extends ServiceIntegrationTests {
+class UserInfoIT extends ServiceIntegrationTests {
 
     @Autowired
     UserInfoRepository userInfoRepository;

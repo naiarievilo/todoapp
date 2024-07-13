@@ -24,7 +24,7 @@ import static dev.naiarievilo.todoapp.security.jwt.TokenTypes.USER_ACCESS;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class JwtServiceUnitTests {
+class JwtServiceTest {
 
     private static final String JWT_ISSUER = "testApp";
     private static final String JWT_SECRET = "jwtSecret";
@@ -34,7 +34,7 @@ class JwtServiceUnitTests {
 
     private User user;
 
-    JwtServiceUnitTests() {
+    JwtServiceTest() {
         jwtService = new JwtService(JWT_SECRET, JWT_ISSUER);
 
         try {

@@ -15,15 +15,15 @@ import static dev.naiarievilo.todoapp.validation.AnnotationsTestCases.RETURNS_ER
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 import static org.junit.jupiter.api.Assertions.*;
 
-class NotBlankIntegrationTests extends ValidationIntegrationTests {
+class NotNullIT extends ValidationIT {
 
     @Autowired
     LocalValidatorFactoryBean localValidatorFactoryBean;
 
     @Test
-    @DisplayName("@NotBlank: " + RETURNS_ERROR_MESSAGE_WHEN + " field is blank")
-    void notBlank_BlankField_ReturnsConstraintViolationError() {
-        var testDTO = new NotBlankTestDTO("  ");
+    @DisplayName("@NotNull: " + RETURNS_ERROR_MESSAGE_WHEN + " field is null")
+    void notNull_FieldNull_ReturnsConstraintViolationError() {
+        var testDTO = new NotNullTestDTO(null);
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
@@ -34,17 +34,17 @@ class NotBlankIntegrationTests extends ValidationIntegrationTests {
     }
 
     @Test
-    @DisplayName("@NotBlank: " + DOES_NOT_RETURN_ERROR_MESSAGE_WHEN + " field is not blank")
-    void notBlank_FieldNotBlank_DoesNotReturnConstraintViolationError() {
-        var testDTO = new NotBlankTestDTO("notBlank");
+    @DisplayName("@NotNull: " + DOES_NOT_RETURN_ERROR_MESSAGE_WHEN + " field is not null")
+    void notNull_FieldNotNull_ReturnsConstraintViolationError() {
+        var testDTO = new NotNullTestDTO("notNull");
         Errors errors = new BeanPropertyBindingResult(testDTO, "testDTO");
 
         localValidatorFactoryBean.validate(testDTO, errors);
         assertFalse(errors.hasErrors());
     }
 
-    record NotBlankTestDTO(
-        @NotBlank
+    record NotNullTestDTO(
+        @NotNull
         String field
     ) { }
 }

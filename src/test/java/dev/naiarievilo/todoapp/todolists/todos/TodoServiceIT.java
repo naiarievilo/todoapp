@@ -23,7 +23,7 @@ import static dev.naiarievilo.todoapp.users.UsersTestConstants.EMAIL_1;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.PASSWORD_2;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TodoServiceIntegrationTests extends ServiceIntegrationTests {
+class TodoServiceIT extends ServiceIntegrationTests {
 
     @Autowired
     TodoRepository todoRepository;

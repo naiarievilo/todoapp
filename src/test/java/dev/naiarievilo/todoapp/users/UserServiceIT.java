@@ -24,7 +24,7 @@ import static dev.naiarievilo.todoapp.users.UserServiceTestCases.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserServiceIntegrationTests extends ServiceIntegrationTests {
+class UserServiceIT extends ServiceIntegrationTests {
 
     @Autowired
     private PasswordEncoder passwordEncoder;

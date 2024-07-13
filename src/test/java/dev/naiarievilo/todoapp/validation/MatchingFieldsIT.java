@@ -15,7 +15,7 @@ import static dev.naiarievilo.todoapp.validation.AnnotationsTestCases.RETURNS_ER
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.DOES_NOT_MATCH;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MatchingFieldsIntegrationTests extends ValidationIntegrationTests {
+class MatchingFieldsIT extends ValidationIT {
 
     private static final String FIELD_VALUE = "fieldValue";
     private static final String OTHER_FIELD_VALUE = "otherFieldValue";

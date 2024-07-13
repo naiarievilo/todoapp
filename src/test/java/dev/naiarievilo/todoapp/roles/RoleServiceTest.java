@@ -25,7 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class RoleServiceUnitTests {
+class RoleServiceTest {
 
     @Mock
     RoleRepository roleRepository;

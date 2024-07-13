@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class RoleControllerIntegrationTests extends ControllerIntegrationTests {
+class RoleControllerIT extends ControllerIntegrationTests {
 
     @Autowired
     MockMvc mockMvc;

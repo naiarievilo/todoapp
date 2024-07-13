@@ -133,33 +133,7 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*IntegrationTests.java</exclude>
-                        <exclude>**/**/*IntegrationTests.java</exclude>
-                    </excludes>
-                    <includes>
-                        <include>**/*UnitTests.java</include>
-                        <include>**/**/UnitTests.java</include>
-                    </includes>
-                    <argLine>-ea</argLine>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*UnitTests.java</exclude>
-                        <exclude>**/**/*UnitTests.java</exclude>
-                    </excludes>
-                    <includes>
-                        <include>**/*IntegrationTests.java</include>
-                        <include>**/**/*IntegrationTests.java</include>
-                    </includes>
-                    <argLine>-ea</argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -36,7 +36,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TodoListServiceUnitTests {
+class TodoListServiceTest {
 
     @Mock
     TodoListRepository listRepository;

@@ -18,7 +18,7 @@ import static dev.naiarievilo.todoapp.validation.ValidationMessages.CONTAINS_NUL
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.MUST_BE_PROVIDED;
 import static org.junit.jupiter.api.Assertions.*;
 
-class NoNullElementsIntegrationTests extends ValidationIntegrationTests {
+class NoNullElementsIT extends ValidationIT {
 
     @Autowired
     LocalValidatorFactoryBean localValidatorFactoryBean;
