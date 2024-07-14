@@ -3,14 +3,13 @@ package dev.naiarievilo.todoapp.todolists.todos;
 import dev.naiarievilo.todoapp.todolists.TodoList;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
+import dev.naiarievilo.todoapp.todolists.todos.exceptions.PositionExceedsMaxAllowedException;
+import dev.naiarievilo.todoapp.todolists.todos.exceptions.PositionNotUniqueException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional(propagation = Propagation.SUPPORTS)
@@ -37,13 +36,24 @@ public class TodoService {
             todosMap.put(todo.getId(), todo);
         }
 
+        Integer maxPositionAllowed = todosDTO.size();
+        Set<Integer> newPositionsRecorded = new HashSet<>();
         Set<Long> matchedTodoIds = new LinkedHashSet<>();
         for (TodoDTO todoDTO : todosDTO) {
             Todo todo = todosMap.get(todoDTO.id());
-            if (todo != null) {
-                matchedTodoIds.add(todo.getId());
-                updateTodo(todo, todoDTO);
+            if (todo == null) {
+                continue;
             }
+
+            if (todoDTO.position() > maxPositionAllowed) {
+                throw new PositionExceedsMaxAllowedException();
+            } else if (newPositionsRecorded.contains(todoDTO.position())) {
+                throw new PositionNotUniqueException();
+            }
+
+            matchedTodoIds.add(todo.getId());
+            updateTodo(todo, todoDTO);
+            newPositionsRecorded.add(todoDTO.position());
         }
 
         if (matchedTodoIds.size() == todosMap.size()) {

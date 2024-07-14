@@ -14,6 +14,10 @@ public class TodoServiceTestCases {
         "Removes todo from parent when its DTO is not present in the DTO set";
     public static final String RETURNS_TODO_WHEN_TODO_EXISTS =
         "Returns todo when todo exists";
+    public static final String THROWS_POSITION_EXCEEDS_MAX_ALLOWED_WHEN_POSITION_IS_GREATER_THAN_LIST_SIZE =
+        "Throws `PositionExceedsMaxAllowedException` when position is greater than the number of to-dos in list";
+    public static final String THROWS_POSITION_NOT_UNIQUE_WHEN_TODOS_HAVE_SAME_POSITION =
+        "Throws `PositionNotUniqueException` when todos in list have the same position";
     public static final String THROWS_TODO_NOT_FOUND_WHEN_TODO_DOES_NOT_EXIST =
         "Throws `TodoNotFoundException` when todo does not exist";
     public static final String UPDATES_TODO_WHEN_INPUT_VALID =
