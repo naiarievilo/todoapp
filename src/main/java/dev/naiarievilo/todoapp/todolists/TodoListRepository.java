@@ -2,6 +2,7 @@ package dev.naiarievilo.todoapp.todolists;
 
 import dev.naiarievilo.todoapp.users.User;
 import io.hypersistence.utils.spring.repository.BaseJpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,4 +52,14 @@ public interface TodoListRepository extends BaseJpaRepository<TodoList, Long> {
                     AND tl.dueDate = :date
         """)
     Optional<TodoList> findByTypeAndDueDate(ListTypes type, LocalDate date, User user);
+
+    @Transactional
+    @Modifying
+    @Query("""
+                 DELETE
+                   FROM TodoList AS tl
+                  WHERE tl.type = :type
+                    AND tl.dueDate < :date
+        """)
+    void deleteAllByTypeAndDueDate(ListTypes type, LocalDate date);
 }

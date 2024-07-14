@@ -62,3 +62,5 @@ spring:
 client:
   uri:
     unlock-user: "http://localhost:3000/unlock-user"
+tasks:
+  weekly: "* * * */7 * ?"

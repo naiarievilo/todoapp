@@ -28,7 +28,7 @@ import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
-    public static final byte EMAIL_CONFIRMATION_PERIOD = 7;
+    public static final int EMAIL_CONFIRMATION_PERIOD = 7;
 
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
