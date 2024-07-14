@@ -48,7 +48,7 @@ class TodoListServiceTest {
     TodoService todoService;
 
     @InjectMocks
-    TodoListServiceImpl listService;
+    TodoListService listService;
 
     @Captor
     ArgumentCaptor<TodoList> listCaptor;

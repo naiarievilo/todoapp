@@ -30,7 +30,7 @@ class RoleServiceTest {
     @Mock
     RoleRepository roleRepository;
     @InjectMocks
-    RoleServiceImpl roleService;
+    RoleService roleService;
     @Captor
     private ArgumentCaptor<Role> roleCaptor;
     private Role userRole;

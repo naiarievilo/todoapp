@@ -5,7 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static dev.naiarievilo.todoapp.todolists.ListTypes.*;
-import static dev.naiarievilo.todoapp.todolists.TodoListServiceImpl.CALENDAR_LIST_TITLE;
+import static dev.naiarievilo.todoapp.todolists.TodoListService.CALENDAR_LIST_TITLE;
 
 public class TodoListsTestHelper {
 

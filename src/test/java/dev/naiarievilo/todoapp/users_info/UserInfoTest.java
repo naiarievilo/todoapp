@@ -32,7 +32,7 @@ class UserInfoTest {
     @Mock
     UserInfoRepository userInfoRepository;
     @InjectMocks
-    UserInfoServiceImpl userInfoService;
+    UserInfoService userInfoService;
 
     @Captor
     private ArgumentCaptor<UserInfo> userInfoCaptor;

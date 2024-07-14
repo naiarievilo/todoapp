@@ -23,7 +23,7 @@ import java.util.Set;
 
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
-import static dev.naiarievilo.todoapp.users.UserServiceImpl.EMAIL_CONFIRMATION_PERIOD;
+import static dev.naiarievilo.todoapp.users.UserService.EMAIL_CONFIRMATION_PERIOD;
 import static dev.naiarievilo.todoapp.users.UserServiceTestCases.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +42,7 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @InjectMocks
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Captor
     private ArgumentCaptor<User> userCaptor;

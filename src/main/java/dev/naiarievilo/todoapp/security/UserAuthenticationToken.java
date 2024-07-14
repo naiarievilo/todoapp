@@ -1,7 +1,7 @@
 package dev.naiarievilo.todoapp.security;
 
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users.UserServiceImpl;
+import dev.naiarievilo.todoapp.users.UserService;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -12,7 +12,7 @@ public class UserAuthenticationToken extends AbstractAuthenticationToken {
     private final transient String credentials;
 
     public UserAuthenticationToken(User user) {
-        super(UserServiceImpl.getRolesFromUser(user));
+        super(UserService.getRolesFromUser(user));
         super.setAuthenticated(true);
         this.credentials = user.getPassword();
         this.user = user;

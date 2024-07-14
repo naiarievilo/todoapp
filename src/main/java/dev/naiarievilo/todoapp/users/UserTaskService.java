@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.naiarievilo.todoapp.users.UserServiceImpl.EMAIL_CONFIRMATION_PERIOD;
+import static dev.naiarievilo.todoapp.users.UserService.EMAIL_CONFIRMATION_PERIOD;
 
 @Service
 @Transactional

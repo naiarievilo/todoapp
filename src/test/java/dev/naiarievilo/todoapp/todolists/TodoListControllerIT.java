@@ -34,7 +34,7 @@ import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.ACCESS_TOKEN;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.BEARER_PREFIX;
 import static dev.naiarievilo.todoapp.todolists.ListTypes.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListControllerTestCases.*;
-import static dev.naiarievilo.todoapp.todolists.TodoListServiceImpl.CALENDAR_LIST_TITLE;
+import static dev.naiarievilo.todoapp.todolists.TodoListService.CALENDAR_LIST_TITLE;
 import static dev.naiarievilo.todoapp.todolists.TodoListsTestHelper.*;
 import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_TASK_2;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;

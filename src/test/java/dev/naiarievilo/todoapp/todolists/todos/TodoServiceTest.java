@@ -32,7 +32,7 @@ class TodoServiceTest {
     TodoMapper todoMapper;
 
     @InjectMocks
-    TodoServiceImpl todoService;
+    TodoService todoService;
 
     @Captor
     private ArgumentCaptor<Todo> todoCaptor;

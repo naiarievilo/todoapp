@@ -1,17 +1,51 @@
 package dev.naiarievilo.todoapp.roles;
 
+import dev.naiarievilo.todoapp.roles.exceptions.RoleAlreadyExistsException;
+import dev.naiarievilo.todoapp.roles.exceptions.RoleNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
-public interface RoleService {
+@Service
+@Transactional(readOnly = true)
+public class RoleService {
 
-    boolean roleExists(Roles role);
+    private final RoleRepository roleRepository;
 
-    Role getRole(Roles role);
+    public RoleService(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
 
-    List<Role> getAllRoles();
+    public List<Role> getAllRoles() {
+        return roleRepository.findAll();
+    }
 
-    void createRole(Roles roles);
+    @Transactional
+    public void createRole(Roles role) {
+        if (roleExists(role)) {
+            throw new RoleAlreadyExistsException(role.name());
+        }
 
-    void deleteRole(Roles role);
+        Role newRole = new Role();
+        newRole.setName(role.name());
+        newRole.setDescription(role.description());
+        roleRepository.persist(newRole);
+    }
+
+    public boolean roleExists(Roles role) {
+        return roleRepository.findByName(role.name()).isPresent();
+    }
+
+    @Transactional
+    public void deleteRole(Roles role) {
+        Role roleToDelete = getRole(role);
+        roleToDelete.unassignUsers();
+        roleRepository.delete(roleToDelete);
+    }
+
+    public Role getRole(Roles role) {
+        return roleRepository.findByName(role.name()).orElseThrow(() -> new RoleNotFoundException(role.name()));
+    }
 
 }
