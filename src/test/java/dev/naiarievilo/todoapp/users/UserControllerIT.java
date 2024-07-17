@@ -1,15 +1,17 @@
 package dev.naiarievilo.todoapp.users;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.naiarievilo.todoapp.ControllerIntegrationTests;
-import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
 import dev.naiarievilo.todoapp.security.ErrorDetails;
 import dev.naiarievilo.todoapp.security.jwt.JwtService;
+import dev.naiarievilo.todoapp.security.jwt.TokensDTO;
 import dev.naiarievilo.todoapp.users.dtos.CredentialsUpdateDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserDTO;
-import dev.naiarievilo.todoapp.users.dtos.UserRolesUpdateDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -19,16 +21,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
-import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationProvider.BAD_CREDENTIALS;
+import static dev.naiarievilo.todoapp.security.jwt.JwtService.NEW_ACCESS_TOKEN_CREATION_FAILED;
+import static dev.naiarievilo.todoapp.security.jwt.JwtService.TYPE_CLAIM;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.*;
 import static dev.naiarievilo.todoapp.users.UserController.REFRESH_TOKEN_HEADER;
 import static dev.naiarievilo.todoapp.users.UserControllerTestCases.*;
@@ -50,19 +56,33 @@ class UserControllerIT extends ControllerIntegrationTests {
     JwtService jwtService;
     @Autowired
     MockMvc mockMvc;
-    @Value("${admin.email}")
-    private String adminEmail;
+    @Autowired
+    Environment environment;
+    @Value("${spring.application.name}")
+    String jwtIssuer;
+    @Value("${jwt.secret}")
+    String jwtSecret;
+    private Algorithm jwtAlgorithm;
     private UserCreationDTO userCreationDTO;
     private UserCreationDTO otherUserCreationDTO;
     private UserDTO userDTO;
     private Exception exception;
     private User user;
+    private JWTCreator.Builder expiredAccessTokenBuilder;
 
     @BeforeEach
     void setUp() {
         userCreationDTO = new UserCreationDTO(EMAIL_1, PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
         otherUserCreationDTO = new UserCreationDTO(EMAIL_2, PASSWORD_2, CONFIRM_PASSWORD_2, FIRST_NAME_2, LAST_NAME_2);
         userDTO = new UserDTO(null, userCreationDTO.email(), userCreationDTO.password(), false);
+
+        jwtAlgorithm = Algorithm.HMAC256(jwtSecret);
+        Instant now = Instant.now();
+        expiredAccessTokenBuilder = JWT.create()
+            .withIssuer(jwtIssuer)
+            .withIssuedAt(now.minusMillis(ACCESS_TOKEN.expirationInMillis()))
+            .withClaim(TYPE_CLAIM, ACCESS_TOKEN.type())
+            .withExpiresAt(now);
     }
 
     @Test
@@ -190,9 +210,17 @@ class UserControllerIT extends ControllerIntegrationTests {
     @Test
     @DisplayName("getNewAccessToken(): " + STATUS_401_RETURNS_ERROR_MESSAGE_WHEN_REFRESH_TOKEN_NOT_VALID)
     void getNewAccessToken_RefreshTokenNotValid_ReturnsErrorDetails() throws Exception {
-        String responseBody = mockMvc.perform(post("/users/current/re-authentication")
+        user = userService.createUser(userCreationDTO);
+
+        String expiredAccessToken = expiredAccessTokenBuilder
+            .withSubject(user.getId().toString())
+            .sign(jwtAlgorithm);
+
+        TokensDTO requiredTokens = new TokensDTO(expiredAccessToken, "invalidRefreshToken");
+
+        String responseBody = mockMvc.perform(post("/users/re-authentication")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + "invalidToken")
+                .content(objectMapper.writeValueAsString(requiredTokens))
             )
             .andExpect(status().isUnauthorized())
             .andReturn().getResponse().getContentAsString();
@@ -204,14 +232,81 @@ class UserControllerIT extends ControllerIntegrationTests {
         assertTrue(errorDetails.getMessages().contains(JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED));
     }
 
+
     @Test
-    @DisplayName("getNewAccessToken(): " + STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_REFRESH_TOKEN_VALID)
+    @DisplayName("getNewAccessToken() " + STATUS_401_RETURNS_ERROR_MESSAGE_WHEN_ACCESS_TOKEN_INVALID_BESIDES_EXPIRED)
+    void getNewAccessToken_AccessTokenInvalidBesidesExpired_ReturnsErrorDetails() throws Exception {
+        user = userService.createUser(userCreationDTO);
+        String refreshToken = jwtService.createToken(user, REFRESH_TOKEN);
+
+        Instant now = Instant.now();
+        String invalidAccessToken = JWT.create()
+            .withIssuedAt(now.minusMillis(ACCESS_TOKEN.expirationInMillis()))
+            .withExpiresAt(now)
+            .sign(jwtAlgorithm);
+
+        TokensDTO requiredTokens = new TokensDTO(invalidAccessToken, refreshToken);
+
+        String responseBody = mockMvc.perform(post("/users/re-authentication")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requiredTokens))
+            )
+            .andExpectAll(
+                status().isUnauthorized(),
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            )
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.UNAUTHORIZED.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(JWT_NOT_VALID_OR_COULD_NOT_BE_PROCESSED));
+    }
+
+    @Test
+    @DisplayName("getNewAccessToken() " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_ACCESS_TOKEN_STILL_VALID)
+    void getNewAccessToken_AccessTokenNotExpired_ReturnsErrorDetails() throws Exception {
+        user = userService.createUser(userCreationDTO);
+        Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
+        String accessToken = tokens.get(ACCESS_TOKEN.key());
+        String refreshToken = tokens.get(REFRESH_TOKEN.key());
+
+        TokensDTO requiredTokens = new TokensDTO(accessToken, refreshToken);
+
+        String responseBody = mockMvc.perform(post("/users/re-authentication")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requiredTokens))
+            )
+            .andExpectAll(
+                status().isBadRequest(),
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            )
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(NEW_ACCESS_TOKEN_CREATION_FAILED));
+    }
+
+    @Test
+    @DisplayName("getNewAccessToken(): " +
+        STATUS_200_RETURNS_NEW_ACCESS_TOKEN_WHEN_ACCESS_TOKEN_EXPIRED_AND_REFRESH_TOKEN_VALID)
     void getNewAccessToken_RefreshTokenValid_ReturnsNewAccessToken() throws Exception {
         user = userService.createUser(userCreationDTO);
         String refreshToken = jwtService.createToken(user, REFRESH_TOKEN);
 
-        String accessToken = mockMvc.perform(post("/users/current/re-authentication")
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + refreshToken)
+        String expiredAccessToken = expiredAccessTokenBuilder
+            .withSubject(user.getId().toString())
+            .sign(jwtAlgorithm);
+
+        TokensDTO requiredTokens = new TokensDTO(expiredAccessToken, refreshToken);
+
+        String accessToken = mockMvc.perform(post("/users/re-authentication")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requiredTokens))
             )
             .andExpectAll(
                 status().isOk(),
@@ -231,7 +326,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
 
         mockMvc
-            .perform(delete("/users/current")
+            .perform(delete("/users/" + user.getId())
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpect(status().isNoContent());
@@ -245,12 +340,12 @@ class UserControllerIT extends ControllerIntegrationTests {
         exception = new UserNotFoundException(user.getId());
 
         mockMvc
-            .perform(delete("/users/current")
+            .perform(delete("/users/" + user.getId())
                 .header(HttpHeaders.AUTHORIZATION, accessToken)
             )
             .andExpect(status().isNoContent());
 
-        String responseBody = mockMvc.perform(delete("/users/current")
+        String responseBody = mockMvc.perform(delete("/users/" + user.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, accessToken)
             )
@@ -271,7 +366,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
         var updateCredentialsDTO = new CredentialsUpdateDTO("invalidEmail", null, null, null);
 
-        String responseBody = mockMvc.perform(patch("/users/current/email")
+        String responseBody = mockMvc.perform(patch("/users/" + user.getId() + "/email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
@@ -297,7 +392,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         exception = new EmailAlreadyRegisteredException(otherUserCreationDTO.email());
         var updateCredentialsDTO = new CredentialsUpdateDTO(otherUserCreationDTO.email(), null, null, null);
 
-        String responseBody = mockMvc.perform(patch("/users/current/email")
+        String responseBody = mockMvc.perform(patch("/users/" + user.getId() + "/email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
@@ -323,7 +418,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         var updateCredentialsDTO = new CredentialsUpdateDTO(NEW_EMAIL, null, null, null);
 
         mockMvc
-            .perform(patch("/users/current/email")
+            .perform(patch("/users/" + user.getId() + "/email")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
@@ -345,7 +440,7 @@ class UserControllerIT extends ControllerIntegrationTests {
             ValidationMessages.formatMessage(DOES_NOT_MATCH, "newPasswordConfirmation", "newPassword")
         );
 
-        String responseBody = mockMvc.perform(patch("/users/current/password")
+        String responseBody = mockMvc.perform(patch("/users/" + user.getId() + "/password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
@@ -372,7 +467,7 @@ class UserControllerIT extends ControllerIntegrationTests {
             "", userCreationDTO.password(), NEW_PASSWORD, NEW_PASSWORD
         );
 
-        mockMvc.perform(patch("/users/current/password")
+        mockMvc.perform(patch("/users/" + user.getId() + "/password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
@@ -394,7 +489,7 @@ class UserControllerIT extends ControllerIntegrationTests {
             ValidationMessages.formatMessage(DOES_NOT_MATCH, "newPasswordConfirmation", "newPassword")
         );
 
-        String responseBody = mockMvc.perform(patch("/users/current/credentials")
+        String responseBody = mockMvc.perform(patch("/users/" + user.getId() + "/credentials")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
@@ -420,7 +515,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         var updateCredentialsDTO =
             new CredentialsUpdateDTO(NEW_EMAIL, userCreationDTO.password(), NEW_PASSWORD, NEW_PASSWORD);
 
-        mockMvc.perform(patch("/users/current/credentials")
+        mockMvc.perform(patch("/users/" + user.getId() + "/credentials")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(updateCredentialsDTO))
@@ -429,147 +524,12 @@ class UserControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
-    @DisplayName("addRoleToUser(): " + STATUS_403_RETURNS_FORBIDDEN_WHEN_AUTHENTICATED_USER_NOT_ADMIN)
-    void addRoleToUser_AuthenticatedUserNotAdmin_ReturnsForbidden() throws Exception {
-        User newUser = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createToken(newUser, ACCESS_TOKEN);
-        var addAdminRoleToSelf = new UserRolesUpdateDTO(newUser.getId(), ROLE_ADMIN.name());
-
-        mockMvc
-            .perform(patch("/users/admin/role-assignment")
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(addAdminRoleToSelf))
-            )
-            .andExpect(
-                status().isForbidden()
-            );
-    }
-
-    @Test
-    @DisplayName("addRoleToUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
-    void addRoleToUser_UserIdOrRoleNotValid_ReturnsErrorDetails() throws Exception {
-        User admin = userService.getUserByEmail(adminEmail);
-        String accessToken = jwtService.createToken(admin, ACCESS_TOKEN);
-        var userRolesUpdate = new UserRolesUpdateDTO(-1L, "");
-
-        List<String> expectedErrorMessages = List.of(
-            ValidationMessages.formatMessage(NOT_VALID, "id"),
-            ValidationMessages.formatMessage(MUST_BE_PROVIDED, "role")
-        );
-
-        String responseBody = mockMvc.perform(patch("/users/admin/role-assignment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-                .content(objectMapper.writeValueAsString(userRolesUpdate))
-            )
-            .andExpectAll(
-                status().isBadRequest(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
-            )
-            .andReturn().getResponse().getContentAsString();
-
-        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
-        assertNotNull(errorDetails.getTimestamp());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
-        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
-        assertTrue(errorDetails.getMessages().containsAll(expectedErrorMessages));
-    }
-
-    @Test
-    @DisplayName("addRoleToUser(): " + STATUS_200_ADDS_ROLE_TO_USER_WHEN_AUTHENTICATED_USER_ADMIN)
-    void addRoleToUser_AuthenticatedUserAdmin_AddsRoleToUser() throws Exception {
-        User admin = userService.getUserByEmail(adminEmail);
-        String accessToken = jwtService.createToken(admin, ACCESS_TOKEN);
-
-        User newUser = userService.createUser(userCreationDTO);
-        UserRolesUpdateDTO userRolesUpdateDTO = new UserRolesUpdateDTO(newUser.getId(), ROLE_ADMIN.name());
-
-        mockMvc.perform(patch("/users/admin/role-assignment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-                .content(objectMapper.writeValueAsString(userRolesUpdateDTO))
-            )
-            .andExpect(status().isNoContent());
-
-        User updatedUser = userService.getUserById(newUser.getId());
-        Role adminRole = roleService.getRole(ROLE_ADMIN);
-        assertTrue(updatedUser.getRoles().contains(adminRole));
-    }
-
-    @Test
-    @DisplayName("removeRoleFromUser(): " + STATUS_403_RETURNS_FORBIDDEN_WHEN_AUTHENTICATED_USER_NOT_ADMIN)
-    void removeRoleFromUser_PrincipalNotAdmin_ReturnsForbidden() throws Exception {
-        User newUser = userService.createUser(userCreationDTO);
-        String accessToken = jwtService.createToken(newUser, ACCESS_TOKEN);
-
-        User admin = userService.getUserByEmail(adminEmail);
-        var userRolesUpdateDTO = new UserRolesUpdateDTO(admin.getId(), ROLE_ADMIN.name());
-
-        mockMvc.perform(patch("/users/admin/role-unassignment")
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRolesUpdateDTO))
-            )
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("removeRoleFromUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
-    void removeRoleFromUser_UserIdOrRoleNotValid_ReturnsErrorDetails() throws Exception {
-        User admin = userService.getUserByEmail(adminEmail);
-        String accessToken = jwtService.createToken(admin, ACCESS_TOKEN);
-        var userRolesUpdateDTO = new UserRolesUpdateDTO(-1L, "");
-
-        List<String> expectedErrorMessages = List.of(
-            ValidationMessages.formatMessage(NOT_VALID, "id"),
-            ValidationMessages.formatMessage(MUST_BE_PROVIDED, "role")
-        );
-
-        String responseBody = mockMvc.perform(patch("/users/admin/role-unassignment")
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRolesUpdateDTO))
-            )
-            .andExpectAll(
-                status().isBadRequest(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
-            )
-            .andReturn().getResponse().getContentAsString();
-
-        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
-        assertNotNull(errorDetails.getTimestamp());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
-        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
-        assertTrue(errorDetails.getMessages().containsAll(expectedErrorMessages));
-    }
-
-    @Test
-    @DisplayName("removeRoleFromUser(): " + STATUS_204_REMOVES_ROLE_FROM_USER_WHEN_AUTHENTICATED_USER_ADMIN)
-    void removeRoleFromUser_AuthenticatedUserAdmin_RemovesRoleFromUser() throws Exception {
-        User admin = userService.getUserByEmail(adminEmail);
-        String accessToken = jwtService.createToken(admin, ACCESS_TOKEN);
-        var userRolesUpdateDTO = new UserRolesUpdateDTO(admin.getId(), ROLE_ADMIN.name());
-
-        mockMvc.perform(patch("/users/admin/role-unassignment")
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRolesUpdateDTO))
-            )
-            .andExpect(status().isNoContent());
-
-        User updatedAdmin = userService.getUserByEmail(adminEmail);
-        Role adminRole = roleService.getRole(ROLE_ADMIN);
-        assertFalse(updatedAdmin.getRoles().contains(adminRole));
-    }
-
-    @Test
     @DisplayName("verifyEmailRequest() : " + STATUS_200_SENDS_EMAIL_VERIFICATION_MESSAGE_WHEN_EMAIL_VALID)
     void verifyEmailRequest_EmailValid_SendsEmailVerificationMessage() throws Exception {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
 
-        mockMvc.perform(post("/users/current/email/verification")
+        mockMvc.perform(post("/users/" + user.getId() + "/email/verify")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpect(status().isOk());

@@ -2,7 +2,6 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
-import dev.naiarievilo.todoapp.roles.exceptions.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
@@ -21,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
-import static dev.naiarievilo.todoapp.roles.Roles.ROLE_ADMIN;
 import static dev.naiarievilo.todoapp.roles.Roles.ROLE_USER;
 import static dev.naiarievilo.todoapp.users.UserService.EMAIL_CONFIRMATION_PERIOD;
 import static dev.naiarievilo.todoapp.users.UserServiceTestCases.*;
@@ -59,11 +57,6 @@ class UserServiceTest {
         userRole.setId(1L);
         userRole.setName(ROLE_USER.name());
         userRole.setDescription(ROLE_USER.description());
-
-        adminRole = new Role();
-        adminRole.setId(2L);
-        adminRole.setName(ROLE_ADMIN.name());
-        adminRole.setDescription(ROLE_ADMIN.description());
 
         user = new User();
         user.setId(1L);
@@ -328,55 +321,6 @@ class UserServiceTest {
         verify(passwordEncoder).matches(PASSWORD_1, currentPassword);
         verify(passwordEncoder).encode(NEW_PASSWORD);
         verify(userRepository).update(user);
-    }
-
-    @Test
-    @DisplayName("addRoleToUser(): " + DOES_NOT_ADD_ROLE_WHEN_ROLE_ALREADY_ASSIGNED)
-    void addRoleToUser_UserAlreadyHasRole_DoesNotAddRole() {
-        userService.addRoleToUser(user, ROLE_USER);
-        verifyNoInteractions(roleService);
-        verifyNoInteractions(userRepository);
-    }
-
-    @Test
-    @DisplayName("addRoleToUser(): " + ADDS_ROLE_TO_USER_WHEN_ROLE_NOT_ASSIGNED)
-    void addRoleToUser_UserDoesNotHaveRole_AddsRoleToUser() {
-        given(roleService.getRole(ROLE_ADMIN)).willReturn(adminRole);
-
-        User updatedUser = userService.addRoleToUser(user, ROLE_ADMIN);
-        assertTrue(updatedUser.getRoles().contains(adminRole));
-        verify(roleService).getRole(ROLE_ADMIN);
-        verify(userRepository).update(userCaptor.capture());
-        assertTrue(userCaptor.getValue().getRoles().contains(adminRole));
-    }
-
-    @Test
-    @DisplayName("removeRoleFromUser(): " + DOES_NOT_REMOVE_ROLE_WHEN_ROLE_NOT_ASSIGNED)
-    void removeRoleFromUser_UserDoesNotHaveRole_DoesNotRemoveRole() {
-        userService.removeRoleFromUser(user, ROLE_ADMIN);
-        verifyNoInteractions(userRepository);
-        verifyNoInteractions(roleService);
-    }
-
-    @Test
-    @DisplayName("removeRoleFromUser(): " + THROWS_USER_ROLE_REMOVAL_PROHIBITED_WHEN_REMOVING_USER_ROLE)
-    void removeRoleFromUser_RoleToRemoveIsUserRole_ThrowsUserRoleRemovalProhibitedException() {
-        assertThrows(UserRoleRemovalProhibitedException.class, () -> userService.removeRoleFromUser(user, ROLE_USER));
-        verifyNoInteractions(userRepository);
-        verifyNoInteractions(roleService);
-    }
-
-    @Test
-    @DisplayName("removeRoleFromUser(): " + REMOVES_ROLE_WHEN_ROLE_ASSIGNED_AND_REMOVABLE)
-    void removeRoleFromUser_RoleIsAssignedAndRemovable_RemovesRole() {
-        user.addRole(adminRole);
-        given(roleService.getRole(ROLE_ADMIN)).willReturn(adminRole);
-
-        User updatedUser = userService.removeRoleFromUser(user, ROLE_ADMIN);
-        assertFalse(updatedUser.getRoles().contains(adminRole));
-        verify(roleService).getRole(ROLE_ADMIN);
-        verify(userRepository).update(userCaptor.capture());
-        assertFalse(userCaptor.getValue().getRoles().contains(adminRole));
     }
 
     @Test

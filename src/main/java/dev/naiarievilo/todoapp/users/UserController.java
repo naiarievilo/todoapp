@@ -2,15 +2,14 @@ package dev.naiarievilo.todoapp.users;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import dev.naiarievilo.todoapp.mailing.EmailService;
-import dev.naiarievilo.todoapp.roles.Roles;
 import dev.naiarievilo.todoapp.security.AuthenticatedUser;
 import dev.naiarievilo.todoapp.security.EmailPasswordAuthenticationToken;
 import dev.naiarievilo.todoapp.security.UserAuthenticationToken;
 import dev.naiarievilo.todoapp.security.jwt.JwtService;
+import dev.naiarievilo.todoapp.security.jwt.TokensDTO;
 import dev.naiarievilo.todoapp.users.dtos.CredentialsUpdateDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.dtos.UserDTO;
-import dev.naiarievilo.todoapp.users.dtos.UserRolesUpdateDTO;
 import dev.naiarievilo.todoapp.users.dtos.groups.*;
 import dev.naiarievilo.todoapp.validation.NotBlank;
 import jakarta.validation.Valid;
@@ -18,7 +17,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -119,76 +117,55 @@ public class UserController {
         }
     }
 
-    @PostMapping("/current/re-authentication")
-    public ResponseEntity<Void> getNewAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String refreshToken) {
-        String newAccessToken = jwtService.createAccessToken(refreshToken);
+    @PostMapping("/re-authentication")
+    public ResponseEntity<Void> getNewAccessToken(@RequestBody TokensDTO tokensDTO) {
+        String newAccessToken = jwtService.createAccessToken(tokensDTO.accessToken(), tokensDTO.refreshToken());
         return ResponseEntity
             .status(HttpStatus.OK)
             .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + newAccessToken)
             .build();
     }
 
-    @DeleteMapping("/current")
+    @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@AuthenticatedUser User user) {
-        userService.deleteUser(user.getId());
+    public void deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
     }
 
-    @PatchMapping("/current/email")
+    @PatchMapping("/{userId}/email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateEmail(
+        @PathVariable Long userId,
         @AuthenticatedUser User user,
         @RequestBody @Validated(EmailUpdate.class) CredentialsUpdateDTO newCredentials
     ) {
         userService.updateEmail(user, newCredentials.newEmail());
     }
 
-    @PostMapping("/current/email/verification")
+    @PostMapping("/{userId}/email/verify")
     @ResponseStatus(HttpStatus.OK)
-    public void verifyEmailRequest(@AuthenticatedUser User user) throws MailException {
+    public void verifyEmailRequest(@PathVariable Long userId, @AuthenticatedUser User user) throws MailException {
         emailService.sendEmailVerificationMessage(user);
     }
 
-    @PatchMapping("/current/password")
+    @PatchMapping("/{userId}/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePassword(
+        @PathVariable Long userId,
         @AuthenticatedUser User user,
         @RequestBody @Validated(PasswordUpdate.class) CredentialsUpdateDTO newCredentials
     ) {
         userService.updatePassword(user, newCredentials.currentPassword(), newCredentials.newPassword());
     }
 
-    @PatchMapping("/current/credentials")
+    @PatchMapping("/{userId}/credentials")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCredentials(
+        @PathVariable Long userId,
         @AuthenticatedUser User user,
         @RequestBody @Validated(CredentialsUpdate.class) CredentialsUpdateDTO newCredentials
     ) {
         userService.updateEmail(user, newCredentials.newEmail());
         userService.updatePassword(user, newCredentials.currentPassword(), newCredentials.newPassword());
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/admin/role-assignment")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addRoleToUser(@RequestBody @Valid UserRolesUpdateDTO userRolesUpdateDTO) {
-        User targetUser = userService.getUserById(userRolesUpdateDTO.id());
-        userService.addRoleToUser(targetUser, Roles.getRole(userRolesUpdateDTO.role()));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/admin/role-unassignment")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeRoleFromUser(@RequestBody @Valid UserRolesUpdateDTO userRolesUpdateDTO) {
-        User targetUser = userService.getUserById(userRolesUpdateDTO.id());
-        userService.removeRoleFromUser(targetUser, Roles.getRole(userRolesUpdateDTO.role()));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/admin/user-deletion")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@RequestBody @Validated(UserDeletion.class) UserDTO userDTO) {
-        User targetUser = userService.getUserById(userDTO.id());
-        userService.deleteUser(targetUser.getId());
     }
 }

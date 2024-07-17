@@ -1,19 +1,47 @@
+admin:
+  email: ${ADMIN_EMAIL}
+  password: ${ADMIN_PASSWORD}
+
+client:
+  uri:
+    unlock-user: ${UNLOCK_USER_URI}
+
+jwt:
+  secret: ${JWT_SECRET}
+
+server:
+  address: ${SERVER_ADDRESS}
+  port: ${SERVER_PORT}
+  ssl:
+    enabled: true
+
 logging:
   level:
     org:
       springframework:
-        boot: "INFO"
-        web: "INFO"
+        boot: "WARN"
+        web: "WARN"
         security:
           web:
-            FilterChainProxy: "INFO"
+            FilterChainProxy: "WARN"
 
 spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  docker:
+    compose:
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: "update"
     show-sql: false
   mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${APP_EMAIL}
+    password: ${APP_EMAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -21,3 +49,16 @@ spring:
           starttls:
             enable: true
             required: true
+  ssl:
+    bundle:
+      jks:
+        app-bundle:
+          key:
+            alias: ${spring.application.name}
+          keystore:
+            location: ${KEYSTORE_LOCATION}
+            password: ${KEYSTORE_PASSWORD}
+            type: ${KEYSTORE_TYPE}
+          truststore:
+            location: ${TRUSTSTORE_LOCATION}
+            password: ${TRUSTSTORE_TYPE}

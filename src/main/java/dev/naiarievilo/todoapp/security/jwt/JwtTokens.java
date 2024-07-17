@@ -6,7 +6,7 @@ import static dev.naiarievilo.todoapp.security.jwt.TokenTypes.*;
 
 public enum JwtTokens {
     ACCESS_TOKEN("accessToken", 1800000, USER_ACCESS),
-    REFRESH_TOKEN("refreshToken", 604800000, USER_ACCESS),
+    REFRESH_TOKEN("refreshToken", 604800000, REFRESH_ACCESS),
     VERIFICATION_TOKEN("emailVerificationToken", 900000, USER_VERIFICATION),
     UNLOCK_TOKEN("unlockUserToken", 900000, USER_UNLOCKING),
     ENABLE_TOKEN("enableUserToken", 900000, USER_ENABLING);

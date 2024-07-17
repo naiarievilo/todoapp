@@ -10,7 +10,6 @@ import java.util.List;
 import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_BLANK;
 
 public enum Roles {
-    ROLE_ADMIN("Superuser role"),
     ROLE_USER("Default account role");
 
     static final List<Roles> rolesList = Arrays.stream(Roles.values()).toList();
@@ -60,5 +59,10 @@ public enum Roles {
 
     public String description() {
         return description;
+    }
+
+    @Override
+    public String toString() {
+        return this.name().replace("ROLE_", "");
     }
 }

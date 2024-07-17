@@ -2,8 +2,6 @@ package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.roles.Role;
 import dev.naiarievilo.todoapp.roles.RoleService;
-import dev.naiarievilo.todoapp.roles.Roles;
-import dev.naiarievilo.todoapp.roles.exceptions.UserRoleRemovalProhibitedException;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
@@ -110,7 +108,6 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long id) {
-        // Entity must be managed to disassociate a user from their assigned roles.
         User user = getUserByIdEagerly(id);
         user.removeAllRoles();
         userInfoService.deleteUserInfo(user.getId());
@@ -143,46 +140,6 @@ public class UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.update(user);
-        return user;
-    }
-
-    @Transactional
-    public User addRoleToUser(User user, Roles role) {
-        Set<Role> userAssignedRoles = user.getRoles();
-        for (Role currentRole : userAssignedRoles) {
-            if (currentRole.getName().equals(role.name())) {
-                return user;
-            }
-        }
-
-        Role roleToAdd = roleService.getRole(role);
-        user.addRole(roleToAdd);
-        userRepository.update(user);
-        return user;
-    }
-
-    @Transactional
-    public User removeRoleFromUser(User user, Roles role) {
-        if (role.name().equals(ROLE_USER.name())) {
-            throw new UserRoleRemovalProhibitedException();
-        }
-
-        Set<Role> userAssignedRoles = user.getRoles();
-        boolean roleIsAssigned = false;
-        for (Role currentRole : userAssignedRoles) {
-            if (currentRole.getName().equals(role.name())) {
-                roleIsAssigned = true;
-                break;
-            }
-        }
-
-        if (!roleIsAssigned) {
-            return user;
-        }
-
-        Role roleToRemove = roleService.getRole(role);
-        user.removeRole(roleToRemove);
         userRepository.update(user);
         return user;
     }

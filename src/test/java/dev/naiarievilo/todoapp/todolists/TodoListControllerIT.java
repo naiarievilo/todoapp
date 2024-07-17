@@ -80,7 +80,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     @Test
     @DisplayName("getInboxList(): " + STATUS_200_RETURNS_INBOX_LIST_WHEN_USER_AUTHENTICATED)
     void getInboxList_UserAuthenticated_ReturnsUserInboxList() throws Exception {
-        String responseBody = mockMvc.perform(get("/users/current/todolists/inbox")
+        String responseBody = mockMvc.perform(get("/users/" + user.getId() + "/todolists/inbox")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpectAll(
@@ -97,7 +97,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     @Test
     @DisplayName("getTodayList(): " + STATUS_200_RETURNS_TODAY_LIST_WHEN_USER_AUTHENTICATED)
     void getTodayList_UserAuthenticated_ReturnsUserTodayList() throws Exception {
-        String responseBody = mockMvc.perform(get("/users/current/todolists/today")
+        String responseBody = mockMvc.perform(get("/users/" + user.getId() + "/todolists/today")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpectAll(
@@ -116,7 +116,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     @Test
     @DisplayName("getWeekLists(): " + STATUS_200_RETURNS_WEEK_LISTS_WHEN_USER_AUTHENTICATED)
     void getWeekLists_UserAuthenticated_ReturnsUserWeekLists() throws Exception {
-        String responseBody = mockMvc.perform(get("/users/current/todolists/week")
+        String responseBody = mockMvc.perform(get("/users/" + user.getId() + "/todolists/week")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpectAll(
@@ -142,7 +142,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
         listService.createList(user, listDTO, CUSTOM);
         listService.createList(user, otherListDTO, CUSTOM);
 
-        String responseBody = mockMvc.perform(get("/users/current/todolists/custom")
+        String responseBody = mockMvc.perform(get("/users/" + user.getId() + "/todolists/custom")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpectAll(
@@ -162,7 +162,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     @Test
     @DisplayName("createList(): " + STATUS_200_CREATES_LIST_WHEN_USER_AUTHENTICATED)
     void createList_UserAuthenticated_CreatesList() throws Exception {
-        String responseBody = mockMvc.perform(post("/users/current/todolists")
+        String responseBody = mockMvc.perform(post("/users/" + user.getId() + "/todolists")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(listDTO))
@@ -187,7 +187,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
         TodoListDTO fakeListDTO = new TodoListDTO(fakeListId, LIST_TITLE_1, CUSTOM, null, null, null);
         var exception = new TodoListNotFoundException(fakeListId);
 
-        String responseBody = mockMvc.perform(put("/users/current/todolists/" + fakeListId)
+        String responseBody = mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + fakeListId)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(fakeListDTO))
@@ -216,7 +216,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
 
         var exception = new UnauthorizedDataAccessException();
 
-        String responseBody = mockMvc.perform(put("/users/current/todolists/" + otherList.getId())
+        String responseBody = mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + otherList.getId())
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedOtherList))
@@ -241,7 +241,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
         TodoListDTO updatedListDTO =
             new TodoListDTO(list.getId(), LIST_TITLE_2, list.getType(), list.getCreatedAt(), list.getDueDate(), null);
 
-        mockMvc.perform(put("/users/current/todolists/" + list.getId())
+        mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + list.getId())
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedListDTO))
@@ -256,7 +256,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     void deleteList_UserHasListAccess_DeleteList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
 
-        mockMvc.perform(delete("/users/current/todolists/" + list.getId())
+        mockMvc.perform(delete("/users/" + user.getId() + "/todolists/" + list.getId())
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpect(status().isNoContent());
@@ -269,7 +269,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
 
         TodoDTO newTodo = TodosTestHelper.newTodoDTO_1();
 
-        String responseBody = mockMvc.perform(post("/users/current/todolists/" + list.getId() + "/todos")
+        String responseBody = mockMvc.perform(post("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newTodo))
@@ -296,7 +296,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
         TodoDTO updatedTodo = new TodoDTO(todo.getId(), TODO_TASK_2, todo.isCompleted(), todo.getPosition(),
             todo.getCreatedAt(), todo.getDueDate());
 
-        mockMvc.perform(put("/users/current/todolists/" + list.getId() + "/todos/" + todo.getId())
+        mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos/" + todo.getId())
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedTodo))
@@ -313,7 +313,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
         TodoDTO newTodo = TodosTestHelper.newTodoDTO_1();
         Todo todo = todoService.createTodo(newTodo, list);
 
-        mockMvc.perform(delete("/users/current/todolists/" + list.getId() + "/todos/" + todo.getId())
+        mockMvc.perform(delete("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos/" + todo.getId())
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpect(status().isNoContent());

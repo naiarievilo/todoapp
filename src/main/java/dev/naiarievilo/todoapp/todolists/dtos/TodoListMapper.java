@@ -22,6 +22,7 @@ public interface TodoListMapper {
     Set<TodoListDTO> toSetDTO(Set<TodoList> lists);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "type", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "todos", ignore = true)

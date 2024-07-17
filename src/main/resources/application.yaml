@@ -1,27 +1,44 @@
 admin:
   email: "admin@example.com"
-  password: "secretPassword1234!?"
+  password: "adminPassword"
+
+client:
+  uri:
+    unlock-user: "http://localhost:3000/unlock-user"
+
 jwt:
-  secret: "ultraSecret"
+  secret: "secret"
+
 logging:
   level:
     org:
       springframework:
-        boot: "DEBUG"
-        web: "DEBUG"
+        boot: "WARN"
+        web: "WARN"
         security:
           web:
-            FilterChainProxy: "DEBUG"
+            FilterChainProxy: "WARN"
+
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  endpoint:
+    health:
+      show-details: "always"
+    beans:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
 server:
-  address: "0.0.0.0"
+  address: "localhost"
   port: 8080
   ssl:
     enabled: false
+
 spring:
   application:
     name: "Todoapp"
@@ -59,8 +76,6 @@ spring:
   sql:
     init:
       mode: "never"
-client:
-  uri:
-    unlock-user: "http://localhost:3000/unlock-user"
+
 tasks:
-  weekly: "* * * */7 * ?"
+  weekly: "0 0 0 */7 * ?"

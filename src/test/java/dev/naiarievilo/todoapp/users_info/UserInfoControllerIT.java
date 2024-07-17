@@ -62,7 +62,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
         userInfoService.deleteUserInfo(user.getId());
         exception = new UserInfoNotFoundException(user.getId());
 
-        String responseBody = mockMvc.perform(get("/users/current/info")
+        String responseBody = mockMvc.perform(get("/users/" + user.getId() + "/info")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpectAll(
@@ -85,7 +85,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
         userInfo = userInfoService.getUserInfoById(user.getId());
         String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
 
-        String responseBody = mockMvc.perform(get("/users/current/info")
+        String responseBody = mockMvc.perform(get("/users/" + user.getId() + "/info")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpectAll(
@@ -109,7 +109,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
         userInfoService.deleteUserInfo(user.getId());
         exception = new UserInfoNotFoundException(user.getId());
 
-        String responseBody = mockMvc.perform(patch("/users/current/info")
+        String responseBody = mockMvc.perform(patch("/users/" + user.getId() + "/info")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userInfoDTO))
@@ -134,7 +134,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
         userInfo = userInfoService.getUserInfoById(user.getId());
         String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
 
-        mockMvc.perform(patch("/users/current/info")
+        mockMvc.perform(patch("/users/" + user.getId() + "/info")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .content(objectMapper.writeValueAsString(userInfoDTO))

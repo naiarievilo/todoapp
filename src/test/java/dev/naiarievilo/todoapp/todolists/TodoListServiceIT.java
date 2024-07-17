@@ -22,7 +22,6 @@ import java.util.Set;
 import static dev.naiarievilo.todoapp.todolists.ListTypes.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListServiceTestCases.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListsTestHelper.*;
-import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_POSITION_2;
 import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_TASK_2;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.EMAIL_1;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.PASSWORD_1;
@@ -183,9 +182,13 @@ class TodoListServiceIT extends ServiceIntegrationTests {
         Todo persistedTodo = TodosTestHelper.newTodo_1();
         list.addTodo(persistedTodo);
         listRepository.persist(list);
-        TodoDTO updatedTodoDTO = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_2, null, null);
-        TodoListDTO updatedListDTO =
-            new TodoListDTO(list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), Set.of(updatedTodoDTO));
+
+        TodoDTO updatedTodoDTO = new TodoDTO(
+            persistedTodo.getId(), TODO_TASK_2, true, persistedTodo.getPosition(), null, null
+        );
+        TodoListDTO updatedListDTO = new TodoListDTO(
+            list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), Set.of(updatedTodoDTO)
+        );
 
         Long userId = user.getId();
         Long listId = list.getId();

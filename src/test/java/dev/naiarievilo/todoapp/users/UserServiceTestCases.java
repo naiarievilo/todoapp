@@ -4,8 +4,6 @@ class UserServiceTestCases {
 
     static final String ADDS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL =
         "adds login attempt when user is not null";
-    static final String ADDS_ROLE_TO_USER_WHEN_ROLE_NOT_ASSIGNED =
-        "adds role to user when role is not assigned";
     static final String AUTHENTICATES_USER_WHEN_USER_NOT_AUTHENTICATED =
         "authenticates user when user is not authenticated";
     static final String CREATES_USER_WHEN_USER_DOES_NOT_EXIST =
@@ -14,8 +12,6 @@ class UserServiceTestCases {
         "deletes `User` when user exists";
     static final String DISABLES_USER_WHEN_USER_ENABLED =
         "disables user when user is enabled";
-    static final String DOES_NOT_ADD_ROLE_WHEN_ROLE_ALREADY_ASSIGNED =
-        "doesn't add role to user when role is already assigned";
     static final String DOES_NOT_AUTHENTICATE_USER_WHEN_USER_ALREADY_AUTHENTICATED =
         "does not authenticate user when user is already authenticated";
     static final String DOES_NOT_DISABLE_USER_WHEN_USER_ALREADY_DISABLED =
@@ -24,8 +20,6 @@ class UserServiceTestCases {
         "does not enable user when user is already enabled";
     static final String DOES_NOT_LOCK_USER_WHEN_USER_ALREADY_LOCKED =
         "does not lock user when user is already locked";
-    static final String DOES_NOT_REMOVE_ROLE_WHEN_ROLE_NOT_ASSIGNED =
-        "does not remove role from user when role is not assigned";
     static final String DOES_NOT_UNLOCK_USER_WHEN_USER_ALREADY_UNLOCKED =
         "does not unlock user when user is already unlocked";
     static final String DOES_NOT_UPDATE_EMAIL_WHEN_NEW_EMAIL_NOT_NEW =
@@ -36,8 +30,6 @@ class UserServiceTestCases {
         "enables user when user is disabled";
     static final String LOCKS_USER_WHEN_USER_NOT_LOCKED =
         "locks user when user is not locked";
-    static final String REMOVES_ROLE_WHEN_ROLE_ASSIGNED_AND_REMOVABLE =
-        "removes role from user when role is assigned and removable";
     static final String RESETS_LOGIN_ATTEMPT_WHEN_USER_NOT_NULL =
         "resets login attempt when user is not null";
     static final String RETURNS_FALSE_WHEN_USER_DOES_NOT_EXIST =
@@ -54,8 +46,6 @@ class UserServiceTestCases {
         "throws `UserAlreadyExistsException` when user already exists";
     static final String THROWS_USER_NOT_FOUND_WHEN_USER_DOES_NOT_EXIST =
         "throws `UserNotFoundException` when user does not exist";
-    static final String THROWS_USER_ROLE_REMOVAL_PROHIBITED_WHEN_REMOVING_USER_ROLE =
-        "throws `UserRoleRemovalProhibitedException` when removing `ROLE_USER`";
     static final String UNLOCKS_USER_WHEN_USER_LOCKED =
         "unlocks user when user is locked";
     static final String UPDATES_EMAIL_WHEN_NEW_EMAIL_NOT_REGISTERED =

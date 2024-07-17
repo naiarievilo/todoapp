@@ -5,9 +5,9 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import dev.naiarievilo.todoapp.users.User;
-import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.*;
+import static dev.naiarievilo.todoapp.security.jwt.TokenTypes.REFRESH_ACCESS;
 import static dev.naiarievilo.todoapp.security.jwt.TokenTypes.USER_ACCESS;
-import static dev.naiarievilo.todoapp.validation.ValidationMessages.IS_BLANK;
 
 @Service
 public class JwtService {
 
+    public static final String NEW_ACCESS_TOKEN_CREATION_FAILED =
+        "New access tokens should only be issued when the provided access token has expired";
     public static final String TYPE_CLAIM = "type";
 
     private final Algorithm algorithm;
@@ -40,26 +42,30 @@ public class JwtService {
             .build();
     }
 
-    public String createAccessToken(String refreshToken) {
-        Validate.notBlank(refreshToken, IS_BLANK, "refreshToken");
-        refreshToken = refreshToken.replace(BEARER_PREFIX, "");
-        DecodedJWT decodedJwt = this.verifyToken(refreshToken, USER_ACCESS);
+    public String createAccessToken(String expiredAccessToken, String refreshToken) {
+        expiredAccessToken = expiredAccessToken.replace(BEARER_PREFIX, "");
+        try {
+            this.verifyToken(expiredAccessToken, USER_ACCESS);
+        } catch (TokenExpiredException e) {
+            refreshToken = refreshToken.replace(BEARER_PREFIX, "");
+            DecodedJWT decodedJwt = this.verifyToken(refreshToken, REFRESH_ACCESS);
+            String userId = decodedJwt.getSubject();
+            Instant now = Instant.now();
 
-        String userId = decodedJwt.getSubject();
-        Instant now = Instant.now();
-        JWTCreator.Builder jwtBuilder = JWT.create()
-            .withSubject(userId)
-            .withIssuer(issuer)
-            .withIssuedAt(now)
-            .withClaim(TYPE_CLAIM, ACCESS_TOKEN.type())
-            .withExpiresAt(now.plusMillis(ACCESS_TOKEN.expirationInMillis()));
+            JWTCreator.Builder jwtBuilder = JWT.create()
+                .withSubject(userId)
+                .withIssuer(issuer)
+                .withIssuedAt(now)
+                .withClaim(TYPE_CLAIM, ACCESS_TOKEN.type())
+                .withExpiresAt(now.plusMillis(ACCESS_TOKEN.expirationInMillis()));
 
-        return jwtBuilder.sign(algorithm);
+            return jwtBuilder.sign(algorithm);
+        }
+
+        throw new AccessTokenCreationFailedException(NEW_ACCESS_TOKEN_CREATION_FAILED);
     }
 
     public DecodedJWT verifyToken(String token, TokenTypes tokenType) {
-        Validate.notBlank(token, IS_BLANK, "token");
-
         DecodedJWT verifiedJWT = jwtVerifier.verify(token);
         int typeClaim = verifiedJWT.getClaim(TYPE_CLAIM).asInt();
         if (typeClaim != tokenType.value()) {

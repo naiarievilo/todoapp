@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.users;
 
 import dev.naiarievilo.todoapp.security.ErrorDetails;
+import dev.naiarievilo.todoapp.security.jwt.AccessTokenCreationFailedException;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
@@ -36,5 +37,9 @@ public class UserControllerAdvice {
         return new ErrorDetails(HttpStatus.INTERNAL_SERVER_ERROR, "Couldn't send email verification message");
     }
 
-
+    @ExceptionHandler(AccessTokenCreationFailedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorDetails handleAccessTokenCreationFailedException(AccessTokenCreationFailedException e) {
+        return new ErrorDetails(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
 }
