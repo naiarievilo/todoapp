@@ -53,9 +53,11 @@ public class EmailService {
     }
 
     public void sendEmailVerificationMessage(User user) throws MailException {
-        UserInfo userInfo = userInfoService.getUserInfoById(user.getId());
+        Long userId = user.getId();
+        UserInfo userInfo = userInfoService.getUserInfoById(userId);
+
         String emailVerificationToken = jwtService.createToken(user, VERIFICATION_TOKEN);
-        String emailVerificationUri = baseUri + "/users/verify?token=" + emailVerificationToken;
+        String emailVerificationUri = baseUri + String.format("/users/%d/verify=%s", userId, emailVerificationToken);
 
         Map<String, Object> templateModel = new HashMap<>();
         templateModel.put(APP_NAME_KEY, appName);
@@ -77,9 +79,11 @@ public class EmailService {
     }
 
     public void sendUnlockUserMessage(User user) throws MailException {
-        UserInfo userInfo = userInfoService.getUserInfoById(user.getId());
+        Long userId = user.getId();
+        UserInfo userInfo = userInfoService.getUserInfoById(userId);
+
         String unlockUserToken = jwtService.createToken(user, UNLOCK_TOKEN);
-        String unlockUserUri = baseUri + "/users/unlock?token=" + unlockUserToken;
+        String unlockUserUri = baseUri + String.format("/users/%d/unlock?token=%s", userId, unlockUserToken);
 
         Map<String, Object> templateModel = new HashMap<>();
         templateModel.put(APP_NAME_KEY, appName);
@@ -121,9 +125,11 @@ public class EmailService {
     }
 
     public void sendEnableUserMessage(User user) throws MailException {
+        Long userId = user.getId();
         UserInfo userInfo = userInfoService.getUserInfoById(user.getId());
+
         String enableUserToken = jwtService.createToken(user, ENABLE_TOKEN);
-        String enableUserUri = baseUri + "/users/enable?token=" + enableUserToken;
+        String enableUserUri = baseUri + String.format("/users/%d/enable?token=%s", userId, enableUserToken);
 
         Map<String, Object> templateModel = new HashMap<>();
         templateModel.put(APP_NAME_KEY, appName);

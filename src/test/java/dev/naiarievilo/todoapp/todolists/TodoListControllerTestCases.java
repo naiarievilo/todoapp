@@ -16,16 +16,24 @@ public class TodoListControllerTestCases {
         OK + "Returns week lists when user is authenticated";
     public static final String STATUS_201_ADDS_TODO_TO_LIST_WHEN_USER_HAS_LIST_ACCESS =
         CREATED + "Adds todo to list when user has access to list";
+    public static final String STATUS_204_DELETES_ALL_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
+        NO_CONTENT + "Deletes all todos from list when user has list access";
     public static final String STATUS_204_DELETES_LIST_WHEN_USER_HAS_LIST_ACCESS =
         NO_CONTENT + "Deletes list when user has access to list";
+    public static final String STATUS_204_DELETES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
+        NO_CONTENT + "Deletes todos from list when user has list access";
     public static final String STATUS_204_DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
         NO_CONTENT + "Deletes todo from list when user has access to list";
     public static final String STATUS_204_UPDATES_LIST_WHEN_USER_HAS_LIST_ACCESS =
         NO_CONTENT + "Updates list when user has access to list";
+    public static final String STATUS_204_UPDATES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
+        NO_CONTENT + "Updates todos from list when user has list access";
     public static final String STATUS_204_UPDATES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
         NO_CONTENT + "Updates todo from list when user has access to list";
     public static final String STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_LIST_NOT_FOUND =
         NOT_FOUND + RETURNS_ERROR_MESSAGES_WHEN + "list does not exist";
     public static final String STATUS_401_RETURNS_ERROR_MESSAGE_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS =
         UNAUTHORIZED + RETURNS_ERROR_MESSAGES_WHEN + "user does not have access to list";
+    public static final String STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_TODO_NOT_FOUND =
+        NOT_FOUND + RETURNS_ERROR_MESSAGES_WHEN + "todo does not exist";
 }

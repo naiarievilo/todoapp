@@ -45,7 +45,7 @@ public class UserController {
         this.emailService = emailService;
     }
 
-    @PostMapping("/creation")
+    @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
         User user = userService.createUser(userCreationDTO);
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
@@ -72,39 +72,41 @@ public class UserController {
             .body(new UserDTO(user.getId(), null, null, user.isVerified()));
     }
 
-    @GetMapping("/verify")
+    @GetMapping("/{userId}/verification")
     @ResponseStatus(HttpStatus.OK)
-    public void verifyEmail(@RequestParam("token") @NotBlank String emailVerificationToken) {
+    public void verifyEmail(@PathVariable Long userId, @RequestParam("token") @NotBlank String emailVerificationToken) {
         DecodedJWT verifiedJWT = jwtService.verifyToken(emailVerificationToken, USER_VERIFICATION);
-        Long userId = Long.valueOf(verifiedJWT.getSubject());
-        User user = userService.getUserById(userId);
+        Long tokenUserId = Long.valueOf(verifiedJWT.getSubject());
+        User user = userService.getUserById(tokenUserId);
         userService.verifyUser(user);
     }
 
-    @GetMapping("/unlock")
+    @GetMapping("/{userId}/unlock")
     @ResponseStatus(HttpStatus.OK)
-    public void unlockUser(@RequestParam("token") @NotBlank String unlockToken) {
+    public void unlockUser(@PathVariable Long userId, @RequestParam("token") @NotBlank String unlockToken) {
         DecodedJWT verifiedJWT = jwtService.verifyToken(unlockToken, USER_UNLOCKING);
-        Long userId = Long.valueOf(verifiedJWT.getSubject());
-        User user = userService.getUserById(userId);
+        Long tokenUserId = Long.valueOf(verifiedJWT.getSubject());
+        User user = userService.getUserById(tokenUserId);
         userService.unlockUser(user);
     }
 
     @PostMapping("/unlock")
     @ResponseStatus(HttpStatus.OK)
-    public void unlockUserRequest(@RequestBody @Validated(UserSecurity.class) UserDTO userDTO) {
+    public void unlockUserRequest(
+        @RequestBody @Validated(UserSecurity.class) UserDTO userDTO
+    ) {
         User user = userService.getUserByEmail(userDTO.email());
         if (user.isLocked()) {
             emailService.sendUnlockUserMessage(user);
         }
     }
 
-    @GetMapping("/enable")
+    @GetMapping("/{userId}/enable")
     @ResponseStatus(HttpStatus.OK)
-    public void enableUser(@RequestParam("token") @NotBlank String enableToken) {
+    public void enableUser(@PathVariable Long userId, @RequestParam("token") @NotBlank String enableToken) {
         DecodedJWT verifiedJWT = jwtService.verifyToken(enableToken, USER_ENABLING);
-        Long userId = Long.valueOf(verifiedJWT.getSubject());
-        User user = userService.getUserById(userId);
+        Long tokenUserId = Long.valueOf(verifiedJWT.getSubject());
+        User user = userService.getUserById(tokenUserId);
         userService.enableUser(user);
     }
 
@@ -117,8 +119,8 @@ public class UserController {
         }
     }
 
-    @PostMapping("/re-authentication")
-    public ResponseEntity<Void> getNewAccessToken(@RequestBody TokensDTO tokensDTO) {
+    @PostMapping("/{userId}/re-authentication")
+    public ResponseEntity<Void> getNewAccessToken(@PathVariable Long userId, @RequestBody TokensDTO tokensDTO) {
         String newAccessToken = jwtService.createAccessToken(tokensDTO.accessToken(), tokensDTO.refreshToken());
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -142,7 +144,7 @@ public class UserController {
         userService.updateEmail(user, newCredentials.newEmail());
     }
 
-    @PostMapping("/{userId}/email/verify")
+    @PostMapping("/{userId}/verification")
     @ResponseStatus(HttpStatus.OK)
     public void verifyEmailRequest(@PathVariable Long userId, @AuthenticatedUser User user) throws MailException {
         emailService.sendEmailVerificationMessage(user);

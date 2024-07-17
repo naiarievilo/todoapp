@@ -6,16 +6,6 @@
       "description": "Secret key to sign JWT."
     },
     {
-      "name": "admin.email",
-      "type": "java.lang.String",
-      "description": "Admin email to register admin in the application."
-    },
-    {
-      "name": "admin.password",
-      "type": "java.lang.String",
-      "description": "Admin password necessary for user registration."
-    },
-    {
       "name": "tasks.weekly",
       "type": "java.lang.String",
       "description": "Cron expression defining a 7-days interval."

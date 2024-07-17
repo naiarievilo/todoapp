@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -404,6 +405,25 @@ class TodoListServiceTest {
     }
 
     @Test
+    @DisplayName("updateTodosFromList(): " + UPDATES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    void updateTodosFromList_UserHasListAccess_UpdatesTodosFromList() {
+        Set<Todo> persistedTodos = TodosTestHelper.todoSet();
+        Set<TodoDTO> updatedTodosDTO = TodosTestHelper.todoDTOSet();
+        persistedList.setUser(user);
+        persistedList.setTodos(persistedTodos);
+
+        Long listId = persistedList.getId();
+        Long userId = user.getId();
+
+        given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
+
+        listService.updateTodosFromList(userId, listId, updatedTodosDTO);
+
+        verify(listRepository).findByIdEagerly(listId);
+        verify(todoService).updateTodos(persistedTodos, updatedTodosDTO, persistedList);
+    }
+
+    @Test
     @DisplayName("removeTodoFromList(): " + THROWS_TODO_NOT_FOUND_WHEN_TODO_NOT_IN_LIST)
     void removeTodoFromList_TodoDoesNotExist_ThrowsTodoNotFoundException() {
         Todo persistedTodo = TodosTestHelper.todo_1();
@@ -456,5 +476,48 @@ class TodoListServiceTest {
         listService.removeTodoFromList(userId, listId, todoId);
         verify(listRepository).findByIdEagerly(listId);
         verify(todoService).deleteTodo(persistedTodo, persistedList);
+    }
+
+    @Test
+    @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    void removeTodosFromList_UserHasListAccess_DeletesTodosFromList() {
+        Set<Todo> persistedTodos = TodosTestHelper.todoSet();
+        persistedList.setUser(user);
+        persistedList.setTodos(persistedTodos);
+
+        Set<Long> todosId = new HashSet<>();
+        for (Todo persistedTodo : persistedTodos) {
+            todosId.add(persistedTodo.getId());
+        }
+
+        Long userId = user.getId();
+        Long listId = persistedList.getId();
+
+        given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
+
+        listService.removeTodosFromList(userId, listId, todosId);
+        verify(listRepository).findByIdEagerly(listId);
+        for (Todo persistedTodo : persistedTodos) {
+            verify(todoService).deleteTodo(persistedTodo, persistedList);
+        }
+    }
+
+    @Test
+    @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    void removeTodosFromList_UserHasListAccess_DeletesAllTodosFromList() {
+        Set<Todo> persistedTodos = TodosTestHelper.todoSet();
+        persistedList.setUser(user);
+        persistedList.setTodos(persistedTodos);
+
+        Long userId = user.getId();
+        Long listId = persistedList.getId();
+
+        given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
+
+        listService.removeTodosFromList(userId, listId);
+        verify(listRepository).findByIdEagerly(listId);
+        for (Todo persistedTodo : persistedTodos) {
+            verify(todoService).deleteTodo(persistedTodo, persistedList);
+        }
     }
 }

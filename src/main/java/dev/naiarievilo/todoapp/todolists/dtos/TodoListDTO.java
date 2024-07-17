@@ -7,7 +7,7 @@ import dev.naiarievilo.todoapp.validation.NotBlank;
 import dev.naiarievilo.todoapp.validation.NotNull;
 import dev.naiarievilo.todoapp.validation.Positive;
 import dev.naiarievilo.todoapp.validation.groups.Creation;
-import dev.naiarievilo.todoapp.validation.groups.Update;
+import jakarta.validation.Valid;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
@@ -16,10 +16,10 @@ import java.util.Set;
 
 public record TodoListDTO(
 
-    @Positive(groups = Update.class)
+    @Positive
     Long id,
 
-    @NotBlank(groups = {Creation.class, Update.class})
+    @NotBlank(groups = Creation.class)
     String title,
 
     @NotNull
@@ -32,6 +32,7 @@ public record TodoListDTO(
     LocalDate dueDate,
 
     @Nullable
+    @Valid
     Set<TodoDTO> todos
 
 ) { }

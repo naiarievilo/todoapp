@@ -164,10 +164,34 @@ public class TodoListService {
     }
 
     @Transactional
+    public void updateTodosFromList(Long userId, Long listId, Set<TodoDTO> todosDTO) {
+        TodoList list = getListByIdEagerly(userId, listId);
+        todoService.updateTodos(list.getTodos(), todosDTO, list);
+    }
+
+    @Transactional
     public void removeTodoFromList(Long userId, Long listId, Long todoId) {
         TodoList list = getListByIdEagerly(userId, listId);
         Todo todo = getTodoFromList(todoId, list);
         todoService.deleteTodo(todo, list);
     }
 
+    @Transactional
+    public void removeTodosFromList(Long userId, Long listId, Set<Long> todosId) {
+        TodoList list = getListByIdEagerly(userId, listId);
+        for (Todo todo : new LinkedHashSet<>(list.getTodos())) {
+            Long todoId = todo.getId();
+            if (todosId.contains(todoId)) {
+                todoService.deleteTodo(todo, list);
+            }
+        }
+    }
+
+    @Transactional
+    public void removeTodosFromList(Long userId, Long listId) {
+        TodoList list = getListByIdEagerly(userId, listId);
+        for (Todo todo : new LinkedHashSet<>(list.getTodos())) {
+            todoService.deleteTodo(todo, list);
+        }
+    }
 }

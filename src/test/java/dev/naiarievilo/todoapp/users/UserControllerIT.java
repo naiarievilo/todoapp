@@ -91,7 +91,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         var invalidUserCreationDTO =
             new UserCreationDTO("notAValidEmail", PASSWORD_1, CONFIRM_PASSWORD_1, FIRST_NAME_1, LAST_NAME_1);
 
-        String responseBody = mockMvc.perform(post("/users/creation")
+        String responseBody = mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidUserCreationDTO))
             )
@@ -109,7 +109,7 @@ class UserControllerIT extends ControllerIntegrationTests {
     @Test
     @DisplayName("createUser(): " + STATUS_201_CREATES_USER_WHEN_USER_DOES_NOT_EXIST)
     void createUser_UserDoesNotExist_CreatesUser() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(post("/users/creation")
+        MockHttpServletResponse response = mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userCreationDTO))
             )
@@ -136,7 +136,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         user = userService.createUser(userCreationDTO);
         exception = new UserAlreadyExistsException(userCreationDTO.email());
 
-        String responseBody = mockMvc.perform(post("/users/creation")
+        String responseBody = mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userCreationDTO))
             )
@@ -151,7 +151,7 @@ class UserControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
-    @DisplayName("verifyUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
+    @DisplayName("authenticateUser(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_DTO_NOT_VALID)
     void authenticateUser_UserAuthenticationDTONotValid_ReturnsErrorDetails() throws Exception {
         UserDTO invalidUserDTO = new UserDTO(null, EMAIL_1, " ", false);
 
@@ -218,7 +218,7 @@ class UserControllerIT extends ControllerIntegrationTests {
 
         TokensDTO requiredTokens = new TokensDTO(expiredAccessToken, "invalidRefreshToken");
 
-        String responseBody = mockMvc.perform(post("/users/re-authentication")
+        String responseBody = mockMvc.perform(post("/users/" + user.getId() + "/re-authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requiredTokens))
             )
@@ -247,7 +247,7 @@ class UserControllerIT extends ControllerIntegrationTests {
 
         TokensDTO requiredTokens = new TokensDTO(invalidAccessToken, refreshToken);
 
-        String responseBody = mockMvc.perform(post("/users/re-authentication")
+        String responseBody = mockMvc.perform(post("/users/" + user.getId() + "/re-authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requiredTokens))
             )
@@ -274,7 +274,7 @@ class UserControllerIT extends ControllerIntegrationTests {
 
         TokensDTO requiredTokens = new TokensDTO(accessToken, refreshToken);
 
-        String responseBody = mockMvc.perform(post("/users/re-authentication")
+        String responseBody = mockMvc.perform(post("/users/" + user.getId() + "/re-authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requiredTokens))
             )
@@ -304,7 +304,7 @@ class UserControllerIT extends ControllerIntegrationTests {
 
         TokensDTO requiredTokens = new TokensDTO(expiredAccessToken, refreshToken);
 
-        String accessToken = mockMvc.perform(post("/users/re-authentication")
+        String accessToken = mockMvc.perform(post("/users/" + user.getId() + "/re-authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requiredTokens))
             )
@@ -529,7 +529,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createToken(user, ACCESS_TOKEN);
 
-        mockMvc.perform(post("/users/" + user.getId() + "/email/verify")
+        mockMvc.perform(post("/users/" + user.getId() + "/verification")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
             )
             .andExpect(status().isOk());
@@ -544,7 +544,7 @@ class UserControllerIT extends ControllerIntegrationTests {
             ValidationMessages.formatMessage(MUST_BE_PROVIDED, "emailVerificationToken")
         );
 
-        String responseBody = mockMvc.perform(get("/users/verify?token=")
+        String responseBody = mockMvc.perform(get("/users/" + user.getId() + "/verification?token=")
             )
             .andExpectAll(
                 status().isBadRequest(),
@@ -565,9 +565,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         user = userService.createUser(userCreationDTO);
         String emailConfirmationToken = jwtService.createToken(user, VERIFICATION_TOKEN);
 
-        mockMvc.perform(get("/users/verify?token=".concat(emailConfirmationToken))
-                .contentType(MediaType.APPLICATION_JSON)
-            )
+        mockMvc.perform(get("/users/" + user.getId() + "/verification?token=" + emailConfirmationToken))
             .andExpect(status().isOk());
 
         user = userService.getUserById(user.getId());
@@ -595,8 +593,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         userService.lockUser(user);
         String unlockUserToken = jwtService.createToken(user, UNLOCK_TOKEN);
 
-        mockMvc.perform(get("/users/unlock?token=".concat(unlockUserToken))
-            )
+        mockMvc.perform(get("/users/" + user.getId() + "/unlock?token=" + unlockUserToken))
             .andExpect(status().isOk());
 
         user = userService.getUserById(user.getId());
@@ -624,8 +621,7 @@ class UserControllerIT extends ControllerIntegrationTests {
         userService.disableUser(user);
         String enableUserToken = jwtService.createToken(user, ENABLE_TOKEN);
 
-        mockMvc.perform(get("/users/enable?token=".concat(enableUserToken))
-            )
+        mockMvc.perform(get("/users/" + user.getId() + "/enable?token=" + enableUserToken))
             .andExpect(status().isOk());
 
         user = userService.getUserById(user.getId());

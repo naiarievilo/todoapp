@@ -1,5 +1,7 @@
 package dev.naiarievilo.todoapp.users;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,8 @@ import static dev.naiarievilo.todoapp.users.UserService.EMAIL_CONFIRMATION_PERIO
 @Transactional
 public class UserTaskService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserTaskService.class);
+
     private final UserRepository userRepository;
 
     public UserTaskService(UserRepository userRepository) {
@@ -21,7 +25,7 @@ public class UserTaskService {
     }
 
     @Scheduled(cron = "${tasks.weekly}")
-    public void deleteAllUnverifiedUsersAfterDeadline() {
+    public void deleteUnverifiedUsersAfterDeadline() {
         LocalDateTime now = LocalDateTime.now();
         List<User> unverifiedUsers = userRepository.findAllByVerified(false);
 
@@ -33,6 +37,10 @@ public class UserTaskService {
             }
         }
 
-        userRepository.deleteAllInBatch(usersToRemove);
+        try {
+            userRepository.deleteAllInBatch(usersToRemove);
+        } catch (Exception e) {
+            logger.warn("Couldn't perform unverified users' deletion weekly task", e);
+        }
     }
 }

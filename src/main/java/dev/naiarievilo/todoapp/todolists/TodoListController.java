@@ -9,6 +9,7 @@ import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.validation.groups.Creation;
 import dev.naiarievilo.todoapp.validation.groups.Update;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -85,7 +86,7 @@ public class TodoListController {
         listService.deleteList(userId, listId);
     }
 
-    @PostMapping("{listId}/todos")
+    @PostMapping("/{listId}/todos")
     @ResponseStatus(HttpStatus.CREATED)
     public TodoDTO addTodoToList(
         @PathVariable Long userId,
@@ -96,18 +97,45 @@ public class TodoListController {
         return todoMapper.toDTO(newTodo);
     }
 
-    @PutMapping("{listId}/todos/{todoId}")
+
+    @PutMapping("/{listId}/todos")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateTodosFromList(
+        @PathVariable Long userId,
+        @PathVariable Long listId,
+        @RequestBody Set<@Valid TodoDTO> todosDTO
+    ) {
+        listService.updateTodosFromList(userId, listId, todosDTO);
+    }
+
+    @DeleteMapping("/{listId}/todos")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeTodosFromList(
+        @PathVariable Long userId,
+        @PathVariable Long listId,
+        @RequestBody(required = false) Set<Long> todosId
+    ) {
+        // When testing with a mock web environment, not including `todosId == null` causes an error
+        if (todosId == null || todosId.isEmpty()) {
+            listService.removeTodosFromList(userId, listId);
+            return;
+        }
+
+        listService.removeTodosFromList(userId, listId, todosId);
+    }
+
+    @PutMapping("/{listId}/todos/{todoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTodoFromList(
         @PathVariable Long userId,
         @PathVariable Long listId,
         @PathVariable Long todoId,
-        @RequestBody @Validated(Update.class) TodoDTO todoDTO
+        @RequestBody @Valid TodoDTO todoDTO
     ) {
         listService.updateTodoFromList(userId, listId, todoId, todoDTO);
     }
 
-    @DeleteMapping("{listId}/todos/{todoId}")
+    @DeleteMapping("/{listId}/todos/{todoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeTodoFromList(@PathVariable Long userId, @PathVariable Long listId, @PathVariable Long todoId) {
         listService.removeTodoFromList(userId, listId, todoId);

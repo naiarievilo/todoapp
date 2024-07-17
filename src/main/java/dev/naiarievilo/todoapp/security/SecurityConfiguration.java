@@ -7,6 +7,7 @@ import dev.naiarievilo.todoapp.users.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -47,9 +48,13 @@ public class SecurityConfiguration {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(
-                    "/actuator/**", "/users/authentication", "/users/re-authentication",
-                    "/users/creation", "/users/enable-user", "/users/unlock-user", "/users/verify-user"
+                    "/actuator/**", "/users/authentication", "/users/enable", "/users/unlock"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET,
+                    "/users/{userId}/re-authentication", "/users/{userId}/verification",
+                    "/users/{userId}/unlock", "/users/{userId}/enable"
+                ).permitAll()
+                .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 .requestMatchers("/users/{userId}/**").access(userAuthorizationManager())
                 .anyRequest().authenticated()
             )

@@ -14,6 +14,7 @@ import dev.naiarievilo.todoapp.todolists.todos.TodoService;
 import dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
+import dev.naiarievilo.todoapp.todolists.todos.exceptions.TodoNotFoundException;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserService;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
@@ -27,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -288,6 +290,37 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
+    @DisplayName("updateTodoFromList(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_TODO_NOT_FOUND)
+    void updateTodoFromList_TodoDoesNotExist_ReturnsErrorDetails() throws Exception {
+        TodoList list = listService.createList(user, listDTO, CUSTOM);
+        TodoDTO newTodo = TodosTestHelper.newTodoDTO_1();
+        Todo todo = todoService.createTodo(newTodo, list);
+        TodoDTO updatedTodo = new TodoDTO(todo.getId(), TODO_TASK_2, todo.isCompleted(), todo.getPosition(),
+            todo.getCreatedAt(), todo.getDueDate());
+
+        todoService.deleteTodo(todo, list);
+        var exception = new TodoNotFoundException(todo.getId());
+
+        String responseBody = mockMvc.perform(
+                put("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos/" + todo.getId())
+                    .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updatedTodo))
+            )
+            .andExpectAll(
+                status().isNotFound(),
+                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            )
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.NOT_FOUND.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(exception.getMessage()));
+    }
+
+    @Test
     @DisplayName("updateTodoFromList(): " + STATUS_204_UPDATES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateTodoFromList_UserHasListAccess_UpdatesTodoFromList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
@@ -307,8 +340,46 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
+    @DisplayName("updateTodosFromList(): " + STATUS_204_UPDATES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    void updateTodosFromList_UserHasListAccess_UpdatesTodosFromList() throws Exception {
+        TodoList list = listService.createList(user, listDTO, CUSTOM);
+        Set<TodoDTO> newTodoDTOSet = TodosTestHelper.newTodoDTOSet();
+        Set<Todo> persistedTodoSet = new LinkedHashSet<>();
+        for (TodoDTO newTodoDTO : newTodoDTOSet) {
+            Todo todo = todoService.createTodo(newTodoDTO, list);
+            persistedTodoSet.add(todo);
+        }
+
+        Set<TodoDTO> updatedTodoDTOSet = new LinkedHashSet<>();
+        int newPosition = persistedTodoSet.size();
+        for (Todo persistedTodo : persistedTodoSet) {
+            TodoDTO updatedTodoDTO = new TodoDTO(
+                persistedTodo.getId(),
+                persistedTodo.getTask(),
+                persistedTodo.isCompleted(),
+                newPosition--,
+                null,
+                persistedTodo.getDueDate()
+            );
+            updatedTodoDTOSet.add(updatedTodoDTO);
+        }
+
+        mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos")
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedTodoDTOSet))
+            )
+            .andExpect(status().isNoContent());
+
+        newPosition = persistedTodoSet.size();
+        for (Todo persistedTodo : persistedTodoSet) {
+            assertEquals(newPosition--, persistedTodo.getPosition());
+        }
+    }
+
+    @Test
     @DisplayName("removeTodoFromList(): " + STATUS_204_DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
-    void updateTodoFromList_UserHasListAccess_RemoveTodoFromList() throws Exception {
+    void removeTodoFromList_UserHasListAccess_RemoveTodoFromList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
         TodoDTO newTodo = TodosTestHelper.newTodoDTO_1();
         Todo todo = todoService.createTodo(newTodo, list);
@@ -319,5 +390,45 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             .andExpect(status().isNoContent());
 
         assertEquals(0, list.getTodos().size());
+    }
+
+    @Test
+    @DisplayName("removeTodosFromList(): " + STATUS_204_DELETES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    void removeTodosFromList_UserHasListAccess_RemovesAllTodosFromList() throws Exception {
+        TodoList list = listService.createList(user, listDTO, CUSTOM);
+        Set<TodoDTO> newTodoDTOSet = TodosTestHelper.newTodoDTOSet();
+        Set<Long> todosId = new HashSet<>();
+        for (TodoDTO newTodoDTO : newTodoDTOSet) {
+            Todo todo = todoService.createTodo(newTodoDTO, list);
+            todosId.add(todo.getId());
+        }
+
+        mockMvc.perform(delete("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos")
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(todosId))
+            )
+            .andExpect(status().isNoContent());
+
+        assertTrue(list.getTodos().isEmpty());
+    }
+
+    @Test
+    @DisplayName("removeTodosFromList(): " + STATUS_204_DELETES_ALL_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    void removeAllTodosFromList_UserHasListAccess_RemovesAllTodosFromList() throws Exception {
+        TodoList list = listService.createList(user, listDTO, CUSTOM);
+        Set<TodoDTO> newTodoDTOSet = TodosTestHelper.newTodoDTOSet();
+        for (TodoDTO newTodoDTO : newTodoDTOSet) {
+            todoService.createTodo(newTodoDTO, list);
+        }
+
+        mockMvc.perform(delete("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos")
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(null))
+            )
+            .andExpect(status().isNoContent());
+
+        assertTrue(list.getTodos().isEmpty());
     }
 }

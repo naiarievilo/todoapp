@@ -27,7 +27,6 @@ public interface TodoListRepository extends BaseJpaRepository<TodoList, Long> {
                  SELECT tl
                    FROM TodoList AS tl
              JOIN FETCH tl.user
-        LEFT JOIN FETCH tl.todos
                   WHERE tl.user = :user
                     AND tl.type = :type
         """)
