@@ -46,6 +46,7 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     private User user;
     private TodoList list;
     private TodoListDTO listDTO;
+    private Long userId;
 
     @BeforeEach
     void setUp() {
@@ -53,6 +54,7 @@ class TodoListServiceIT extends ServiceIntegrationTests {
         user.setEmail(EMAIL_1);
         user.setPassword(PASSWORD_1);
         userRepository.persist(user);
+        userId = user.getId();
 
         list = new TodoList();
         list.setTitle(LIST_TITLE_1);
@@ -75,8 +77,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     @Transactional
     @DisplayName("getTodayList(): " + RETURNS_TODAY_LIST_WHEN_LIST_EXISTS)
     void getTodayList_TodayListExists_ReturnsTodayList() {
-        userRepository.persist(user);
-
         TodoList todayList = listService.getTodayList(user);
         assertNotNull(todayList);
         assertEquals(CALENDAR, todayList.getType());
@@ -119,7 +119,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     @DisplayName("getListByIdEagerly(): " + RETURNS_LIST_WHEN_LIST_EXISTS)
     void getListByIdEagerly_ListExists_ReturnsList() {
         listRepository.persist(list);
-        Long userId = user.getId();
         Long listId = list.getId();
 
         TodoList returnedList = listService.getListByIdEagerly(userId, listId);
@@ -132,11 +131,9 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     @Transactional
     @DisplayName("getListByIdEagerly(): " + THROWS_UNAUTHORIZED_DATA_ACCESS_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void getListByIdEagerly_ListDoesNotExist_ThrowsUnauthorizedDataAccessException() {
-        userRepository.persist(user);
+        userId = 3242L;
         listRepository.persist(list);
-        Long userId = 3242L;
         Long listId = list.getId();
-
         assertThrows(UnauthorizedDataAccessException.class, () -> listService.getListByIdEagerly(userId, listId));
     }
 
@@ -144,7 +141,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     @Transactional
     @DisplayName("createList(): " + CREATES_LIST_WHEN_INPUT_VALID)
     void createList_InputValid_CreatesList() {
-
         TodoList createdList = listService.createList(user, listDTO, CUSTOM);
         assertNotNull(createdList);
         assertEquals(listDTO.title(), createdList.getTitle());
@@ -158,9 +154,10 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     @DisplayName("updateList(): " + UPDATES_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateList_UserHasListAccess_UpdatesList() {
         listRepository.persist(list);
-        Long userId = user.getId();
         Long listId = list.getId();
-        TodoListDTO updatedListDTO = new TodoListDTO(list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), null);
+        TodoListDTO updatedListDTO = new TodoListDTO(
+            list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), null
+        );
 
         listService.updateList(userId, listId, updatedListDTO);
 
@@ -171,7 +168,7 @@ class TodoListServiceIT extends ServiceIntegrationTests {
 
     @Test
     @Transactional
-    @DisplayName("updateList(): " + UPDATES_LIST_AND_ITS_TODOS_WHEN_USER_HAS_ACCESS)
+    @DisplayName("updateList(): " + UPDATES_LIST_AND_ITS_TODOS_WHEN_USER_HAS_LIST_ACCESS)
     void updateList_HasTodosToUpdate_UpdatesListAndTodos() {
         Todo persistedTodo = TodosTestHelper.newTodo_1();
         list.addTodo(persistedTodo);
@@ -184,7 +181,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
             list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), Set.of(updatedTodoDTO)
         );
 
-        Long userId = user.getId();
         Long listId = list.getId();
 
         listService.updateList(userId, listId, updatedListDTO);
@@ -205,11 +201,21 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     @DisplayName("deleteList(): " + DELETES_LIST_WHEN_USER_HAS_ACCESS)
     void deleteList_UserHasListAccess_DeletesList() {
         listRepository.persist(list);
-        Long userId = user.getId();
         Long listId = list.getId();
-
         listService.deleteList(userId, listId);
         assertFalse(listRepository.existsById(listId));
+    }
+
+    @Test
+    @DisplayName("addNewTodoToList(): " + DOES_NOT_ADD_TODO_TO_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
+    void addNewTodoToList_UserDoesNotHaveListAccess_DoesNotAddTodoToList() {
+        Set<Todo> persistedTodos = TodosTestHelper.newTodoSet();
+        list.setTodos(persistedTodos);
+        listRepository.persist(list);
+        Long listId = list.getId();
+
+        Set<Todo> returnedTodos = listService.getTodosFromList(userId, listId);
+        assertTrue(persistedTodos.containsAll(returnedTodos) && returnedTodos.containsAll(persistedTodos));
     }
 
     @Test
@@ -217,7 +223,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     @DisplayName("addNewTodoToList(): " + ADDS_TODO_TO_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void addNewTodoToList_UserHasListAccess_AddsTodoToList() {
         listRepository.persist(list);
-        Long userId = user.getId();
         Long listId = list.getId();
 
         TodoDTO newTodoDTO = TodosTestHelper.newTodoDTO_1();
@@ -241,7 +246,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
         listRepository.persist(list);
 
         TodoDTO updatedTodoDTO = new TodoDTO(newTodo.getId(), "updated task", true, newTodo.getPosition(), null, null);
-        Long userId = user.getId();
         Long listId = list.getId();
         Long todoId = updatedTodoDTO.id();
         assert todoId != null;
@@ -274,7 +278,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
             ));
         }
 
-        Long userId = user.getId();
         Long listId = list.getId();
         listService.updateTodosFromList(userId, listId, updatedTodoDTOSet);
 
@@ -291,8 +294,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
         Todo newTodo = TodosTestHelper.newTodo_1();
         list.addTodo(newTodo);
         listRepository.persist(list);
-
-        Long userId = user.getId();
         Long listId = list.getId();
         Long todoId = newTodo.getId();
 
@@ -307,14 +308,13 @@ class TodoListServiceIT extends ServiceIntegrationTests {
         Set<Todo> newTodos = TodosTestHelper.newTodoSet();
         list.setTodos(newTodos);
         listRepository.persist(list);
+        Long listId = list.getId();
 
         Set<Long> todosId = list.getTodos().stream()
             .limit(2)
             .map(Todo::getId)
             .collect(Collectors.toSet());
 
-        Long userId = user.getId();
-        Long listId = list.getId();
 
         listService.removeTodosFromList(userId, listId, todosId);
         assertEquals(1, list.getTodos().size());
@@ -326,8 +326,6 @@ class TodoListServiceIT extends ServiceIntegrationTests {
         Set<Todo> newTodos = TodosTestHelper.newTodoSet();
         list.setTodos(newTodos);
         listRepository.persist(list);
-
-        Long userId = user.getId();
         Long listId = list.getId();
 
         listService.removeTodosFromList(userId, listId);

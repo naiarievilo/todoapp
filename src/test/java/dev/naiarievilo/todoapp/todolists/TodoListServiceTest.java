@@ -58,6 +58,8 @@ class TodoListServiceTest {
     private TodoList todayList;
     private TodoList persistedList;
     private Set<TodoList> weeklyLists;
+    private Long listId;
+    private Long userId;
 
     @BeforeEach
     void setUp() {
@@ -69,6 +71,10 @@ class TodoListServiceTest {
         todayList = TodoListsTestHelper.todayList();
         weeklyLists = TodoListsTestHelper.weeklyLists();
         persistedList = TodoListsTestHelper.list_1();
+        persistedList.setUser(user);
+
+        userId = user.getId();
+        listId = persistedList.getId();
     }
 
     @Test
@@ -178,8 +184,6 @@ class TodoListServiceTest {
     void getListByIdEagerly_ListExists_ReturnsList() {
         todayList.setId(LIST_ID_1);
         todayList.setUser(user);
-        Long userId = user.getId();
-        Long listId = todayList.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(todayList));
 
@@ -191,7 +195,6 @@ class TodoListServiceTest {
     @Test
     @DisplayName("getListByIdEagerly(): " + THROWS_LIST_NOT_FOUND_WHEN_LIST_DOES_NOT_EXIST)
     void getListByIdEagerly_ListDoesNotExist_ThrowsTodoListNotFoundException() {
-        Long userId = user.getId();
         given(listRepository.findByIdEagerly(LIST_ID_1)).willReturn(Optional.empty());
         assertThrows(TodoListNotFoundException.class, () -> listService.getListByIdEagerly(userId, LIST_ID_1));
     }
@@ -199,10 +202,9 @@ class TodoListServiceTest {
     @Test
     @DisplayName("getListByIdEagerly(): " + THROWS_UNAUTHORIZED_DATA_ACCESS_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void getListByIdEagerly_ListDoesNotExist_ThrowsUnauthorizedDataAccessException() {
+        userId = 243L;
         todayList.setId(LIST_ID_1);
         todayList.setUser(user);
-        Long userId = 243L;
-        Long listId = todayList.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(todayList));
         assertThrows(UnauthorizedDataAccessException.class, () -> listService.getListByIdEagerly(userId, listId));
@@ -232,12 +234,11 @@ class TodoListServiceTest {
     @Test
     @DisplayName("updateList(): " + DOES_NOT_UPDATE_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void updateList_UserDoesNotHaveListAccess_DoesNotUpdateList() {
-        persistedList.setUser(user);
-        TodoListDTO updatedListDTO =
-            new TodoListDTO(persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3), null);
+        userId = 875L;
 
-        Long userId = 875L;
-        Long listId = persistedList.getId();
+        TodoListDTO updatedListDTO = new TodoListDTO(
+            persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3), null
+        );
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 
@@ -251,12 +252,9 @@ class TodoListServiceTest {
     @Test
     @DisplayName("updateList(): " + UPDATES_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateList_UserHasListAccess_UpdatesList() {
-        persistedList.setUser(user);
-        TodoListDTO updatedListDTO =
-            new TodoListDTO(persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3), null);
-
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
+        TodoListDTO updatedListDTO = new TodoListDTO(
+            persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3), null
+        );
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 
@@ -267,17 +265,12 @@ class TodoListServiceTest {
     }
 
     @Test
-    @DisplayName("updateList(): " + UPDATES_LIST_AND_ITS_TODOS_WHEN_USER_HAS_ACCESS)
+    @DisplayName("updateList(): " + UPDATES_LIST_AND_ITS_TODOS_WHEN_USER_HAS_LIST_ACCESS)
     void updateList_HasTodosToUpdate_UpdatesListAndTodos() {
-        persistedList.setUser(user);
-
         TodoListDTO updatedListDTO = new TodoListDTO(
             persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3),
             Set.of(new TodoDTO(null, TODO_TASK_1, false, TODO_POSITION_1, null, null))
         );
-
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 
@@ -291,11 +284,9 @@ class TodoListServiceTest {
     @Test
     @DisplayName("deleteList(): " + DOES_NOT_DELETE_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void deleteList_UserDoesNotHaveListAccess_DoesNotDeleteList() {
-        persistedList.setUser(user);
-        Long userId = 987L;
-        Long listId = persistedList.getId();
-
+        userId = 987L;
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
+
         assertThrows(UnauthorizedDataAccessException.class, () -> listService.deleteList(userId, listId));
         verify(listRepository, never()).delete(persistedList);
     }
@@ -303,22 +294,39 @@ class TodoListServiceTest {
     @Test
     @DisplayName("deleteList(): " + DELETES_LIST_WHEN_USER_HAS_ACCESS)
     void deleteList_UserHasListAccess_DeletesList() {
-        persistedList.setUser(user);
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
-
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
         listService.deleteList(userId, listId);
         verify(listRepository).delete(persistedList);
     }
 
     @Test
+    @DisplayName("getTodosFromList(): " + DOES_NOT_GET_TODOS_FROM_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
+    void getTodosFromList_UserDoesNotHaveListAccess_DoesNotGetTodosFromList() {
+        userId = 3432L;
+        Set<Todo> persistedTodos = TodosTestHelper.todoSet();
+        persistedList.setTodos(persistedTodos);
+
+        given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
+        assertThrows(UnauthorizedDataAccessException.class, () -> listService.getTodosFromList(userId, listId));
+    }
+
+    @Test
+    @DisplayName("getTodosFromList(): " + GETS_ALL_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    void getTodosFromList_UserHasListAccess_GetsTodosFromList() {
+        Set<Todo> persistedTodos = TodosTestHelper.todoSet();
+        persistedList.setTodos(persistedTodos);
+
+        given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
+
+        Set<Todo> returnedTodos = listService.getTodosFromList(userId, listId);
+        assertTrue(persistedTodos.containsAll(returnedTodos) && returnedTodos.containsAll(persistedTodos));
+    }
+
+    @Test
     @DisplayName("addNewTodoToList(): " + DOES_NOT_ADD_TODO_TO_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void addNewTodoToList_UserDoesNotHaveListAccess_DoesNotAddTodoToList() {
+        userId = 43L;
         TodoDTO newTodo = TodosTestHelper.newTodoDTO_1();
-        persistedList.setUser(user);
-        Long userId = 43L;
-        Long listId = persistedList.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
         assertThrows(UnauthorizedDataAccessException.class,
@@ -331,9 +339,6 @@ class TodoListServiceTest {
     @DisplayName("addNewTodoToList(): " + ADDS_TODO_TO_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void addNewTodoToList_UserHasListAccess_AddsTodoToList() {
         TodoDTO newTodo = TodosTestHelper.newTodoDTO_1();
-        persistedList.setUser(user);
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
         given(todoService.createTodo(newTodo, persistedList)).willReturn(TodosTestHelper.todo_1());
@@ -350,11 +355,8 @@ class TodoListServiceTest {
     void updateTodoFromList_TodoDoesNotExist_ThrowsTodoNotFoundException() {
         Todo persistedTodo = TodosTestHelper.todo_1();
         TodoDTO updatedTodo = TodosTestHelper.todoDTO_2();
-        persistedList.setUser(user);
         persistedList.addTodo(persistedTodo);
 
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
         Long todoId = updatedTodo.id();
         assert todoId != null;
 
@@ -369,13 +371,10 @@ class TodoListServiceTest {
     @Test
     @DisplayName("updateTodoFromList(): " + DOES_NOT_UPDATE_TODO_FROM_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void updateTodoFromList_UserDoesNotHaveListAccess_DoesNotUpdateTodoFromList() {
+        userId = 432L;
         Todo persistedTodo = TodosTestHelper.todo_1();
         TodoDTO updatedTodo = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_3, null, null);
-        persistedList.setUser(user);
         persistedList.addTodo(persistedTodo);
-
-        Long userId = 432L;
-        Long listId = persistedList.getId();
         Long todoId = persistedTodo.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
@@ -390,11 +389,7 @@ class TodoListServiceTest {
     void updateTodoFromList_UserHasListAccess_UpdatesTodoFromList() {
         Todo persistedTodo = TodosTestHelper.todo_1();
         TodoDTO updatedTodo = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_3, null, null);
-        persistedList.setUser(user);
         persistedList.addTodo(persistedTodo);
-
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
         Long todoId = persistedTodo.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
@@ -409,11 +404,7 @@ class TodoListServiceTest {
     void updateTodosFromList_UserHasListAccess_UpdatesTodosFromList() {
         Set<Todo> persistedTodos = TodosTestHelper.todoSet();
         Set<TodoDTO> updatedTodosDTO = TodosTestHelper.todoDTOSet();
-        persistedList.setUser(user);
         persistedList.setTodos(persistedTodos);
-
-        Long listId = persistedList.getId();
-        Long userId = user.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 
@@ -427,11 +418,7 @@ class TodoListServiceTest {
     @DisplayName("removeTodoFromList(): " + THROWS_TODO_NOT_FOUND_WHEN_TODO_NOT_IN_LIST)
     void removeTodoFromList_TodoDoesNotExist_ThrowsTodoNotFoundException() {
         Todo persistedTodo = TodosTestHelper.todo_1();
-        persistedList.setUser(user);
         persistedList.addTodo(persistedTodo);
-
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
         Long todoId = 433L;
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
@@ -444,13 +431,10 @@ class TodoListServiceTest {
     @Test
     @DisplayName("removeTodoFromList(): " + DOES_NOT_DELETE_TODO_FROM_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS)
     void removeTodoFromList_UserDoesNotHaveListAccess_DoesNotDeleteTodoFromList() {
+        userId = 750L;
         Todo persistedTodo = TodosTestHelper.todo_1();
-        persistedList.setUser(user);
-        persistedList.addTodo(persistedTodo);
-
-        Long userId = 750L;
-        Long listId = persistedList.getId();
         Long todoId = persistedTodo.getId();
+        persistedList.addTodo(persistedTodo);
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 
@@ -464,12 +448,8 @@ class TodoListServiceTest {
     @DisplayName("removeTodoFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void removeTodoFromList_UserHasListAccess_DeletesTodoFromList() {
         Todo persistedTodo = TodosTestHelper.todo_1();
-        persistedList.setUser(user);
-        persistedList.addTodo(persistedTodo);
-
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
         Long todoId = persistedTodo.getId();
+        persistedList.addTodo(persistedTodo);
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 
@@ -482,16 +462,12 @@ class TodoListServiceTest {
     @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void removeTodosFromList_UserHasListAccess_DeletesTodosFromList() {
         Set<Todo> persistedTodos = TodosTestHelper.todoSet();
-        persistedList.setUser(user);
         persistedList.setTodos(persistedTodos);
 
         Set<Long> todosId = new HashSet<>();
         for (Todo persistedTodo : persistedTodos) {
             todosId.add(persistedTodo.getId());
         }
-
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 
@@ -506,11 +482,7 @@ class TodoListServiceTest {
     @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void removeTodosFromList_UserHasListAccess_DeletesAllTodosFromList() {
         Set<Todo> persistedTodos = TodosTestHelper.todoSet();
-        persistedList.setUser(user);
         persistedList.setTodos(persistedTodos);
-
-        Long userId = user.getId();
-        Long listId = persistedList.getId();
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
 

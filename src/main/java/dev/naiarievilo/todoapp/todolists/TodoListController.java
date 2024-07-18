@@ -86,6 +86,13 @@ public class TodoListController {
         listService.deleteList(userId, listId);
     }
 
+    @GetMapping("/{listId}/todos")
+    @ResponseStatus(HttpStatus.OK)
+    public Set<TodoDTO> getTodosFromList(@PathVariable Long userId, @PathVariable Long listId) {
+        Set<Todo> todos = listService.getTodosFromList(userId, listId);
+        return todoMapper.toSetDTO(todos);
+    }
+
     @PostMapping("/{listId}/todos")
     @ResponseStatus(HttpStatus.CREATED)
     public TodoDTO addTodoToList(

@@ -48,7 +48,8 @@ public class SecurityConfiguration {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(
-                    "/actuator/**", "/users/authentication", "/users/enable", "/users/unlock"
+                    "/actuator/**", "/users/authentication", "/users/enable", "/users/unlock",
+                    "/v3/api-docs", "/swagger-ui/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/users/{userId}/re-authentication", "/users/{userId}/verification",

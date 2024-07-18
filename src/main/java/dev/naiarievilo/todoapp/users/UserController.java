@@ -46,6 +46,7 @@ public class UserController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserCreationDTO userCreationDTO) {
         User user = userService.createUser(userCreationDTO);
         Map<String, String> tokens = jwtService.createAccessAndRefreshTokens(user);
@@ -58,6 +59,7 @@ public class UserController {
     }
 
     @PostMapping("/authentication")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<UserDTO> authenticateUser(@RequestBody @Validated(UserAuthentication.class) UserDTO userDTO) {
         var authentication = (UserAuthenticationToken) authenticationManager.authenticate(
             EmailPasswordAuthenticationToken.unauthenticated(userDTO.email(), userDTO.password())
@@ -120,6 +122,7 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/re-authentication")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Void> getNewAccessToken(@PathVariable Long userId, @RequestBody TokensDTO tokensDTO) {
         String newAccessToken = jwtService.createAccessToken(tokensDTO.accessToken(), tokensDTO.refreshToken());
         return ResponseEntity

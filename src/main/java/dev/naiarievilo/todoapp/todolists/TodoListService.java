@@ -144,6 +144,11 @@ public class TodoListService {
         listRepository.delete(list);
     }
 
+    public Set<Todo> getTodosFromList(Long userId, Long listId) {
+        TodoList list = getListByIdEagerly(userId, listId);
+        return list.getTodos();
+    }
+
     @Transactional
     public Todo addNewTodoToList(Long userId, Long listId, TodoDTO todoDTO) {
         TodoList list = getListByIdEagerly(userId, listId);
