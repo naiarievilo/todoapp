@@ -1,4 +1,10 @@
 spring:
+  docker:
+    compose:
+      profiles:
+        active: "test"
+      skip:
+        in-tests: false
   jpa:
     hibernate:
       ddl-auto: "create-drop"

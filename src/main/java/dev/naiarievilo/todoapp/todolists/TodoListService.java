@@ -7,6 +7,8 @@ import dev.naiarievilo.todoapp.todolists.exceptions.TodoListNotFoundException;
 import dev.naiarievilo.todoapp.todolists.todos.Todo;
 import dev.naiarievilo.todoapp.todolists.todos.TodoService;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
+import dev.naiarievilo.todoapp.todolists.todos.exceptions.ImmutableListException;
+import dev.naiarievilo.todoapp.todolists.todos.exceptions.PositionExceedsMaxAllowedException;
 import dev.naiarievilo.todoapp.todolists.todos.exceptions.TodoNotFoundException;
 import dev.naiarievilo.todoapp.users.User;
 import org.springframework.stereotype.Service;
@@ -116,13 +118,13 @@ public class TodoListService {
     @Transactional
     public void updateList(Long userId, Long listId, TodoListDTO listDTO) {
         TodoList list = getListByIdEagerly(userId, listId);
-        listMapper.updateEntityFromDTO(list, listDTO);
 
-        Set<TodoDTO> todosDTO = listDTO.todos();
-        if (todosDTO != null) {
-            todoService.updateTodos(list.getTodos(), todosDTO, list);
+        ListTypes listType = listDTO.getType();
+        if (listType == INBOX || listType == CALENDAR) {
+            throw new ImmutableListException(listType.getType());
         }
 
+        listMapper.updateEntityFromDTO(list, listDTO);
         listRepository.update(list);
     }
 
@@ -149,6 +151,17 @@ public class TodoListService {
         return list.getTodos();
     }
 
+    public Todo getTodoFromList(Long userId, Long listId, Long todoId) {
+        TodoList list = getListByIdEagerly(userId, listId);
+        return getTodoFromList(todoId, list);
+    }
+
+    private Todo getTodoFromList(Long todoId, TodoList parent) {
+        return parent.getTodos().stream()
+            .filter(todo -> todo.getId().equals(todoId))
+            .findFirst().orElseThrow(() -> new TodoNotFoundException(todoId));
+    }
+
     @Transactional
     public Todo addNewTodoToList(Long userId, Long listId, TodoDTO todoDTO) {
         TodoList list = getListByIdEagerly(userId, listId);
@@ -159,19 +172,17 @@ public class TodoListService {
     public void updateTodoFromList(Long userId, Long listId, Long todoId, TodoDTO todoDTO) {
         TodoList list = getListByIdEagerly(userId, listId);
         Todo todo = getTodoFromList(todoId, list);
-        todoService.updateTodo(todo, todoDTO);
-    }
+        if (todoDTO.getPosition() > list.getTodos().size()) {
+            throw new PositionExceedsMaxAllowedException(todoId);
+        }
 
-    private Todo getTodoFromList(Long todoId, TodoList parent) {
-        return parent.getTodos().stream()
-            .filter(todo -> todo.getId().equals(todoId))
-            .findFirst().orElseThrow(() -> new TodoNotFoundException(todoId));
+        todoService.updateTodo(todo, todoDTO);
     }
 
     @Transactional
     public void updateTodosFromList(Long userId, Long listId, Set<TodoDTO> todosDTO) {
         TodoList list = getListByIdEagerly(userId, listId);
-        todoService.updateTodos(list.getTodos(), todosDTO, list);
+        todoService.updateTodos(list.getTodos(), todosDTO);
     }
 
     @Transactional
@@ -179,17 +190,31 @@ public class TodoListService {
         TodoList list = getListByIdEagerly(userId, listId);
         Todo todo = getTodoFromList(todoId, list);
         todoService.deleteTodo(todo, list);
+
+        Set<Todo> todos = list.getTodos();
+        adjustTodosPosition(todos);
+    }
+
+    private void adjustTodosPosition(Set<Todo> todos) {
+        int newPosition = 1;
+        for (Todo todo : todos) {
+            todo.setPosition(newPosition++);
+        }
     }
 
     @Transactional
     public void removeTodosFromList(Long userId, Long listId, Set<Long> todosId) {
         TodoList list = getListByIdEagerly(userId, listId);
-        for (Todo todo : new LinkedHashSet<>(list.getTodos())) {
+        Set<Todo> todos = list.getTodos();
+
+        for (Todo todo : new LinkedHashSet<>(todos)) {
             Long todoId = todo.getId();
             if (todosId.contains(todoId)) {
                 todoService.deleteTodo(todo, list);
             }
         }
+
+        adjustTodosPosition(todos);
     }
 
     @Transactional

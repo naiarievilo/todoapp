@@ -1,5 +1,6 @@
 package dev.naiarievilo.todoapp.users.dtos;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.naiarievilo.todoapp.users.dtos.groups.UserAuthentication;
 import dev.naiarievilo.todoapp.users.dtos.groups.UserDeletion;
@@ -8,21 +9,51 @@ import dev.naiarievilo.todoapp.validation.Email;
 import dev.naiarievilo.todoapp.validation.Password;
 import dev.naiarievilo.todoapp.validation.Positive;
 
-public record UserDTO(
+public class UserDTO {
 
     @Positive(groups = UserDeletion.class)
-    Long id,
+    private final Long id;
 
     @Email(groups = {UserAuthentication.class, UserSecurity.class})
-    String email,
+    private final String email;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Password(groups = UserAuthentication.class)
-    String password,
+    private final String password;
 
-    @JsonProperty(value = "is_verified", access = JsonProperty.Access.READ_ONLY)
-    Boolean verified
-) {
+    private final Boolean verified;
+
+    @JsonCreator
+    public UserDTO(
+        @JsonProperty("id")
+        Long id,
+        @JsonProperty("email")
+        String email,
+        @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY)
+        String password,
+        @JsonProperty(value = "is_verified", access = JsonProperty.Access.READ_ONLY)
+        Boolean verified
+    ) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.verified = verified;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Boolean getVerified() {
+        return verified;
+    }
 
     @Override
     public String toString() {

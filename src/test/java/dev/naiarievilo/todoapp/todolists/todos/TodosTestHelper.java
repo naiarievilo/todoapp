@@ -9,7 +9,6 @@ import java.util.Set;
 public class TodosTestHelper {
 
     public static final LocalDate NEW_TODO_DUE_DATE = LocalDate.now().plusDays(4);
-    public static final Long NEW_TODO_ID = 4L;
     public static final Integer NEW_TODO_POSITION = 4;
     public static final String NEW_TODO_TASK = "New todo task";
     public static final LocalDate TODO_DUE_DATE_1 = LocalDate.now().plusDays(1);
@@ -58,11 +57,11 @@ public class TodosTestHelper {
     public static Todo todo_1() {
         TodoDTO todoDTO = todoDTO_1();
         Todo todo = new Todo();
-        todo.setId(todoDTO.id());
-        todo.setTask(todoDTO.task());
-        todo.setCompleted(todoDTO.completed());
-        todo.setPosition(todoDTO.position());
-        todo.setDueDate(todoDTO.dueDate());
+        todo.setId(todoDTO.getId());
+        todo.setTask(todoDTO.getTask());
+        todo.setCompleted(todoDTO.getCompleted());
+        todo.setPosition(todoDTO.getPosition());
+        todo.setDueDate(todoDTO.getDueDate());
 
         return todo;
     }
@@ -70,11 +69,11 @@ public class TodosTestHelper {
     public static Todo todo_2() {
         TodoDTO todoDTO = todoDTO_2();
         Todo todo = new Todo();
-        todo.setId(todoDTO.id());
-        todo.setTask(todoDTO.task());
-        todo.setCompleted(todoDTO.completed());
-        todo.setPosition(todoDTO.position());
-        todo.setDueDate(todoDTO.dueDate());
+        todo.setId(todoDTO.getId());
+        todo.setTask(todoDTO.getTask());
+        todo.setCompleted(todoDTO.getCompleted());
+        todo.setPosition(todoDTO.getPosition());
+        todo.setDueDate(todoDTO.getDueDate());
 
         return todo;
     }
@@ -82,11 +81,11 @@ public class TodosTestHelper {
     public static Todo todo_3() {
         TodoDTO todoDTO = todoDTO_3();
         Todo todo = new Todo();
-        todo.setId(todoDTO.id());
-        todo.setTask(todoDTO.task());
-        todo.setCompleted(todoDTO.completed());
-        todo.setPosition(todoDTO.position());
-        todo.setDueDate(todoDTO.dueDate());
+        todo.setId(todoDTO.getId());
+        todo.setTask(todoDTO.getTask());
+        todo.setCompleted(todoDTO.getCompleted());
+        todo.setPosition(todoDTO.getPosition());
+        todo.setDueDate(todoDTO.getDueDate());
 
         return todo;
     }
@@ -100,15 +99,15 @@ public class TodosTestHelper {
     }
 
     public static TodoDTO newTodoDTO_1() {
-        return new TodoDTO(null, TODO_TASK_1, false, TODO_POSITION_1, null, TODO_DUE_DATE_1);
+        return new TodoDTO(TODO_TASK_1, false, TODO_POSITION_1, TODO_DUE_DATE_1);
     }
 
     public static TodoDTO newTodoDTO_2() {
-        return new TodoDTO(null, TODO_TASK_2, true, TODO_POSITION_2, null, TODO_DUE_DATE_2);
+        return new TodoDTO(TODO_TASK_2, true, TODO_POSITION_2, TODO_DUE_DATE_2);
     }
 
     public static TodoDTO newTodoDTO_3() {
-        return new TodoDTO(null, TODO_TASK_3, false, TODO_POSITION_3, null, TODO_DUE_DATE_3);
+        return new TodoDTO(TODO_TASK_3, false, TODO_POSITION_3, TODO_DUE_DATE_3);
     }
 
     public static Set<Todo> newTodoSet() {
@@ -122,30 +121,30 @@ public class TodosTestHelper {
     public static Todo newTodo_1() {
         TodoDTO todoDTO = newTodoDTO_1();
         Todo todo = new Todo();
-        todo.setTask(todoDTO.task());
-        todo.setCompleted(todoDTO.completed());
-        todo.setPosition(todoDTO.position());
-        todo.setDueDate(todoDTO.dueDate());
+        todo.setTask(todoDTO.getTask());
+        todo.setCompleted(todoDTO.getCompleted());
+        todo.setPosition(todoDTO.getPosition());
+        todo.setDueDate(todoDTO.getDueDate());
         return todo;
     }
 
     public static Todo newTodo_2() {
         TodoDTO todoDTO = newTodoDTO_2();
         Todo todo = new Todo();
-        todo.setTask(todoDTO.task());
-        todo.setCompleted(todoDTO.completed());
-        todo.setPosition(todoDTO.position());
-        todo.setDueDate(todoDTO.dueDate());
+        todo.setTask(todoDTO.getTask());
+        todo.setCompleted(todoDTO.getCompleted());
+        todo.setPosition(todoDTO.getPosition());
+        todo.setDueDate(todoDTO.getDueDate());
         return todo;
     }
 
     public static Todo newTodo_3() {
         TodoDTO todoDTO = newTodoDTO_3();
         Todo todo = new Todo();
-        todo.setTask(todoDTO.task());
-        todo.setCompleted(todoDTO.completed());
-        todo.setPosition(todoDTO.position());
-        todo.setDueDate(todoDTO.dueDate());
+        todo.setTask(todoDTO.getTask());
+        todo.setCompleted(todoDTO.getCompleted());
+        todo.setPosition(todoDTO.getPosition());
+        todo.setDueDate(todoDTO.getDueDate());
         return todo;
     }
 }

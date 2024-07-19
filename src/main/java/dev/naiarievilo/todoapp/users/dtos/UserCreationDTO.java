@@ -15,7 +15,7 @@ public record UserCreationDTO(
     @Password
     String password,
 
-    @JsonProperty("password_confirmation")
+    @JsonProperty("confirm_password")
     @Password
     String passwordConfirmation,
 

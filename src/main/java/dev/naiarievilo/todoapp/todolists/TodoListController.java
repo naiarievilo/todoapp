@@ -10,7 +10,10 @@ import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.validation.groups.Creation;
 import dev.naiarievilo.todoapp.validation.groups.Update;
 import jakarta.validation.Valid;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +22,7 @@ import java.util.Set;
 import static dev.naiarievilo.todoapp.todolists.ListTypes.CUSTOM;
 
 @RestController
-@RequestMapping("/users/{userId}/todolists")
+@RequestMapping(path = "/users/{userId}/todolists", produces = MediaTypes.HAL_JSON_VALUE)
 public class TodoListController {
 
     private final TodoListService listService;
@@ -34,63 +37,73 @@ public class TodoListController {
 
     @GetMapping("/inbox")
     @ResponseStatus(HttpStatus.OK)
-    public TodoListDTO getInboxList(@AuthenticatedUser User user) {
+    public TodoListDTO getInboxList(@AuthenticatedUser User user, @PathVariable Long userId) {
         TodoList list = listService.getInboxList(user);
-        return listMapper.toDTO(list);
+        return listMapper.toModel(list, userId);
     }
 
     @GetMapping("/today")
     @ResponseStatus(HttpStatus.OK)
-    public TodoListDTO getTodayList(@AuthenticatedUser User user) {
+    public TodoListDTO getTodayList(@AuthenticatedUser User user, @PathVariable Long userId) {
         TodoList list = listService.getTodayList(user);
-        return listMapper.toDTO(list);
+        return listMapper.toModel(list, userId);
     }
 
     @GetMapping("/week")
     @ResponseStatus(HttpStatus.OK)
-    public Set<TodoListDTO> getWeekLists(@AuthenticatedUser User user) {
+    public Set<TodoListDTO> getWeekLists(@AuthenticatedUser User user, @PathVariable Long userId) {
         Set<TodoList> weeklyLists = listService.getWeeklyLists(user);
-        return listMapper.toSetDTO(weeklyLists);
+        return listMapper.toModels(weeklyLists, userId);
     }
 
     @GetMapping("/custom")
     @ResponseStatus(HttpStatus.OK)
-    public Set<TodoListDTO> getCustomLists(@AuthenticatedUser User user) {
+    public Set<TodoListDTO> getCustomLists(@AuthenticatedUser User user, @PathVariable Long userId) {
         Set<TodoList> customLists = listService.getAllCustomLists(user);
-        return listMapper.toSetDTO(customLists);
+        return listMapper.toModels(customLists, userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TodoListDTO createList(
         @AuthenticatedUser User user,
+        @PathVariable Long userId,
         @RequestBody @Validated(Creation.class) TodoListDTO listDTO
     ) {
         TodoList newList = listService.createList(user, listDTO, CUSTOM);
-        return listMapper.toDTO(newList);
+        return listMapper.toModel(newList, userId);
+    }
+
+    @GetMapping("/{listId}")
+    @ResponseStatus(HttpStatus.OK)
+    public TodoListDTO getList(@PathVariable Long userId, @PathVariable Long listId) {
+        TodoList list = listService.getListByIdEagerly(userId, listId);
+        return listMapper.toModel(list, userId);
     }
 
     @PutMapping("/{listId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateList(
+    public ResponseEntity<Void> updateList(
         @PathVariable Long userId,
         @PathVariable Long listId,
         @RequestBody @Validated(Update.class) TodoListDTO listDTO
     ) {
         listService.updateList(userId, listId, listDTO);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{listId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteList(@PathVariable Long userId, @PathVariable Long listId) {
+    public ResponseEntity<Void> deleteList(@PathVariable Long userId, @PathVariable Long listId) {
         listService.deleteList(userId, listId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{listId}/todos")
     @ResponseStatus(HttpStatus.OK)
     public Set<TodoDTO> getTodosFromList(@PathVariable Long userId, @PathVariable Long listId) {
         Set<Todo> todos = listService.getTodosFromList(userId, listId);
-        return todoMapper.toSetDTO(todos);
+        return todoMapper.toModels(todos, userId, listId);
     }
 
     @PostMapping("/{listId}/todos")
@@ -101,50 +114,65 @@ public class TodoListController {
         @RequestBody @Validated(Creation.class) TodoDTO todoDTO
     ) {
         Todo newTodo = listService.addNewTodoToList(userId, listId, todoDTO);
-        return todoMapper.toDTO(newTodo);
+        return todoMapper.toModel(newTodo, userId, listId);
     }
 
 
     @PutMapping("/{listId}/todos")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTodosFromList(
+    public ResponseEntity<Void> updateTodosFromList(
         @PathVariable Long userId,
         @PathVariable Long listId,
         @RequestBody Set<@Valid TodoDTO> todosDTO
     ) {
         listService.updateTodosFromList(userId, listId, todosDTO);
+        return ResponseEntity.noContent().build();
     }
 
+    @Nullable
     @DeleteMapping("/{listId}/todos")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeTodosFromList(
+    public ResponseEntity<Void> removeTodosFromList(
         @PathVariable Long userId,
         @PathVariable Long listId,
         @RequestBody(required = false) Set<Long> todosId
     ) {
-        // When testing with a mock web environment, not including `todosId == null` causes an error
-        if (todosId == null || todosId.isEmpty()) {
+        if (todosId.isEmpty()) {
             listService.removeTodosFromList(userId, listId);
-            return;
+        } else {
+            listService.removeTodosFromList(userId, listId, todosId);
         }
 
-        listService.removeTodosFromList(userId, listId, todosId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{listId}/todos/{todoId}")
+    @ResponseStatus(HttpStatus.OK)
+    public TodoDTO getTodoFromList(@PathVariable Long userId, @PathVariable Long listId, @PathVariable Long todoId) {
+        Todo todo = listService.getTodoFromList(userId, listId, todoId);
+        return todoMapper.toModel(todo, userId, listId);
     }
 
     @PutMapping("/{listId}/todos/{todoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTodoFromList(
+    public ResponseEntity<Void> updateTodoFromList(
         @PathVariable Long userId,
         @PathVariable Long listId,
         @PathVariable Long todoId,
         @RequestBody @Valid TodoDTO todoDTO
     ) {
         listService.updateTodoFromList(userId, listId, todoId, todoDTO);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{listId}/todos/{todoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeTodoFromList(@PathVariable Long userId, @PathVariable Long listId, @PathVariable Long todoId) {
+    public ResponseEntity<Void> removeTodoFromList(
+        @PathVariable Long userId,
+        @PathVariable Long listId,
+        @PathVariable Long todoId
+    ) {
         listService.removeTodoFromList(userId, listId, todoId);
+        return ResponseEntity.noContent().build();
     }
 }

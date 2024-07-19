@@ -14,9 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import static dev.naiarievilo.todoapp.todolists.todos.TodoServiceTestCases.*;
 import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.*;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.EMAIL_1;
@@ -79,41 +76,16 @@ class TodoServiceIT extends ServiceIntegrationTests {
             new TodoDTO(newTodo_1.getId(), NEW_TODO_TASK, true, NEW_TODO_POSITION, null, NEW_TODO_DUE_DATE);
 
         todoService.updateTodo(newTodo_1, updatedTodoDTO);
-        assertEquals(newTodo_1.getTask(), updatedTodoDTO.task());
+        assertEquals(newTodo_1.getTask(), updatedTodoDTO.getTask());
         assertTrue(newTodo_1.isCompleted());
-        assertEquals(newTodo_1.getPosition(), updatedTodoDTO.position());
-        assertEquals(newTodo_1.getDueDate(), updatedTodoDTO.dueDate());
+        assertEquals(newTodo_1.getPosition(), updatedTodoDTO.getPosition());
+        assertEquals(newTodo_1.getDueDate(), updatedTodoDTO.getDueDate());
 
         Todo updatedTodo = todoRepository.findById(newTodo_1.getId()).orElseThrow(TodoNotFoundException::new);
-        assertEquals(updatedTodo.getTask(), updatedTodoDTO.task());
+        assertEquals(updatedTodo.getTask(), updatedTodoDTO.getTask());
         assertTrue(updatedTodo.isCompleted());
-        assertEquals(updatedTodo.getPosition(), updatedTodoDTO.position());
-        assertEquals(updatedTodo.getDueDate(), updatedTodoDTO.dueDate());
-    }
-
-    @Test
-    @DisplayName("updateTodos(): " + REMOVES_TODO_FROM_PARENT_WHEN_TODO_NOT_IN_DTO_SET)
-    void updateTodos_TodoNotInDTOSet_RemovesTodoFromParent() {
-        parentList.setTodos(TodosTestHelper.newTodoSet());
-        listRepository.persist(parentList);
-
-        Set<TodoDTO> updatedTodoDTOSet = new LinkedHashSet<>();
-        Todo todoToRemove = null;
-        TodoDTO lastTodoDTO = null;
-        for (Todo todo : parentList.getTodos()) {
-            TodoDTO newTodoDTO = new TodoDTO(
-                todo.getId(), todo.getTask(), todo.isCompleted(), todo.getPosition(), null, todo.getDueDate()
-            );
-            updatedTodoDTOSet.add(newTodoDTO);
-            todoToRemove = todo;
-            lastTodoDTO = newTodoDTO;
-        }
-
-        updatedTodoDTOSet.remove(lastTodoDTO);
-
-        todoService.updateTodos(parentList.getTodos(), updatedTodoDTOSet, parentList);
-        assertEquals(2, parentList.getTodos().size());
-        assertFalse(parentList.getTodos().contains(todoToRemove));
+        assertEquals(updatedTodo.getPosition(), updatedTodoDTO.getPosition());
+        assertEquals(updatedTodo.getDueDate(), updatedTodoDTO.getDueDate());
     }
 
     @Test

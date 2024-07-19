@@ -1,4 +1,8 @@
 spring:
+  docker:
+    compose:
+      profiles:
+        active: "dev"
   jpa:
     hibernate:
       ddl-auto: "update"

@@ -9,7 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Transactional(propagation = Propagation.SUPPORTS)
@@ -23,48 +27,36 @@ public class TodoService {
         this.todoMapper = todoMapper;
     }
 
-    public Todo createTodo(TodoDTO todoDTO, TodoList parent) {
-        Todo newTodo = todoMapper.toEntity(todoDTO);
-        parent.addTodo(newTodo);
+    public Todo createTodo(TodoDTO todoDTO, TodoList list) {
+        Todo newTodo = todoMapper.toNewEntity(todoDTO);
+        newTodo.setPosition(list.getTodos().size() + 1);
+        list.addTodo(newTodo);
         todoRepository.persist(newTodo);
         return newTodo;
     }
 
-    public void updateTodos(Set<Todo> todos, Set<TodoDTO> todosDTO, TodoList parent) {
+    public void updateTodos(Set<Todo> todos, Set<TodoDTO> todosDTO) {
         Map<Long, Todo> todosMap = new HashMap<>();
         for (Todo todo : todos) {
             todosMap.put(todo.getId(), todo);
         }
 
-        Integer maxPositionAllowed = todosDTO.size();
+        Integer maxPositionAllowed = todos.size();
         Set<Integer> newPositionsRecorded = new HashSet<>();
-        Set<Long> matchedTodoIds = new LinkedHashSet<>();
         for (TodoDTO todoDTO : todosDTO) {
-            Todo todo = todosMap.get(todoDTO.id());
+            Todo todo = todosMap.get(todoDTO.getId());
             if (todo == null) {
                 continue;
             }
 
-            if (todoDTO.position() > maxPositionAllowed) {
-                throw new PositionExceedsMaxAllowedException();
-            } else if (newPositionsRecorded.contains(todoDTO.position())) {
-                throw new PositionNotUniqueException();
+            if (todoDTO.getPosition() > maxPositionAllowed) {
+                throw new PositionExceedsMaxAllowedException(todo.getId());
+            } else if (newPositionsRecorded.contains(todoDTO.getPosition())) {
+                throw new PositionNotUniqueException(todo.getId());
             }
 
-            matchedTodoIds.add(todo.getId());
             updateTodo(todo, todoDTO);
-            newPositionsRecorded.add(todoDTO.position());
-        }
-
-        if (matchedTodoIds.size() == todosMap.size()) {
-            return;
-        }
-
-        Set<Long> unmatchedTodoIds = todosMap.keySet();
-        unmatchedTodoIds.removeAll(matchedTodoIds);
-        for (Long unmatchedTodoId : unmatchedTodoIds) {
-            Todo todoToRemove = todosMap.get(unmatchedTodoId);
-            deleteTodo(todoToRemove, parent);
+            newPositionsRecorded.add(todoDTO.getPosition());
         }
     }
 
@@ -73,8 +65,17 @@ public class TodoService {
         todoRepository.update(todo);
     }
 
-    public void deleteTodo(Todo todo, TodoList parent) {
-        parent.removeTodo(todo);
+    public void synchronizeWithListDueDate(Set<Todo> todos, LocalDate listDueDate) {
+        for (Todo todo : todos) {
+            if (todo.getDueDate() != null) {
+                todo.setDueDate(listDueDate);
+                todoRepository.update(todo);
+            }
+        }
+    }
+
+    public void deleteTodo(Todo todo, TodoList list) {
+        list.removeTodo(todo);
         todoRepository.delete(todo);
     }
 }

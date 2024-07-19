@@ -32,6 +32,8 @@ public class TodoListControllerTestCases {
         NO_CONTENT + "Updates todo from list when user has access to the list";
     public static final String STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_LIST_NOT_FOUND =
         NOT_FOUND + RETURNS_ERROR_MESSAGES_WHEN + "list does not exist";
+    public static final String STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_USER_TRIES_TO_UPDATE_CALENDAR_OR_INBOX =
+        BAD_REQUEST + RETURNS_ERROR_MESSAGES_WHEN + "user tries to update calendar or inbox lists";
     public static final String STATUS_401_RETURNS_ERROR_MESSAGE_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS =
         UNAUTHORIZED + RETURNS_ERROR_MESSAGES_WHEN + "user does not have access to the list";
     public static final String STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_TODO_NOT_FOUND =

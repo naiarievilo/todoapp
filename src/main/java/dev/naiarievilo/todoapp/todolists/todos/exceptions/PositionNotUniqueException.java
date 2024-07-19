@@ -2,9 +2,7 @@ package dev.naiarievilo.todoapp.todolists.todos.exceptions;
 
 public class PositionNotUniqueException extends RuntimeException {
 
-    private static final String DEFAULT_MESSAGE = "To-dos must have unique positions within a list";
-
-    public PositionNotUniqueException() {
-        super(DEFAULT_MESSAGE);
+    public PositionNotUniqueException(Long todoId) {
+        super("New position for to-do with id '" + todoId + "' is not unique in the list");
     }
 }

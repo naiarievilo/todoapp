@@ -1,15 +1,41 @@
 services:
-  postgres:
-    image: "postgres:14.12"
+  todoapp:
+    build: "Dockerfile"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${ENV:-dev}
+    ports:
+      - "8080:8080"
+    profiles: [ "container" ]
+
+  db-dev:
+    image: "postgres:16.3-alpine3.20"
     environment:
       POSTGRES_DB: "todoapp"
       POSTGRES_USER: "user"
       POSTGRES_PASSWORD: "password"
     ports:
       - "15432:5432"
+    profiles: [ "dev", "container" ]
+    volumes:
+      - dev-data:/var/lib/postgresql/data
+
+  db-test:
+    image: "postgres:16.3-alpine3.20"
+    environment:
+      POSTGRES_DB: "test-db"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+    ports:
+      - "15433:5432"
+    profiles: [ "test" ]
+
   smtp:
     image: "axllent/mailpit"
     command: [ "--enable-spamassassin", "postmark" ]
     ports:
       - "8025:8025"
       - "1025:1025"
+    profiles: [ "test", "dev", "container" ]
+
+volumes:
+  dev-data:

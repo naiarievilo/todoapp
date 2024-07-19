@@ -62,7 +62,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<UserDTO> authenticateUser(@RequestBody @Validated(UserAuthentication.class) UserDTO userDTO) {
         var authentication = (UserAuthenticationToken) authenticationManager.authenticate(
-            EmailPasswordAuthenticationToken.unauthenticated(userDTO.email(), userDTO.password())
+            EmailPasswordAuthenticationToken.unauthenticated(userDTO.getEmail(), userDTO.getPassword())
         );
 
         User user = authentication.getPrincipal();
@@ -97,7 +97,7 @@ public class UserController {
     public void unlockUserRequest(
         @RequestBody @Validated(UserSecurity.class) UserDTO userDTO
     ) {
-        User user = userService.getUserByEmail(userDTO.email());
+        User user = userService.getUserByEmail(userDTO.getEmail());
         if (user.isLocked()) {
             emailService.sendUnlockUserMessage(user);
         }
@@ -115,7 +115,7 @@ public class UserController {
     @PostMapping("/enable")
     @ResponseStatus(HttpStatus.OK)
     public void enableUserRequest(@RequestBody @Validated(UserSecurity.class) UserDTO userDTO) {
-        User user = userService.getUserByEmail(userDTO.email());
+        User user = userService.getUserByEmail(userDTO.getEmail());
         if (!user.isEnabled()) {
             emailService.sendEnableUserMessage(user);
         }

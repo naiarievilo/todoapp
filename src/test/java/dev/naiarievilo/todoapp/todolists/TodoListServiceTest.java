@@ -8,6 +8,7 @@ import dev.naiarievilo.todoapp.todolists.todos.Todo;
 import dev.naiarievilo.todoapp.todolists.todos.TodoService;
 import dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
+import dev.naiarievilo.todoapp.todolists.todos.exceptions.PositionExceedsMaxAllowedException;
 import dev.naiarievilo.todoapp.todolists.todos.exceptions.TodoNotFoundException;
 import dev.naiarievilo.todoapp.users.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +29,8 @@ import java.util.Set;
 import static dev.naiarievilo.todoapp.todolists.ListTypes.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListServiceTestCases.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListsTestHelper.*;
-import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.*;
+import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_POSITION_2;
+import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_TASK_2;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.EMAIL_1;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.USER_ID_1;
 import static org.junit.jupiter.api.Assertions.*;
@@ -213,10 +215,10 @@ class TodoListServiceTest {
     @Test
     @DisplayName("createList(): " + CREATES_LIST_WHEN_INPUT_VALID)
     void createList_InputValid_CreatesList() {
-        TodoListDTO newListDTO = new TodoListDTO(null, LIST_TITLE_1, null, null, LocalDate.now().plusDays(3), null);
+        TodoListDTO newListDTO = new TodoListDTO(null, LIST_TITLE_1, null, null, LocalDate.now().plusDays(3));
         TodoList newList = new TodoList();
-        newList.setTitle(newListDTO.title());
-        newList.setDueDate(newListDTO.dueDate());
+        newList.setTitle(newListDTO.getTitle());
+        newList.setDueDate(newListDTO.getDueDate());
 
         given(listMapper.toEntity(newListDTO)).willReturn(newList);
 
@@ -237,7 +239,7 @@ class TodoListServiceTest {
         userId = 875L;
 
         TodoListDTO updatedListDTO = new TodoListDTO(
-            persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3), null
+            persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3)
         );
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
@@ -253,7 +255,7 @@ class TodoListServiceTest {
     @DisplayName("updateList(): " + UPDATES_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateList_UserHasListAccess_UpdatesList() {
         TodoListDTO updatedListDTO = new TodoListDTO(
-            persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3), null
+            persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3)
         );
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
@@ -262,23 +264,6 @@ class TodoListServiceTest {
         verify(listRepository).findByIdEagerly(listId);
         verify(listMapper).updateEntityFromDTO(persistedList, updatedListDTO);
         verifyNoInteractions(todoService);
-    }
-
-    @Test
-    @DisplayName("updateList(): " + UPDATES_LIST_AND_ITS_TODOS_WHEN_USER_HAS_LIST_ACCESS)
-    void updateList_HasTodosToUpdate_UpdatesListAndTodos() {
-        TodoListDTO updatedListDTO = new TodoListDTO(
-            persistedList.getId(), LIST_TITLE_2, null, null, LocalDate.now().plusDays(3),
-            Set.of(new TodoDTO(null, TODO_TASK_1, false, TODO_POSITION_1, null, null))
-        );
-
-        given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
-
-        listService.updateList(userId, listId, updatedListDTO);
-        verify(listRepository).findByIdEagerly(listId);
-        verify(listMapper).updateEntityFromDTO(persistedList, updatedListDTO);
-        assert updatedListDTO.todos() != null;
-        verify(todoService).updateTodos(persistedList.getTodos(), updatedListDTO.todos(), persistedList);
     }
 
     @Test
@@ -357,7 +342,7 @@ class TodoListServiceTest {
         TodoDTO updatedTodo = TodosTestHelper.todoDTO_2();
         persistedList.addTodo(persistedTodo);
 
-        Long todoId = updatedTodo.id();
+        Long todoId = updatedTodo.getId();
         assert todoId != null;
 
         given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
@@ -373,7 +358,7 @@ class TodoListServiceTest {
     void updateTodoFromList_UserDoesNotHaveListAccess_DoesNotUpdateTodoFromList() {
         userId = 432L;
         Todo persistedTodo = TodosTestHelper.todo_1();
-        TodoDTO updatedTodo = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_3, null, null);
+        TodoDTO updatedTodo = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_2, null, null);
         persistedList.addTodo(persistedTodo);
         Long todoId = persistedTodo.getId();
 
@@ -385,10 +370,28 @@ class TodoListServiceTest {
     }
 
     @Test
+    @DisplayName("updateTodoFromList(): " +
+        THROWS_POSITION_EXCEEDS_MAX_ALLOWED_WHEN_NEW_POSITION_GREATER_THAN_LIST_SIZE)
+    void updateTodoFromList_NewPositionExceedsMaxAllowed_ThrowsPositionExceedsMaxAllowedException() {
+        Todo persistedTodo = TodosTestHelper.todo_1();
+        TodoDTO updatedTodo = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_2, null, null);
+        persistedList.addTodo(persistedTodo);
+        Long todoId = persistedTodo.getId();
+
+        given(listRepository.findByIdEagerly(listId)).willReturn(Optional.of(persistedList));
+        assertThrows(PositionExceedsMaxAllowedException.class,
+            () -> listService.updateTodoFromList(userId, listId, todoId, updatedTodo));
+        verify(listRepository).findByIdEagerly(listId);
+        verifyNoInteractions(todoService);
+    }
+
+    @Test
     @DisplayName("updateTodoFromList(): " + UPDATES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateTodoFromList_UserHasListAccess_UpdatesTodoFromList() {
         Todo persistedTodo = TodosTestHelper.todo_1();
-        TodoDTO updatedTodo = new TodoDTO(persistedTodo.getId(), TODO_TASK_2, true, TODO_POSITION_3, null, null);
+        TodoDTO updatedTodo = new TodoDTO(
+            persistedTodo.getId(), TODO_TASK_2, true, persistedTodo.getPosition(), null, null
+        );
         persistedList.addTodo(persistedTodo);
         Long todoId = persistedTodo.getId();
 
@@ -411,7 +414,7 @@ class TodoListServiceTest {
         listService.updateTodosFromList(userId, listId, updatedTodosDTO);
 
         verify(listRepository).findByIdEagerly(listId);
-        verify(todoService).updateTodos(persistedTodos, updatedTodosDTO, persistedList);
+        verify(todoService).updateTodos(persistedTodos, updatedTodosDTO);
     }
 
     @Test
@@ -459,7 +462,7 @@ class TodoListServiceTest {
     }
 
     @Test
-    @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    @DisplayName("removeTodosFromList(): " + DELETES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void removeTodosFromList_UserHasListAccess_DeletesTodosFromList() {
         Set<Todo> persistedTodos = TodosTestHelper.todoSet();
         persistedList.setTodos(persistedTodos);
@@ -479,7 +482,7 @@ class TodoListServiceTest {
     }
 
     @Test
-    @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    @DisplayName("removeTodosFromList(): " + DELETES_ALL_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void removeTodosFromList_UserHasListAccess_DeletesAllTodosFromList() {
         Set<Todo> persistedTodos = TodosTestHelper.todoSet();
         persistedList.setTodos(persistedTodos);

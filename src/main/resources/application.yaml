@@ -9,8 +9,8 @@ logging:
   level:
     org:
       springframework:
-        boot: "WARN"
-        web: "WARN"
+        boot: "DEBUG"
+        web: "DEBUG"
         security:
           web:
             FilterChainProxy: "WARN"
@@ -38,12 +38,6 @@ server:
 spring:
   application:
     name: "Todoapp"
-  docker:
-    compose:
-      skip:
-        in-tests: false
-      lifecycle-management: start_only
-      enabled: true
   jackson:
     time-zone: "UTC"
   jpa:
@@ -69,6 +63,8 @@ spring:
           starttls:
             enable: false
             required: false
+  profiles:
+    active: "dev"
   sql:
     init:
       mode: "never"

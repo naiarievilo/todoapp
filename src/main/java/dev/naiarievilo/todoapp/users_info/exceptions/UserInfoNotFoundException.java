@@ -9,7 +9,7 @@ public class UserInfoNotFoundException extends RuntimeException {
     }
 
     public UserInfoNotFoundException(Long userInfoId) {
-        super("User info with id " + userInfoId + " not found");
+        super("User info with id '" + userInfoId + "' not found");
     }
 
     public UserInfoNotFoundException(String message) {

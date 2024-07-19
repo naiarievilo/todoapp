@@ -14,6 +14,7 @@ import dev.naiarievilo.todoapp.todolists.todos.TodoService;
 import dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
+import dev.naiarievilo.todoapp.todolists.todos.exceptions.ImmutableListException;
 import dev.naiarievilo.todoapp.todolists.todos.exceptions.TodoNotFoundException;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserService;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -75,8 +77,8 @@ class TodoListControllerIT extends ControllerIntegrationTests {
         user = userService.createUser(userCreationDTO);
         accessToken = jwtService.createToken(user, ACCESS_TOKEN);
 
-        listDTO = new TodoListDTO(null, LIST_TITLE_1, null, null, null, null);
-        otherListDTO = new TodoListDTO(null, LIST_TITLE_2, null, null, null, null);
+        listDTO = new TodoListDTO(null, LIST_TITLE_1, null, null, null);
+        otherListDTO = new TodoListDTO(null, LIST_TITLE_2, null, null, null);
     }
 
     @Test
@@ -87,13 +89,13 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             )
             .andExpectAll(
                 status().isOk(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                content().contentTypeCompatibleWith(MediaType.parseMediaType(MediaTypes.HAL_JSON_VALUE))
             )
             .andReturn().getResponse().getContentAsString();
 
         TodoListDTO returnedListDTO = objectMapper.readValue(responseBody, TodoListDTO.class);
-        assertEquals(INBOX.toString(), returnedListDTO.title());
-        assertEquals(INBOX, returnedListDTO.type());
+        assertEquals(INBOX.toString(), returnedListDTO.getTitle());
+        assertEquals(INBOX, returnedListDTO.getType());
     }
 
     @Test
@@ -104,15 +106,15 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             )
             .andExpectAll(
                 status().isOk(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                content().contentTypeCompatibleWith(MediaType.parseMediaType(MediaTypes.HAL_JSON_VALUE))
             )
             .andReturn().getResponse().getContentAsString();
 
         TodoListDTO returnedListDTO = objectMapper.readValue(responseBody, TodoListDTO.class);
         LocalDate today = LocalDate.now();
-        assertEquals(today.format(CALENDAR_LIST_TITLE), returnedListDTO.title());
-        assertEquals(CALENDAR, returnedListDTO.type());
-        assertEquals(today, returnedListDTO.dueDate());
+        assertEquals(today.format(CALENDAR_LIST_TITLE), returnedListDTO.getTitle());
+        assertEquals(CALENDAR, returnedListDTO.getType());
+        assertEquals(today, returnedListDTO.getDueDate());
     }
 
     @Test
@@ -123,7 +125,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             )
             .andExpectAll(
                 status().isOk(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                content().contentType(MediaType.parseMediaType(MediaTypes.HAL_JSON_VALUE))
             )
             .andReturn().getResponse().getContentAsString();
 
@@ -131,9 +133,9 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             objectMapper.readValue(responseBody, new TypeReference<LinkedHashSet<TodoListDTO>>() { });
         LocalDate dayOfWeek = START_OF_WEEK;
         for (TodoListDTO currListDTO : listDTOSet) {
-            assertEquals(dayOfWeek.format(CALENDAR_LIST_TITLE), currListDTO.title());
-            assertEquals(CALENDAR, currListDTO.type());
-            assertEquals(dayOfWeek, currListDTO.dueDate());
+            assertEquals(dayOfWeek.format(CALENDAR_LIST_TITLE), currListDTO.getTitle());
+            assertEquals(CALENDAR, currListDTO.getType());
+            assertEquals(dayOfWeek, currListDTO.getDueDate());
             dayOfWeek = dayOfWeek.plusDays(1);
         }
     }
@@ -149,7 +151,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             )
             .andExpectAll(
                 status().isOk(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                content().contentType(MediaType.parseMediaType(MediaTypes.HAL_JSON_VALUE))
             )
             .andReturn().getResponse().getContentAsString();
 
@@ -157,7 +159,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             objectMapper.readValue(responseBody, new TypeReference<LinkedHashSet<TodoListDTO>>() { });
         assertEquals(2, listDTOSet.size());
         for (TodoListDTO list : listDTOSet) {
-            assertEquals(CUSTOM, list.type());
+            assertEquals(CUSTOM, list.getType());
         }
     }
 
@@ -166,27 +168,27 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     void createList_UserAuthenticated_CreatesList() throws Exception {
         String responseBody = mockMvc.perform(post("/users/" + user.getId() + "/todolists")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.parseMediaType(MediaTypes.HAL_JSON_VALUE))
                 .content(objectMapper.writeValueAsString(listDTO))
             )
             .andExpectAll(
                 status().isCreated(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                content().contentType(MediaType.parseMediaType(MediaTypes.HAL_JSON_VALUE))
             )
             .andReturn().getResponse().getContentAsString();
 
         TodoListDTO returnedListDTO = objectMapper.readValue(responseBody, TodoListDTO.class);
         assertNotNull(returnedListDTO);
-        assertNotNull(returnedListDTO.id());
-        assertNotNull(returnedListDTO.createdAt());
-        assertEquals(CUSTOM, returnedListDTO.type());
+        assertNotNull(returnedListDTO.getId());
+        assertNotNull(returnedListDTO.getCreatedAt());
+        assertEquals(CUSTOM, returnedListDTO.getType());
     }
 
     @Test
     @DisplayName("updateList(): " + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_LIST_NOT_FOUND)
     void updateList_ListDoesNotExist_ReturnsErrorDetails() throws Exception {
         Long fakeListId = 3423L;
-        TodoListDTO fakeListDTO = new TodoListDTO(fakeListId, LIST_TITLE_1, CUSTOM, null, null, null);
+        TodoListDTO fakeListDTO = new TodoListDTO(fakeListId, LIST_TITLE_1, CUSTOM, null, null);
         var exception = new TodoListNotFoundException(fakeListId);
 
         String responseBody = mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + fakeListId)
@@ -214,7 +216,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             new UserCreationDTO(EMAIL_2, PASSWORD_2, CONFIRM_PASSWORD_2, FIRST_NAME_2, LAST_NAME_2);
         User otherUser = userService.createUser(otherUserCreationDTO);
         TodoList otherList = listService.createList(otherUser, otherListDTO, CUSTOM);
-        TodoListDTO updatedOtherList = new TodoListDTO(otherList.getId(), LIST_TITLE_3, null, null, null, null);
+        TodoListDTO updatedOtherList = new TodoListDTO(otherList.getId(), LIST_TITLE_3, null, null, null);
 
         var exception = new UnauthorizedDataAccessException();
 
@@ -237,11 +239,40 @@ class TodoListControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
+    @DisplayName("updateList(): +" + STATUS_400_RETURNS_ERROR_MESSAGE_WHEN_USER_TRIES_TO_UPDATE_CALENDAR_OR_INBOX)
+    void updateList_UpdateCalendarOrInbox_ReturnsErrorDetails() throws Exception {
+        TodoList list = listService.createList(user, listDTO, INBOX);
+        ListTypes listType = list.getType();
+        TodoListDTO updatedListDTO = new TodoListDTO(
+            list.getId(), LIST_TITLE_2, list.getType(), list.getCreatedAt(), list.getDueDate()
+        );
+
+        var exception = new ImmutableListException(listType.getType());
+
+        String responseBody = mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + list.getId())
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedListDTO))
+            )
+            .andExpectAll(
+                status().isBadRequest(),
+                content().contentType(MediaType.APPLICATION_JSON)
+            )
+            .andReturn().getResponse().getContentAsString();
+
+        ErrorDetails errorDetails = objectMapper.readValue(responseBody, ErrorDetails.class);
+        assertNotNull(errorDetails.getTimestamp());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), errorDetails.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST.getReasonPhrase(), errorDetails.getReason());
+        assertTrue(errorDetails.getMessages().contains(exception.getMessage()));
+    }
+
+    @Test
     @DisplayName("updateList(): " + STATUS_204_UPDATES_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void updateList_UserHasListAccess_UpdatesList() throws Exception {
         TodoList list = listService.createList(user, listDTO, CUSTOM);
         TodoListDTO updatedListDTO =
-            new TodoListDTO(list.getId(), LIST_TITLE_2, list.getType(), list.getCreatedAt(), list.getDueDate(), null);
+            new TodoListDTO(list.getId(), LIST_TITLE_2, list.getType(), list.getCreatedAt(), list.getDueDate());
 
         mockMvc.perform(put("/users/" + user.getId() + "/todolists/" + list.getId())
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
@@ -250,7 +281,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             )
             .andExpect(status().isNoContent());
 
-        assertEquals(list.getTitle(), updatedListDTO.title());
+        assertEquals(list.getTitle(), updatedListDTO.getTitle());
     }
 
     @Test
@@ -278,15 +309,15 @@ class TodoListControllerIT extends ControllerIntegrationTests {
             )
             .andExpectAll(
                 status().isCreated(),
-                content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                content().contentTypeCompatibleWith(MediaType.parseMediaType(MediaTypes.HAL_JSON_VALUE))
             )
             .andReturn().getResponse().getContentAsString();
 
         TodoDTO createdTodo = objectMapper.readValue(responseBody, TodoDTO.class);
-        assertNotNull(createdTodo.id());
-        assertNotNull(createdTodo.createdAt());
-        assertEquals(newTodo.task(), createdTodo.task());
-        assertEquals(newTodo.completed(), createdTodo.completed());
+        assertNotNull(createdTodo.getId());
+        assertNotNull(createdTodo.getCreatedAt());
+        assertEquals(newTodo.getTask(), createdTodo.getTask());
+        assertEquals(newTodo.getCompleted(), createdTodo.getCompleted());
     }
 
     @Test
@@ -425,7 +456,7 @@ class TodoListControllerIT extends ControllerIntegrationTests {
         mockMvc.perform(delete("/users/" + user.getId() + "/todolists/" + list.getId() + "/todos")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(null))
+                .content(objectMapper.writeValueAsString(new LinkedHashSet<>()))
             )
             .andExpect(status().isNoContent());
 

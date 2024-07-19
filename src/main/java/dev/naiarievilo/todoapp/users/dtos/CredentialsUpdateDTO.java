@@ -23,7 +23,7 @@ public record CredentialsUpdateDTO(
     @Password(groups = {PasswordUpdate.class, CredentialsUpdate.class})
     String newPassword,
 
-    @JsonProperty("new_password_confirmation")
+    @JsonProperty("confirm_new_password")
     @Password(groups = {PasswordUpdate.class, CredentialsUpdate.class})
     String newPasswordConfirmation
 

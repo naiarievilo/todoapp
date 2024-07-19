@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import static dev.naiarievilo.todoapp.todolists.ListTypes.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListServiceTestCases.*;
 import static dev.naiarievilo.todoapp.todolists.TodoListsTestHelper.*;
-import static dev.naiarievilo.todoapp.todolists.todos.TodosTestHelper.TODO_TASK_2;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.EMAIL_1;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.PASSWORD_1;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,7 +60,7 @@ class TodoListServiceIT extends ServiceIntegrationTests {
         list.setType(CUSTOM);
         list.setUser(user);
 
-        listDTO = new TodoListDTO(null, list.getTitle(), null, null, null, null);
+        listDTO = new TodoListDTO(null, list.getTitle(), null, null, null);
     }
 
     @Test
@@ -143,7 +142,7 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     void createList_InputValid_CreatesList() {
         TodoList createdList = listService.createList(user, listDTO, CUSTOM);
         assertNotNull(createdList);
-        assertEquals(listDTO.title(), createdList.getTitle());
+        assertEquals(listDTO.getTitle(), createdList.getTitle());
         assertEquals(CUSTOM, createdList.getType());
         assertNotNull(createdList.getCreatedAt());
         assertTrue(listRepository.existsById(createdList.getId()));
@@ -155,45 +154,12 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     void updateList_UserHasListAccess_UpdatesList() {
         listRepository.persist(list);
         Long listId = list.getId();
-        TodoListDTO updatedListDTO = new TodoListDTO(
-            list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), null
-        );
+        TodoListDTO updatedListDTO = new TodoListDTO(list.getId(), LIST_TITLE_2, null, null, LocalDate.now());
 
         listService.updateList(userId, listId, updatedListDTO);
 
         TodoList updatedList = listRepository.findById(listId).orElseThrow(TodoListNotFoundException::new);
-        assertEquals(updatedListDTO.title(), updatedList.getTitle());
-        assertEquals(updatedListDTO.dueDate(), updatedList.getDueDate());
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("updateList(): " + UPDATES_LIST_AND_ITS_TODOS_WHEN_USER_HAS_LIST_ACCESS)
-    void updateList_HasTodosToUpdate_UpdatesListAndTodos() {
-        Todo persistedTodo = TodosTestHelper.newTodo_1();
-        list.addTodo(persistedTodo);
-        listRepository.persist(list);
-
-        TodoDTO updatedTodoDTO = new TodoDTO(
-            persistedTodo.getId(), TODO_TASK_2, true, persistedTodo.getPosition(), null, null
-        );
-        TodoListDTO updatedListDTO = new TodoListDTO(
-            list.getId(), LIST_TITLE_2, null, null, LocalDate.now(), Set.of(updatedTodoDTO)
-        );
-
-        Long listId = list.getId();
-
-        listService.updateList(userId, listId, updatedListDTO);
-
-        TodoList updatedList = listRepository.findById(listId).orElseThrow(TodoListNotFoundException::new);
-        assertEquals(updatedListDTO.title(), updatedList.getTitle());
-        assertEquals(updatedListDTO.dueDate(), updatedList.getDueDate());
-        assertEquals(1, updatedList.getTodos().size());
-
-        Todo updatedTodo = updatedList.getTodos().iterator().next();
-        assertEquals(updatedTodoDTO.task(), updatedTodo.getTask());
-        assertEquals(updatedTodoDTO.position(), updatedTodo.getPosition());
-        assertEquals(updatedTodoDTO.dueDate(), updatedTodo.getDueDate());
+        assertEquals(updatedListDTO.getTitle(), updatedList.getTitle());
     }
 
     @Test
@@ -232,9 +198,9 @@ class TodoListServiceIT extends ServiceIntegrationTests {
 
         Todo addedTodo = list.getTodos().iterator().next();
         assertTrue(todoRepository.existsById(addedTodo.getId()));
-        assertEquals(newTodoDTO.task(), addedTodo.getTask());
-        assertEquals(newTodoDTO.position(), addedTodo.getPosition());
-        assertEquals(newTodoDTO.dueDate(), addedTodo.getDueDate());
+        assertEquals(newTodoDTO.getTask(), addedTodo.getTask());
+        assertEquals(newTodoDTO.getPosition(), addedTodo.getPosition());
+        assertEquals(newTodoDTO.getDueDate(), addedTodo.getDueDate());
     }
 
     @Test
@@ -247,13 +213,13 @@ class TodoListServiceIT extends ServiceIntegrationTests {
 
         TodoDTO updatedTodoDTO = new TodoDTO(newTodo.getId(), "updated task", true, newTodo.getPosition(), null, null);
         Long listId = list.getId();
-        Long todoId = updatedTodoDTO.id();
+        Long todoId = updatedTodoDTO.getId();
         assert todoId != null;
 
         listService.updateTodoFromList(userId, listId, todoId, updatedTodoDTO);
         Todo updatedTodo = list.getTodos().iterator().next();
-        assertEquals(updatedTodoDTO.task(), updatedTodo.getTask());
-        assertEquals(updatedTodoDTO.completed(), updatedTodo.isCompleted());
+        assertEquals(updatedTodoDTO.getTask(), updatedTodo.getTask());
+        assertEquals(updatedTodoDTO.getCompleted(), updatedTodo.isCompleted());
     }
 
     @Test
@@ -303,7 +269,7 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     }
 
     @Test
-    @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    @DisplayName("removeTodosFromList(): " + DELETES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void removeTodosFromList_UserHasListAccess_DeletesTodosFromList() {
         Set<Todo> newTodos = TodosTestHelper.newTodoSet();
         list.setTodos(newTodos);
@@ -321,7 +287,7 @@ class TodoListServiceIT extends ServiceIntegrationTests {
     }
 
     @Test
-    @DisplayName("removeTodosFromList(): " + DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
+    @DisplayName("removeTodosFromList(): " + DELETES_ALL_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS)
     void removeTodosFromList_UserHasListAccess_DeletesAllTodosFromList() {
         Set<Todo> newTodos = TodosTestHelper.newTodoSet();
         list.setTodos(newTodos);

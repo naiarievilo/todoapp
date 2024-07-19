@@ -9,7 +9,7 @@ public class UserAlreadyExistsException extends RuntimeException {
     }
 
     public UserAlreadyExistsException(Long id) {
-        super("User with id " + id + " already exists");
+        super("User with id '" + id + "' already exists");
     }
 
     public UserAlreadyExistsException(String email) {

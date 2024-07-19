@@ -12,8 +12,12 @@ public class TodoListServiceTestCases {
         "Creates and returns weekly lists when lists do not exist";
     public static final String CREATES_LIST_WHEN_INPUT_VALID =
         "Creates list when input is valid";
+    public static final String DELETES_ALL_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
+        "Removes todos from list when user has access to the list";
     public static final String DELETES_LIST_WHEN_USER_HAS_ACCESS =
         "Deletes list when user has access to the list";
+    public static final String DELETES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
+        "Removes todos from list when user has access to the list";
     public static final String DELETES_TODO_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
         "Deletes todo from list when user has access to the list";
     public static final String DOES_NOT_ADD_TODO_TO_LIST_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS =
@@ -30,8 +34,6 @@ public class TodoListServiceTestCases {
         "Does not update todo from list when user does not have access to the list";
     public static final String GETS_ALL_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
         "Gets all todos form list when user has access to the list";
-    public static final String REMOVES_TODOS_FROM_LIST_WHEN_USER_HAS_LIST_ACCESS =
-        "Removes todos from list when user has access to the list";
     public static final String RETURNS_ALL_USER_CUSTOM_LISTS =
         "Returns all custom lists of user";
     public static final String RETURNS_INBOX_LIST_WHEN_LIST_EXISTS =
@@ -44,6 +46,8 @@ public class TodoListServiceTestCases {
         "Returns weekly lists when list exists";
     public static final String THROWS_LIST_NOT_FOUND_WHEN_LIST_DOES_NOT_EXIST =
         "Throws `TodoListNotFoundException` when list does not exist";
+    public static final String THROWS_POSITION_EXCEEDS_MAX_ALLOWED_WHEN_NEW_POSITION_GREATER_THAN_LIST_SIZE =
+        "Throws `PositionExceedsMaxAllowedException` when new position is greater than the list's size";
     public static final String THROWS_TODO_NOT_FOUND_WHEN_TODO_NOT_IN_LIST =
         "Throw `TodoNotFoundException` when todo does not exist in the list";
     public static final String THROWS_UNAUTHORIZED_DATA_ACCESS_WHEN_USER_DOES_NOT_HAVE_LIST_ACCESS =
