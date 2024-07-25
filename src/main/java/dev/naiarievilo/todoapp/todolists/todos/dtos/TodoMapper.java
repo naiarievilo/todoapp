@@ -2,12 +2,14 @@ package dev.naiarievilo.todoapp.todolists.todos.dtos;
 
 import dev.naiarievilo.todoapp.todolists.TodoListController;
 import dev.naiarievilo.todoapp.todolists.todos.Todo;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class TodoMapper {
@@ -36,14 +38,14 @@ public class TodoMapper {
         );
     }
 
-    public Set<TodoDTO> toModels(Set<Todo> todos, Long userId, Long listId) {
+    public CollectionModel<TodoDTO> toModels(Set<Todo> todos, Long userId, Long listId) {
         Set<TodoDTO> todosDTO = new LinkedHashSet<>();
         for (Todo todo : todos) {
             TodoDTO todoDTO = toModel(todo, userId, listId);
             todosDTO.add(todoDTO);
         }
 
-        return todosDTO;
+        return CollectionModel.of(todosDTO).withFallbackType(TodoDTO.class);
     }
 
     public TodoDTO toModel(Todo todo, Long userId, Long listId) {
@@ -54,15 +56,7 @@ public class TodoMapper {
 
     public void addSelfLink(TodoDTO todoDTO, Long userId, Long listId) {
         Long todoId = todoDTO.getId();
-        todoDTO.add(
-            linkTo(methodOn(TodoListController.class).getTodoFromList(userId, listId, todoId)).withSelfRel()
-                .andAffordance(
-                    afford(methodOn(TodoListController.class).updateTodoFromList(userId, listId, todoId, todoDTO))
-                )
-                .andAffordance(
-                    afford(methodOn(TodoListController.class).removeTodoFromList(userId, listId, todoId))
-                )
-        );
+        todoDTO.add(linkTo(methodOn(TodoListController.class).getTodoFromList(userId, listId, todoId)).withSelfRel());
     }
 
     public Todo toEntity(TodoDTO todoDTO) {

@@ -1,6 +1,7 @@
 package dev.naiarievilo.todoapp.todolists;
 
 import dev.naiarievilo.todoapp.security.ErrorDetails;
+import dev.naiarievilo.todoapp.todolists.exceptions.DeletionProhibitedException;
 import dev.naiarievilo.todoapp.todolists.exceptions.TodoListNotFoundException;
 import dev.naiarievilo.todoapp.todolists.todos.exceptions.ImmutableListException;
 import dev.naiarievilo.todoapp.todolists.todos.exceptions.PositionExceedsMaxAllowedException;
@@ -28,5 +29,11 @@ public class TodoListControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDetails handleBadUpdateExceptions(RuntimeException e) {
         return new ErrorDetails(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(DeletionProhibitedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDetails handleDeletionProhibitedException(DeletionProhibitedException e) {
+        return new ErrorDetails(HttpStatus.FORBIDDEN, e.getMessage());
     }
 }

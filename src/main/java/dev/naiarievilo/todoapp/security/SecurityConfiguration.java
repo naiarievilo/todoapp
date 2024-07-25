@@ -49,7 +49,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(
                     "/actuator/**", "/users/authentication", "/users/enable", "/users/unlock",
-                    "/v3/api-docs", "/swagger-ui/**"
+                    "/api-docs", "/swagger-ui/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/users/{userId}/re-authentication", "/users/{userId}/verification",

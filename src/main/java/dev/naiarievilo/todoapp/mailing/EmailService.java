@@ -2,8 +2,8 @@ package dev.naiarievilo.todoapp.mailing;
 
 import dev.naiarievilo.todoapp.security.jwt.JwtService;
 import dev.naiarievilo.todoapp.users.User;
-import dev.naiarievilo.todoapp.users_info.UserInfo;
-import dev.naiarievilo.todoapp.users_info.UserInfoService;
+import dev.naiarievilo.todoapp.users.info.UserInfo;
+import dev.naiarievilo.todoapp.users.info.UserInfoService;
 import jakarta.mail.MessagingException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;

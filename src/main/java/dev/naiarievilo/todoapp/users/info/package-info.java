@@ -1,4 +1,4 @@
 @NonNullApi
-package dev.naiarievilo.todoapp.users_info;
+package dev.naiarievilo.todoapp.users.info;
 
 import org.springframework.lang.NonNullApi;

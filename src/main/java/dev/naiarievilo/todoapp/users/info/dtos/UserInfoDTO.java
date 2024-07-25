@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users_info.dtos;
+package dev.naiarievilo.todoapp.users.info.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.naiarievilo.todoapp.validation.NotBlank;

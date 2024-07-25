@@ -30,7 +30,7 @@ public interface TodoListRepository extends BaseJpaRepository<TodoList, Long> {
                   WHERE tl.user = :user
                     AND tl.type = :type
         """)
-    List<TodoList> findAllByType(ListTypes type, User user);
+    List<TodoList> findAllByType(User user, ListTypes type);
 
     @Query("""
                  SELECT tl

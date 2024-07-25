@@ -2,13 +2,18 @@ package dev.naiarievilo.todoapp.todolists.dtos;
 
 import dev.naiarievilo.todoapp.todolists.TodoList;
 import dev.naiarievilo.todoapp.todolists.TodoListController;
+import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoMapper;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import static dev.naiarievilo.todoapp.todolists.ListTypes.CALENDAR;
+import static dev.naiarievilo.todoapp.todolists.ListTypes.INBOX;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class TodoListMapper {
@@ -19,33 +24,13 @@ public class TodoListMapper {
         this.todoMapper = todoMapper;
     }
 
-    public Set<TodoListDTO> toDTOs(Set<TodoList> lists) {
-        Set<TodoListDTO> listsDTO = new LinkedHashSet<>();
-        for (TodoList list : lists) {
-            listsDTO.add(toDTO(list));
-        }
-
-        return listsDTO;
-    }
-
-    public TodoListDTO toDTO(TodoList list) {
-        return new TodoListDTO(
-            list.getId(),
-            list.getTitle(),
-            list.getType(),
-            list.getCreatedAt(),
-            list.getDueDate(),
-            todoMapper.toDTOs(list.getTodos())
-        );
-    }
-
-    public Set<TodoListDTO> toModels(Set<TodoList> lists, Long userId) {
+    public CollectionModel<TodoListDTO> toModels(Set<TodoList> lists, Long userId) {
         Set<TodoListDTO> listsDTO = new LinkedHashSet<>();
         for (TodoList list : lists) {
             listsDTO.add(toModel(list, userId));
         }
 
-        return listsDTO;
+        return CollectionModel.of(listsDTO).withFallbackType(TodoListDTO.class);
     }
 
     public TodoListDTO toModel(TodoList list, Long userId) {
@@ -56,17 +41,26 @@ public class TodoListMapper {
         return listDTO;
     }
 
+    public TodoListDTO toDTO(TodoList list) {
+        Set<TodoDTO> todosDTO = new LinkedHashSet<>();
+        if (list.getType() == CALENDAR || list.getType() == INBOX) {
+            todosDTO = todoMapper.toDTOs(list.getTodos());
+        }
+
+        return new TodoListDTO(
+            list.getId(),
+            list.getTitle(),
+            list.getType(),
+            list.getCreatedAt(),
+            list.getDueDate(),
+            todosDTO
+        );
+    }
+
     public void addLinks(TodoListDTO listDTO, Long userId) {
         Long listId = listDTO.getId();
         listDTO.add(
-            linkTo(methodOn(TodoListController.class).getList(userId, listId)).withSelfRel()
-                .andAffordance(
-                    afford(methodOn(TodoListController.class).updateList(userId, listId, listDTO))
-                )
-                .andAffordance(
-                    afford(methodOn(TodoListController.class).deleteList(userId, listId))
-                ),
-
+            linkTo(methodOn(TodoListController.class).getList(userId, listId)).withSelfRel(),
             linkTo(methodOn(TodoListController.class).getTodosFromList(userId, listId)).withRel("todos")
         );
     }

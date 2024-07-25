@@ -1,10 +1,10 @@
-package dev.naiarievilo.todoapp.users_info;
+package dev.naiarievilo.todoapp.users.info;
 
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
-import dev.naiarievilo.todoapp.users_info.dtos.UserInfoDTO;
-import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoAlreadyExistsException;
-import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoNotFoundException;
+import dev.naiarievilo.todoapp.users.info.dtos.UserInfoDTO;
+import dev.naiarievilo.todoapp.users.info.exceptions.UserInfoAlreadyExistsException;
+import dev.naiarievilo.todoapp.users.info.exceptions.UserInfoNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

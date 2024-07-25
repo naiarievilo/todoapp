@@ -5,6 +5,8 @@ import dev.naiarievilo.todoapp.security.jwt.AccessTokenCreationFailedException;
 import dev.naiarievilo.todoapp.users.exceptions.EmailAlreadyRegisteredException;
 import dev.naiarievilo.todoapp.users.exceptions.UserAlreadyExistsException;
 import dev.naiarievilo.todoapp.users.exceptions.UserNotFoundException;
+import dev.naiarievilo.todoapp.users.info.exceptions.UserInfoAlreadyExistsException;
+import dev.naiarievilo.todoapp.users.info.exceptions.UserInfoNotFoundException;
 import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,13 +20,17 @@ public class UserControllerAdvice {
 
     private static final Logger logger = LoggerFactory.getLogger(UserControllerAdvice.class);
 
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler({UserNotFoundException.class, UserInfoNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorDetails handleUserNotFoundException(UserNotFoundException e) {
+    public ErrorDetails handleUserNotFoundException(RuntimeException e) {
         return new ErrorDetails(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
-    @ExceptionHandler({UserAlreadyExistsException.class, EmailAlreadyRegisteredException.class})
+    @ExceptionHandler({
+        UserAlreadyExistsException.class,
+        UserInfoAlreadyExistsException.class,
+        EmailAlreadyRegisteredException.class
+    })
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorDetails handleUserAlreadyExists(RuntimeException e) {
         return new ErrorDetails(HttpStatus.CONFLICT, e.getMessage());

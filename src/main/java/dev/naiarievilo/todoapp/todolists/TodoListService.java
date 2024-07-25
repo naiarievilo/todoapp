@@ -3,6 +3,7 @@ package dev.naiarievilo.todoapp.todolists;
 import dev.naiarievilo.todoapp.security.exceptions.UnauthorizedDataAccessException;
 import dev.naiarievilo.todoapp.todolists.dtos.TodoListDTO;
 import dev.naiarievilo.todoapp.todolists.dtos.TodoListMapper;
+import dev.naiarievilo.todoapp.todolists.exceptions.DeletionProhibitedException;
 import dev.naiarievilo.todoapp.todolists.exceptions.TodoListNotFoundException;
 import dev.naiarievilo.todoapp.todolists.todos.Todo;
 import dev.naiarievilo.todoapp.todolists.todos.TodoService;
@@ -102,7 +103,7 @@ public class TodoListService {
     }
 
     public Set<TodoList> getAllCustomLists(User user) {
-        List<TodoList> customLists = listRepository.findAllByType(CUSTOM, user);
+        List<TodoList> customLists = listRepository.findAllByType(user, CUSTOM);
         return new LinkedHashSet<>(customLists);
     }
 
@@ -119,7 +120,7 @@ public class TodoListService {
     public void updateList(Long userId, Long listId, TodoListDTO listDTO) {
         TodoList list = getListByIdEagerly(userId, listId);
 
-        ListTypes listType = listDTO.getType();
+        ListTypes listType = list.getType();
         if (listType == INBOX || listType == CALENDAR) {
             throw new ImmutableListException(listType.getType());
         }
@@ -143,6 +144,11 @@ public class TodoListService {
     @Transactional
     public void deleteList(Long userId, Long listId) {
         TodoList list = getListByIdEagerly(userId, listId);
+        ListTypes listType = list.getType();
+        if (listType == INBOX || listType == CALENDAR) {
+            throw new DeletionProhibitedException(listType);
+        }
+
         listRepository.delete(list);
     }
 

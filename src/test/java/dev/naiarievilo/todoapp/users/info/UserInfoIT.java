@@ -1,12 +1,12 @@
-package dev.naiarievilo.todoapp.users_info;
+package dev.naiarievilo.todoapp.users.info;
 
 import dev.naiarievilo.todoapp.ServiceIntegrationTests;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserRepository;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
-import dev.naiarievilo.todoapp.users_info.dtos.UserInfoDTO;
-import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoAlreadyExistsException;
-import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoNotFoundException;
+import dev.naiarievilo.todoapp.users.info.dtos.UserInfoDTO;
+import dev.naiarievilo.todoapp.users.info.exceptions.UserInfoAlreadyExistsException;
+import dev.naiarievilo.todoapp.users.info.exceptions.UserInfoNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
-import static dev.naiarievilo.todoapp.users_info.UserInfoTestCases.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserInfoIT extends ServiceIntegrationTests {
@@ -58,13 +57,13 @@ class UserInfoIT extends ServiceIntegrationTests {
     }
 
     @Test
-    @DisplayName("userInfoExists(): " + RETURNS_FALSE_WHEN_USER_INFO_DOES_NOT_EXIST)
+    @DisplayName("userInfoExists(): " + UserInfoTestCases.RETURNS_FALSE_WHEN_USER_INFO_DOES_NOT_EXIST)
     void userInfoExists_UserInfoDoesNotExist_ReturnsFalse() {
         assertFalse(userInfoService.userInfoExists(userInfo.getId()));
     }
 
     @Test
-    @DisplayName("userInfoExists(): " + RETURNS_TRUE_WHEN_USER_INFO_EXISTS)
+    @DisplayName("userInfoExists(): " + UserInfoTestCases.RETURNS_TRUE_WHEN_USER_INFO_EXISTS)
     void userInfoExists_UserInfoExists_ReturnsTrue() {
         userInfoRepository.persist(userInfo);
         Long id = userInfo.getId();
@@ -74,14 +73,14 @@ class UserInfoIT extends ServiceIntegrationTests {
     }
 
     @Test
-    @DisplayName("getUserInfoById(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
+    @DisplayName("getUserInfoById(): " + UserInfoTestCases.THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
     void getUserInfoById_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
         Long id = userInfo.getId();
         assertThrows(UserInfoNotFoundException.class, () -> userInfoService.getUserInfoById(id));
     }
 
     @Test
-    @DisplayName("getUserInfoById(): " + RETURNS_USER_INFO_WHEN_INFO_EXISTS)
+    @DisplayName("getUserInfoById(): " + UserInfoTestCases.RETURNS_USER_INFO_WHEN_INFO_EXISTS)
     void getUserInfoById_UserInfoExists_ReturnsUserInfo() {
         userInfoRepository.persist(userInfo);
 
@@ -93,14 +92,14 @@ class UserInfoIT extends ServiceIntegrationTests {
     }
 
     @Test
-    @DisplayName("createUserInfo(): " + THROWS_USER_INFO_ALREADY_EXISTS_WHEN_INFO_ALREADY_EXISTS)
+    @DisplayName("createUserInfo(): " + UserInfoTestCases.THROWS_USER_INFO_ALREADY_EXISTS_WHEN_INFO_ALREADY_EXISTS)
     void createUserInfo_UserInfoAlreadyExists_ThrowsUserInfoAlreadyExists() {
         userInfoRepository.persist(userInfo);
         assertThrows(UserInfoAlreadyExistsException.class, () -> userInfoService.createUserInfo(userCreationDTO, user));
     }
 
     @Test
-    @DisplayName("createUserInfo(): " + CREATES_USER_INFO_WHEN_USER_INFO_DOES_NOT_EXIST)
+    @DisplayName("createUserInfo(): " + UserInfoTestCases.CREATES_USER_INFO_WHEN_USER_INFO_DOES_NOT_EXIST)
     void createUserInfo_UserInfoDoesNotExist_CreatesUserInfo() {
         userInfoService.createUserInfo(userCreationDTO, user);
 
@@ -111,14 +110,14 @@ class UserInfoIT extends ServiceIntegrationTests {
     }
 
     @Test
-    @DisplayName("deleteUserInfo(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
+    @DisplayName("deleteUserInfo(): " + UserInfoTestCases.THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
     void deleteUserInfo_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
         Long id = userInfo.getId();
         assertThrows(UserInfoNotFoundException.class, () -> userInfoService.deleteUserInfo(id));
     }
 
     @Test
-    @DisplayName("deleteUserInfo(): " + DELETES_USER_INFO_WHEN_USER_INFO_EXISTS)
+    @DisplayName("deleteUserInfo(): " + UserInfoTestCases.DELETES_USER_INFO_WHEN_USER_INFO_EXISTS)
     void deleteUserInfo_UserInfoExists_DeletesUserInfo() {
         userInfoRepository.persist(userInfo);
         Long id = userInfo.getId();
@@ -128,14 +127,14 @@ class UserInfoIT extends ServiceIntegrationTests {
     }
 
     @Test
-    @DisplayName("updateUserInfo(): " + THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
+    @DisplayName("updateUserInfo(): " + UserInfoTestCases.THROWS_USER_INFO_NOT_FOUND_WHEN_INFO_DOES_NOT_EXIST)
     void updateUserInfo_UserInfoDoesNotExist_ThrowsUserInfoNotFoundException() {
         Long id = user.getId();
         assertThrows(UserInfoNotFoundException.class, () -> userInfoService.updateUserInfo(id, userInfoDTO));
     }
 
     @Test
-    @DisplayName("updateUserInfo(): " + UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
+    @DisplayName("updateUserInfo(): " + UserInfoTestCases.UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
     void updateUserInfo_UserInfoExists_UpdatesUserInfo() {
         Long id = user.getId();
         userInfoRepository.persist(userInfo);

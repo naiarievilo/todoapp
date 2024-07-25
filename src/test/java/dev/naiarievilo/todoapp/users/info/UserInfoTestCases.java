@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users_info;
+package dev.naiarievilo.todoapp.users.info;
 
 public class UserInfoTestCases {
 

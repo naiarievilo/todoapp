@@ -7,6 +7,7 @@ import dev.naiarievilo.todoapp.todolists.todos.dtos.TodoDTO;
 import dev.naiarievilo.todoapp.validation.NotBlank;
 import dev.naiarievilo.todoapp.validation.Positive;
 import dev.naiarievilo.todoapp.validation.groups.Creation;
+import dev.naiarievilo.todoapp.validation.groups.Update;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.lang.Nullable;
@@ -20,7 +21,7 @@ public class TodoListDTO extends RepresentationModel<TodoListDTO> {
     @Positive
     private final Long id;
 
-    @NotBlank(groups = Creation.class)
+    @NotBlank(groups = {Creation.class, Update.class})
     private final String title;
 
     private final ListTypes type;
@@ -43,7 +44,7 @@ public class TodoListDTO extends RepresentationModel<TodoListDTO> {
         @JsonProperty("type") ListTypes type,
         @JsonProperty("created_at") LocalDateTime createdAt,
         @Nullable @JsonProperty("due_date") LocalDate dueDate,
-        @JsonProperty(value = "todos", access = JsonProperty.Access.WRITE_ONLY) Set<TodoDTO> todos
+        @JsonProperty(value = "todos") Set<TodoDTO> todos
     ) {
         this.id = id;
         this.title = title;

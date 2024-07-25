@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users_info;
+package dev.naiarievilo.todoapp.users.info;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.naiarievilo.todoapp.ControllerIntegrationTests;
@@ -7,8 +7,8 @@ import dev.naiarievilo.todoapp.security.jwt.JwtService;
 import dev.naiarievilo.todoapp.users.User;
 import dev.naiarievilo.todoapp.users.UserService;
 import dev.naiarievilo.todoapp.users.dtos.UserCreationDTO;
-import dev.naiarievilo.todoapp.users_info.dtos.UserInfoDTO;
-import dev.naiarievilo.todoapp.users_info.exceptions.UserInfoNotFoundException;
+import dev.naiarievilo.todoapp.users.info.dtos.UserInfoDTO;
+import dev.naiarievilo.todoapp.users.info.exceptions.UserInfoNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.ACCESS_TOKEN;
 import static dev.naiarievilo.todoapp.security.jwt.JwtTokens.BEARER_PREFIX;
 import static dev.naiarievilo.todoapp.users.UsersTestConstants.*;
-import static dev.naiarievilo.todoapp.users_info.UserInfoControllerTestCases.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,7 +54,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
-    @DisplayName("getUserInfo(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_INFO_NOT_FOUND)
+    @DisplayName("getUserInfo(): " + UserInfoControllerTestCases.STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_INFO_NOT_FOUND)
     void getUserInfo_UserInfoDoesNotExist_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
@@ -79,7 +78,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
-    @DisplayName("getUserInfo(): " + STATUS_200_RETURNS_USER_INFO_DTO_WHEN_USER_INFO_EXISTS)
+    @DisplayName("getUserInfo(): " + UserInfoControllerTestCases.STATUS_200_RETURNS_USER_INFO_DTO_WHEN_USER_INFO_EXISTS)
     void getUserInfo_UserInfoExists_ReturnsUserInfoDTO() throws Exception {
         user = userService.createUser(userCreationDTO);
         userInfo = userInfoService.getUserInfoById(user.getId());
@@ -102,7 +101,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
-    @DisplayName("updateUserInfo(): " + STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_INFO_NOT_FOUND)
+    @DisplayName("updateUserInfo(): " + UserInfoControllerTestCases.STATUS_404_RETURNS_ERROR_MESSAGE_WHEN_USER_INFO_NOT_FOUND)
     void updateUserInfo_UserInfoDoesNotExist_ReturnsErrorDetails() throws Exception {
         user = userService.createUser(userCreationDTO);
         String accessToken = jwtService.createAccessAndRefreshTokens(user).get(ACCESS_TOKEN.key());
@@ -128,7 +127,7 @@ class UserInfoControllerIT extends ControllerIntegrationTests {
     }
 
     @Test
-    @DisplayName("updateUserInfo(): " + STATUS_200_UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
+    @DisplayName("updateUserInfo(): " + UserInfoControllerTestCases.STATUS_200_UPDATES_USER_INFO_WHEN_USER_INFO_EXISTS)
     void updateUserInfo_UserInfoExists_UpdatesUserInfo() throws Exception {
         user = userService.createUser(userCreationDTO);
         userInfo = userInfoService.getUserInfoById(user.getId());

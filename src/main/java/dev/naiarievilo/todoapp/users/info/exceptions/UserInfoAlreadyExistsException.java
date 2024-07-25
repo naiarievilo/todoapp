@@ -1,4 +1,4 @@
-package dev.naiarievilo.todoapp.users_info.exceptions;
+package dev.naiarievilo.todoapp.users.info.exceptions;
 
 public class UserInfoAlreadyExistsException extends RuntimeException {
 
