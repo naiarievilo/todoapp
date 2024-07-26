@@ -17,6 +17,9 @@ Todoapp is a REST-like API for frontend applications.
 - To-dos:
     - Support for drag-and-drop behavior through to-do positioning
     - Support for due dates for inbox and custom lists to help define deadlines for each to-do
+- Task scheduling:
+  - Deletion of unverified users
+  - Deletion of old to-do calendar lists
 
 ## Requirements
 
@@ -26,11 +29,11 @@ Todoapp is a REST-like API for frontend applications.
 ## Running the application
 
 1. Clone the repository with `git clone https://github.com/naiarievilo/todoapp.git`
-2. Run the application with `./mvnw spring-boot:run` or through your IDE of choice.
+2. With the Docker daemon running, start the application with `./mvnw spring-boot:run` or using your IDE of choice.
 
 ## Usage
 
 After initializing the application, access http://localhost:8080/swagger-ui/index.html and search for `/api-docs` to
-refer to the API's OpenAPI documentation:
+refer to the OpenAPI documentation:
 
 ![API documentation screenshot](/img/api-docs-screenshot.png)
