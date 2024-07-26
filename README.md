@@ -1,10 +1,8 @@
 # Todoapp API
 
-## Introduction
-
 Todoapp is a REST-like API for frontend applications.
 
-### Features
+## Features
 
 - Personal accounts:
     - Support for storing the user's avatar URLs
