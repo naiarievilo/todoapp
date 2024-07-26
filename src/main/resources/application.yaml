@@ -38,9 +38,6 @@ server:
 spring:
   application:
     name: "Todoapp"
-  docker:
-    compose:
-      lifecycle-management: "start_only"
   jackson:
     time-zone: "UTC"
   jpa:
@@ -75,6 +72,10 @@ spring:
 springdoc:
   api-docs:
     path: "/api-docs"
+  swagger-ui:
+    disable-swagger-default-url: true
+    config-url: "/openapi/swagger-config"
+    url: "/api-docs"
 
 tasks:
   weekly: "0 0 0 */7 * ?"

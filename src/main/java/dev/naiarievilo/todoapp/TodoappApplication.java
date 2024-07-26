@@ -23,7 +23,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
     info = @Info(
         title = "Todoapp API",
         version = "v1.0",
-        description = "Todoapp is a REST API for to-do frontend applications. It features personalized accounts," +
+        description = "Todoapp is a REST-like API for to-do frontend applications. It features personalized accounts," +
             " mailing service, and to-do lists: inbox list, calendar lists, and custom lists. To-dos have support" +
             " for drag-and-drop behavior and due dates.",
         contact = @Contact(email = "naiarievilo@gmail.com")

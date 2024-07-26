@@ -1,12 +1,4 @@
 services:
-  todoapp:
-    build: "Dockerfile"
-    environment:
-      SPRING_PROFILES_ACTIVE: ${ENV:-dev}
-    ports:
-      - "8080:8080"
-    profiles: [ "container" ]
-
   db-dev:
     image: "postgres:16.3-alpine3.20"
     environment:
@@ -15,7 +7,7 @@ services:
       POSTGRES_PASSWORD: "password"
     ports:
       - "15432:5432"
-    profiles: [ "dev", "container" ]
+    profiles: [ "dev" ]
     volumes:
       - dev-data:/var/lib/postgresql/data
 
@@ -35,7 +27,7 @@ services:
     ports:
       - "8025:8025"
       - "1025:1025"
-    profiles: [ "test", "dev", "container" ]
+    profiles: [ "test", "dev" ]
 
 volumes:
   dev-data:
