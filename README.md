@@ -1,6 +1,6 @@
 # Todoapp API
 
-Todoapp is a REST-like API for frontend applications.
+Todoapp is a REST API that manages tasks through to-do lists.
 
 ## Features
 
